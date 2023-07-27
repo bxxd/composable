@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# for my symlink ignoring
+langwave
+
 # C extensions
 *.so
 
