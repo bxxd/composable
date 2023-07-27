@@ -1,0 +1,3 @@
+[submodule "langwave"]
+	path = langwave
+	url = https://github.com/bxxd/langwave
