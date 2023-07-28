@@ -2,7 +2,7 @@ from langwave.document_loaders.sec import qk_html
 import logging
 from langchain.chat_models import ChatOpenAI
 from langchain.schema.messages import HumanMessage
-from langchain.chains import create_extraction_chain
+from langchain.chains import create_tagging_chain
 from langchain.prompts import ChatPromptTemplate
 
 from types import SimpleNamespace
@@ -24,14 +24,45 @@ async def test_ner(args):
 
     schema = {
         "properties": {
-            "category": {"type": "string"},
-            "subcategory": {"type": "string"},
-            "tags": {"type": "array", "items": {"type": "string"}},
+            "title": {
+                "type": "string",
+                "description": "If you were to give this text a concise title, what would it be?",
+            },
+            "category": {
+                "type": "string",
+                "description": "What best concise set of words would describe the nature of the text?",
+            },
+            "subcategory": {
+                "type": "string",
+                "description": "What is another, more specific, set of words that would describe the nature of the text?",
+            },
+            "tags": {
+                "type": "array",
+                "description": "If you had to look up this text later, what tags would you use, including Named Entity Recognition (NER) tags?",
+                "items": {"type": "string"},
+            },
+            "sentiment": {
+                "type": "string",
+                "description": "How would you categorize the sentiment of the financial information in the text?",
+                "enum": [
+                    "very positive",
+                    "positive",
+                    "slightly positive",
+                    "neutral",
+                    "slightly negative",
+                    "negative",
+                    "very negative",
+                ],
+            },
         },
-        "required": ["category", "subcategory", "tags"],
+        "required": ["title", "category", "subcategory", "tags", "sentiment"],
     }
 
-    chain = create_extraction_chain(schema, llm)
+    chain = create_tagging_chain(schema, llm)
+
+    x = await chain.arun(s.text)
+
+    log.info(f"test extracted: {x}")
 
     sections = qk_html.get_sections(args.filing)
     for s in sections:
@@ -43,10 +74,13 @@ async def test_ner(args):
         log.info(f"extracted: {x}")
 
 
-def test_get_filing(args):
+async def test_get_filing(args):
     llm = ChatOpenAI()
     sections = qk_html.get_sections(args.filing)
-    for s in sections:
+
+    # return
+
+    for s in sections[:]:
         num_tokens = llm.get_num_tokens_from_messages([HumanMessage(content=s.text)])
         print(f"### section {s.cnt}:\n`{s.text}`\nnum_tokens {num_tokens}")
 
@@ -55,8 +89,8 @@ def test_get_filing(args):
 
 async def main(args):
     # log.info(f"Reading {args.filing}")
-    # await test_get_filing(args)
-    await test_ner(args)
+    await test_get_filing(args)
+    # await test_ner(args)
 
 
 import argparse, asyncio
@@ -64,7 +98,7 @@ import argparse, asyncio
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filing", "-f", help="filing document", required=True)
+    parser.add_argument("--filing", "-f", help="filing document", required=False)
     parser.add_argument("--debug", "-d", action="store_true")
     return parser.parse_args()
 

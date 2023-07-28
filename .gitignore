@@ -6,6 +6,8 @@ __pycache__/
 # for my symlink ignoring
 langwave
 
+out*
+
 # C extensions
 *.so
 
