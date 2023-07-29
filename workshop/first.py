@@ -38,12 +38,8 @@ async def test_conversation():
 
     log.info(f"history messages: {history.messages}")
 
-    # llm = OpenAI(temperature=0)
-    # conversation = ConversationChain(
-    #     llm=llm,
-    #     verbose=True,
-    #     memory=ChatMessageHistory()
-    # )
+    llm = OpenAI(temperature=0)
+    # conversation = ConversationChain(llm=llm, verbose=True, memory=ChatMessageHistory())
 
     # resp = conversation.predict(input="Hi there!")
 
