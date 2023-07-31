@@ -37,16 +37,8 @@ tagging_schema = {
         },
         "sentiment": {
             "type": "string",
-            "description": "How would you categorize the sentiment of the financial information in the text?",
-            "enum": [
-                "very positive",
-                "positive",
-                "slightly positive",
-                "neutral",
-                "slightly negative",
-                "negative",
-                "very negative",
-            ],
+            "description": "How would you describe the impact of the text on the company it applies to?",
+            "enum": ["bullish", "neutral", "bearish"],
         },
     },
     "required": ["title", "category", "subcategory", "tags", "sentiment"],
