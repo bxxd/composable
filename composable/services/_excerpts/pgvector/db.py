@@ -106,6 +106,9 @@ def before_insert_or_update_excerpt(mapper, connection, target):
     log.info(f"before_insert_or_update_page: dirty: {dirty}")
     log.info(f"target embedding exists: {target.embedding is not None}")
 
+    if dirty:
+        target.created_at = datetime.now()
+
     if dirty or target.embedding is None:
         text = f"""{target.excerpt}"""
         target.embedding = get_embedding(text)
@@ -130,6 +133,9 @@ def before_insert_or_update_tag(mapper, connection, target):
 
     log.info(f"before_insert_or_update_page: dirty: {dirty}")
     log.info(f"target embedding exists: {target.embedding is not None}")
+
+    if dirty:
+        target.created_at = datetime.now()
 
     if dirty or target.embedding is None:
         text = f"""{target.tag}"""

@@ -88,7 +88,7 @@ tagging_schema = {
     "properties": {
         "title": {
             "type": "string",
-            "description": "Give a well formatted concise title for this text, so people know what they are looking at!",
+            "description": "Give a well formatted title for this text, so people know what they are looking at. Be concise.",
         },
         "category": {
             "type": "string",
@@ -100,12 +100,12 @@ tagging_schema = {
         },
         "tags": {
             "type": "array",
-            "description": "If you had to look up this text later, what tags would you use, including Named Entity Recognition (NER) tags?",
+            "description": "If you had to look up this text later, what tags would you use, including Named Entity Recognition (NER) tags? Include Person, Location, Organization, Financial Instrument, Business Segment, and Miscellaneous tags but not Date, Time, or Money.",
             "items": {"type": "string"},
         },
         "analysis": {
             "type": "string",
-            "description": "What would be the financial sentiment of this text, from perspective of an investor?",
+            "description": "What would be the financial sentiment of this text, from the perspective of an investor?",
             "enum": [
                 "very positive",
                 "positive",
@@ -123,7 +123,7 @@ tagging_schema = {
 async def save_filing_excerpts(filing: db.Filing, file: str):
     sections = qk_html.get_sections(file)
 
-    llm = ChatOpenAI(temperature=0.2, verbose=False)
+    llm = ChatOpenAI(temperature=0.2, verbose=False, model="gpt-4")
 
     chain = create_tagging_chain(tagging_schema, llm)
 
@@ -152,6 +152,7 @@ async def save_filing_excerpts(filing: db.Filing, file: str):
 
             tags = tags.get("tags")
             if tags and isinstance(tags, list):
+                tags = set(tags)
                 await session.set_tags(excerpt.id, tags)
 
             await session.commit()
