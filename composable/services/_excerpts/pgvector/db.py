@@ -50,6 +50,7 @@ class Filing(Base):
     filed_at = Column(Date)
     filing_period = Column(String(10))
     filing_type = Column(String(10))
+    model = Column(String(255))
     url = Column(String(255))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
@@ -63,9 +64,11 @@ class Excerpt(Base):
     category = Column(String(255))
     subcategory = Column(String(255))
     sentiment = Column(String(255))
+    insight = Column(Text)
     excerpt = Column(Text)
     embedding = Column(Vector(1536))
     category_embedding = Column(Vector(1536))
+    tokens = Column(Integer)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
