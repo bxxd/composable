@@ -27,6 +27,7 @@ CREATE TABLE excerpts(
     subcategory varchar(255),
     sentiment varchar(255),
     excerpt text,
+    insight text,
     embedding VECTOR(1536),
     category_embedding VECTOR(1536),
     created_at timestamp DEFAULT now(),

@@ -7,6 +7,8 @@ from composable.services._excerpts.pgvector import db
 from langwave.document_loaders.sec import qk_html
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_tagging_chain
+from langchain.schema.messages import HumanMessage
+from langchain.callbacks import get_openai_callback
 
 import logging
 
@@ -72,6 +74,8 @@ async def save_filing(args):
             (filing,) = filings[0]
             log.debug(f"already have filing: {filing}")
 
+        filing.model = args.model
+
         filing = await session.merge(filing)
         await session.commit()
 
@@ -81,31 +85,48 @@ async def save_filing(args):
 
     log.info(f"have filing: {filing}")
 
-    await save_filing_excerpts(filing, file)
+    await save_filing_excerpts(args, filing, file)
+
+
+_TAGGING_TEMPLATE = """You are creating a rolling extract for the company. This will be used in a value proposition for investment.
+
+Using logos, analytical rigor, calculations.
+
+Extract the desired information from the following passage.
+
+Maintain a concise and clear format, using shorthand and notations that only you, an LLM AI, can understand.
+
+Include any magnitude units on monetary values. Keep monetary units in millions where applicable.
+
+Only extract the properties mentioned in the 'information_extraction' function.
+
+Passage:
+{input}
+"""
 
 
 tagging_schema = {
     "properties": {
-        "title": {
-            "type": "string",
-            "description": "Give a well formatted title for this text, so people know what they are looking at. Be concise.",
+        "tags": {
+            "type": "array",
+            "description": "If you had to look up this passage later, what unique set of tags would you use?",
+            "items": {"type": "string"},
         },
         "category": {
             "type": "string",
-            "description": "What main financial category does this text apply to?",
+            "description": "What main financial category does this passage apply to?",
         },
         "subcategory": {
             "type": "string",
-            "description": "Give a concise subcategory for the text, if there is one, to distinguish this text.",
+            "description": "Give a concise subcategory for the passage, if there is one, to distinguish this passage.",
         },
-        "tags": {
-            "type": "array",
-            "description": "If you had to look up this text later, what tags would you use, including Named Entity Recognition (NER) tags? Include Person, Location, Organization, Financial Instrument, Business Segment, and Miscellaneous tags but not Date, Time, or Money.",
-            "items": {"type": "string"},
+        "insight": {
+            "type": "string",
+            "description": "In a sentence, what is an insight of this passage?",
         },
         "analysis": {
             "type": "string",
-            "description": "What would be the financial sentiment of this text, from the perspective of an investor?",
+            "description": "What would be the financial sentiment of this passage, from the perspective of an investor?",
             "enum": [
                 "very positive",
                 "positive",
@@ -115,17 +136,25 @@ tagging_schema = {
                 "very negative",
             ],
         },
+        "title": {
+            "type": "string",
+            "description": "Give a well formatted title for this passage, so people know what they are looking at. Be concise.",
+        },
     },
-    "required": ["title", "category", "subcategory", "tags", "analysis"],
+    "required": ["category", "subcategory", "tags", "insight", "analysis", "title"],
 }
 
 
-async def save_filing_excerpts(filing: db.Filing, file: str):
+async def save_filing_excerpts(args, filing: db.Filing, file: str):
     sections = qk_html.get_sections(file)
 
-    llm = ChatOpenAI(temperature=0.2, verbose=False, model="gpt-4")
+    # , model="gpt-4"
+
+    llm = ChatOpenAI(temperature=0.2, verbose=False, model=args.model)
 
     chain = create_tagging_chain(tagging_schema, llm)
+
+    running_cost = 0.0
 
     async with db.Session.context() as session:
         for s in sections:
@@ -135,15 +164,27 @@ async def save_filing_excerpts(filing: db.Filing, file: str):
             if not excerpt:
                 excerpt = db.Excerpt(index=s.cnt, filing_id=filing.id)
 
-            tags = await chain.arun(s.text)
+            s.text = s.text.replace("\n", " ")
+
+            with get_openai_callback() as cb:
+                tags = await chain.arun(s.text)
+                running_cost += cb.total_cost
+                log.info(
+                    f"Total Cost (USD): ${cb.total_cost} tokens: {cb.total_tokens} input_tokens: {cb.prompt_tokens} output_tokens: {cb.completion_tokens}"
+                )
 
             log.info(f"tags: {tags}")
+            log.info(f"running_cost: ${running_cost}")
 
             excerpt.excerpt = s.text
             excerpt.title = tags.get("title")
             excerpt.category = tags.get("category")
             excerpt.subcategory = tags.get("subcategory")
             excerpt.sentiment = tags.get("analysis")
+            excerpt.insight = tags.get("insight")
+            excerpt.tokens = llm.get_num_tokens_from_messages(
+                [HumanMessage(content=s.text)]
+            )
 
             excerpt = await session.merge(excerpt)
             await session.commit()
@@ -176,6 +217,7 @@ def parse_args():
     parser.add_argument("--filing", "-f", help="Filing config yaml")
     parser.add_argument("--company", "-c", help="Company config yaml")
     parser.add_argument("--debug", "-d", action="store_true")
+    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-16k")
     return parser.parse_args()
 
 
