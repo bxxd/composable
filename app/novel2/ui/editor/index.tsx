@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
 import { TiptapExtensions } from "./extensions";
+
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useDebouncedCallback } from "use-debounce";
 import { useCompletion } from "ai/react";

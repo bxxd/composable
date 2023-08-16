@@ -14,6 +14,7 @@ import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
 import UploadImagesPlugin from "@/ui/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
+import { getExtensions } from "../kit";
 
 const CustomImage = TiptapImage.extend({
   addProseMirrorPlugins() {
