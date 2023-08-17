@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
 import { TiptapExtensions } from "./extensions";
+import { getExtensions } from "./extensions/kit";
 
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useDebouncedCallback } from "use-debounce";
@@ -35,7 +36,7 @@ export default function Editor() {
   }, 750);
 
   const editor = useEditor({
-    extensions: TiptapExtensions,
+    extensions: getExtensions(),
     editorProps: TiptapEditorProps,
     onUpdate: (e) => {
       setSaveStatus("Unsaved");
