@@ -16,6 +16,10 @@ import { EditorBubbleMenu } from "./components/bubble-menu";
 import { getPrevText } from "@/lib/editor";
 import { ImageResizer } from "./components/image-resizer";
 
+import { mockContent } from "./mocks";
+
+// import "./tiptap.scss";
+
 export default function Editor() {
   const [content, setContent] = useLocalStorage(
     "content",
@@ -28,16 +32,51 @@ export default function Editor() {
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setSaveStatus("Saving...");
-    setContent(json);
+    // setContent(json);
     // Simulate a delay in saving.
     setTimeout(() => {
       setSaveStatus("Saved");
     }, 500);
   }, 750);
 
+  // const editor = useEditor({
+  //   extensions: getExtensions(),
+  //   editorProps: TiptapEditorProps,
+  //   onUpdate: (e) => {
+  //     setSaveStatus("Unsaved");
+  //     const selection = e.editor.state.selection;
+  //     const lastTwo = getPrevText(e.editor, {
+  //       chars: 2,
+  //     });
+  //     if (lastTwo === "++" && !isLoading) {
+  //       e.editor.commands.deleteRange({
+  //         from: selection.from - 2,
+  //         to: selection.from,
+  //       });
+  //       complete(
+  //         getPrevText(e.editor, {
+  //           chars: 5000,
+  //         }),
+  //       );
+  //       // complete(e.editor.storage.markdown.getMarkdown());
+  //       va.track("Autocomplete Shortcut Used");
+  //     } else {
+  //       debouncedUpdates(e);
+  //     }
+  //   },
+  //   autofocus: "end",
+  // });
+
   const editor = useEditor({
     extensions: getExtensions(),
-    editorProps: TiptapEditorProps,
+    // content: mockContent,
+    editorProps: {
+      attributes: {
+        class: `prose prose-p:my-2 prose-h1:my-2 prose-h2:my-2 prose-h3:my-2 prose-ul:my-2 prose-ol:my-2 max-w-none focus:outline-none w-full`,
+        spellcheck: "false",
+        suppressContentEditableWarning: "true",
+      },
+    },
     onUpdate: (e) => {
       setSaveStatus("Unsaved");
       const selection = e.editor.state.selection;
@@ -127,11 +166,14 @@ export default function Editor() {
 
   // Hydrate the editor with the content from localStorage.
   useEffect(() => {
+    console.log("hydrating content=" + content);
     if (editor && content && !hydrated) {
       editor.commands.setContent(content);
       setHydrated(true);
     }
   }, [editor, content, hydrated]);
+
+  // editor.commands.setContent(DEFAULT_EDITOR_CONTENT);
 
   return (
     <div

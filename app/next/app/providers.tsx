@@ -5,7 +5,7 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { displayFontMapper, defaultFontMapper } from "./styles/fonts";
 import useLocalStorage from "./lib/hooks/use-local-storage";
-import { cn } from "./lib/utils";
+import { cn } from "@/lib/utils";
 
 export const AppContext = createContext<{
   font: string;
