@@ -13,6 +13,9 @@ import Heading from "@tiptap/extension-heading";
 import { Document } from "./doc";
 import DropCursor from "@tiptap/extension-dropcursor";
 import { TrailingNode } from "./extensions/trailingNode";
+import { EditorView } from "prosemirror-view";
+import { Slice } from "prosemirror-model";
+import { Event } from "react";
 import { Markdown } from "tiptap-markdown";
 
 let mockdata = {
@@ -31,12 +34,16 @@ let mockdata = {
   ],
 };
 
-function handlePaste(view, event, slice) {
+function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
   // Prevent default paste behavior
   event.preventDefault();
 
   // Get plain text from clipboard
-  const plainText = event.clipboardData.getData("text/plain");
+  const plainText = event.clipboardData?.getData("text/plain");
+
+  if (!plainText) {
+    return false;
+  }
 
   // Insert the plain text at the current cursor position
   const transaction = view.state.tr.insertText(plainText);
@@ -100,6 +107,5 @@ const Tiptap = () => {
     </section>
   );
 };
-// flex justify-start p-4 border-yellow-300 border border-dashed rounded-lg m-1 w-full
-// flex w-full
+
 export default Tiptap;
