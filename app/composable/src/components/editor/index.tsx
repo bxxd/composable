@@ -8,15 +8,21 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import Text from "@tiptap/extension-text";
 import { Paragraph, ParagraphOptions } from "@tiptap/extension-paragraph";
 import HardBreak from "@tiptap/extension-hard-break";
-// import StarterKit from "@tiptap/starter-kit";
 import Heading from "@tiptap/extension-heading";
 import { Document } from "./doc";
 import DropCursor from "@tiptap/extension-dropcursor";
 import { TrailingNode } from "./extensions/trailingNode";
 import { EditorView } from "prosemirror-view";
 import { Slice } from "prosemirror-model";
-import { Event } from "react";
-import { Markdown } from "tiptap-markdown";
+
+import { Icon } from "@iconify/react";
+import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
+
+import { useChat } from "ai/react";
+
+import { toast } from "sonner";
+
+// import { Markdown } from "tiptap-markdown";
 
 let mockdata = {
   type: "doc",
@@ -101,9 +107,25 @@ const Tiptap = () => {
     },
   });
 
+  const handleAIButtonClick = () => {
+    toast("Button Pushed!");
+  };
+
   return (
-    <section className="border-yellow-300 border border-dashed rounded-lg m-1 p-4">
+    <section className="flex flex-col border-yellow-300 border border-dashed rounded-lg m-1 p-4">
       <EditorContent className="" editor={editor} />
+      <div className="relative group inline-block">
+        <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">
+          Send to AI
+        </span>
+        <button
+          className="ml-auto w-6 h-6 bg-gray-400 hover:bg-gray-500 active:bg-gray-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5"
+          onClick={handleAIButtonClick}
+        >
+          <Icon icon={chatPasteGoIcon} className="text-white" />
+        </button>
+        <p></p>
+      </div>
     </section>
   );
 };
