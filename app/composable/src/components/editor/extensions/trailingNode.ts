@@ -44,6 +44,11 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
 
           const shouldInsertNodeAtEnd = plugin.getState(state);
 
+          // console.log(
+          //   "appendTransaction shouldInsertNodeAtEnd",
+          //   shouldInsertNodeAtEnd
+          // );
+
           const endPosition = doc.content.size;
 
           const type = schema.nodes[this.options.node];
@@ -55,14 +60,22 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
         },
         state: {
           init: (_, state) => {
+            // return false;
             const lastNode = state.tr.doc.lastChild;
+
+            // console.log("init trailingNode", lastNode);
+
+            if (lastNode?.attrs.isAssistant) return true;
 
             return !nodeEqualsType({ node: lastNode, types: disabledNodes });
           },
           apply: (tr, value) => {
+            // console.log("apply trailingNode", lastNode);
+            if (tr.doc.lastChild?.attrs.isAssistant) return true;
+
             if (!tr.docChanged) return value;
 
-            const lastNode = (tr.doc.lastChild?.content as any)?.content?.[0];
+            let lastNode = (tr.doc.lastChild?.content as any)?.content?.[0];
 
             return !nodeEqualsType({ node: lastNode, types: disabledNodes });
           },

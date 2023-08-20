@@ -15,17 +15,19 @@ const ToasterProvider = () => {
 
 export default function Home() {
   return (
-    <ThemeProvider
-      attribute="class"
-      value={{
-        light: "light-theme",
-        dark: "dark-theme",
-      }}
-    >
-      <ToasterProvider />
-      <main className="App container flex flex-col gap-4 max-w-[100ch]">
-        <Tiptap />
-      </main>
-    </ThemeProvider>
+    <>
+      <ThemeProvider
+        attribute="class"
+        value={{
+          light: "light-theme",
+          dark: "dark-theme",
+        }}
+      >
+        <ToasterProvider />
+        <main className="App container flex flex-col gap-4 max-w-[100ch]">
+          <Tiptap />
+        </main>
+      </ThemeProvider>
+    </>
   );
 }

@@ -5,11 +5,21 @@ import plusIcon from "@iconify/icons-mdi/plus";
 import dragIndicatorIcon from "@iconify/icons-ic/baseline-drag-indicator";
 import closeIcon from "@iconify/icons-mdi/close";
 
-export const BlockNodeView: React.FC<NodeViewProps> = ({
+interface ExtendedNodeViewProps extends NodeViewProps {
+  extraClass?: string;
+}
+
+export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   node,
   getPos,
   editor,
 }) => {
+  const isAssistant = node.attrs.isAssistant;
+
+  // console.log("Is Assistant?", isAssistant);
+  // console.log("attrs", node.attrs);
+  // console.log(node);
+
   const isTable = useMemo(() => {
     const { content } = node.content as any;
 
@@ -35,11 +45,17 @@ export const BlockNodeView: React.FC<NodeViewProps> = ({
   };
 
   return (
-    <NodeViewWrapper as="div" className="flex gap-2 group w-full relative">
+    <NodeViewWrapper
+      as="div"
+      className={`flex gap-2 group w-full relative ${
+        isAssistant ? "assistant-block" : "user-block"
+      }`}
+    >
       <section
         className="flex mt-2 pt-[2px] gap-1"
         aria-label="left-menu"
         contentEditable="false"
+        suppressContentEditableWarning
       >
         <button
           type="button"
