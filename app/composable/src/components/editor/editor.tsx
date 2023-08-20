@@ -242,17 +242,18 @@ const Tiptap = () => {
   };
 
   return (
-    <section className="flex flex-col border-yellow-300 border border-dashed rounded-lg m-1 p-4">
+    <section className="flex flex-col border-yellow-300 border border-dashed rounded-lg m-1 p-1 pt-3 pb-0">
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
         <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">
           Send to AI
         </span>
         <button
-          className="ml-auto w-6 h-6 bg-gray-400 hover:bg-gray-500 active:bg-gray-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5"
+          className="ml-auto w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5"
           onClick={handleAIButtonClick}
         >
-          <Icon icon={chatPasteGoIcon} className="text-white" />
+          {/* <Icon icon={chatPasteGoIcon} className="text-white" /> */}
+          <Icon icon="subway:down-2" />
         </button>
       </div>
     </section>

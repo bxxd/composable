@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   let messages = JSON.parse(prompt);
 
-  let system_prompt = { role: "system", content: "Hello, how are you?" };
+  let system_prompt = { role: "system", content: "" };
 
   messages = [system_prompt, ...messages];
 
