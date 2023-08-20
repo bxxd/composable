@@ -47,9 +47,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   return (
     <NodeViewWrapper
       as="div"
-      className={`flex gap-2 group w-full relative ${
-        isAssistant ? "assistant-block" : "user-block"
-      }`}
+      className={`flex gap-2 group w-full relative ${node.attrs.role}-block`}
     >
       <section
         className="flex mt-2 pt-[2px] gap-1"

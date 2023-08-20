@@ -2,6 +2,7 @@
 
 import Workspace from "@/components/workspace";
 import Tiptap from "@/components/editor";
+import Header from "./header";
 
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
@@ -23,10 +24,11 @@ export default function Home() {
           dark: "dark-theme",
         }}
       >
-        <ToasterProvider />
+        <Header />
         <main className="App container flex flex-col gap-4 max-w-[100ch]">
           <Tiptap />
         </main>
+        <ToasterProvider />
       </ThemeProvider>
     </>
   );

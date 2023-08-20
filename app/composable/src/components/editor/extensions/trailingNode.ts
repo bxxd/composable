@@ -60,7 +60,7 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
         },
         state: {
           init: (_, state) => {
-            // return false;
+            return false;
             const lastNode = state.tr.doc.lastChild;
 
             // console.log("init trailingNode", lastNode);
@@ -71,7 +71,7 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
           },
           apply: (tr, value) => {
             // console.log("apply trailingNode", lastNode);
-            if (tr.doc.lastChild?.attrs.isAssistant) return true;
+            if (tr.doc.lastChild?.attrs.role != "user") return true;
 
             if (!tr.docChanged) return value;
 

@@ -1,9 +1,15 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { BlockNodeView } from "./blockNodeView";
+import { Editor } from "@tiptap/core";
+
+export interface HandleAIButtonClickParams {
+  editor?: Editor | null;
+}
 
 export interface BlockOptions {
   isAssistant?: boolean; // Make it optional if not all blocks will have it
+  handleAIButtonClick: (params: HandleAIButtonClickParams) => void;
   HTMLAttributes: Record<string, any>;
 }
 
@@ -41,8 +47,8 @@ export const DBlock = Node.create<BlockOptions>({
 
   addAttributes() {
     return {
-      isAssistant: {
-        default: false,
+      role: {
+        default: "user",
       },
     };
   },
@@ -76,5 +82,14 @@ export const DBlock = Node.create<BlockOptions>({
 
   addNodeView() {
     return ReactNodeViewRenderer(BlockNodeView);
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Enter: ({ editor }) => {
+        this.options.handleAIButtonClick({ editor });
+        return editor.chain().run();
+      },
+    };
   },
 });

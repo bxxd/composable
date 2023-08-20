@@ -19,9 +19,14 @@ export async function POST(req: Request) {
 
   let messages = JSON.parse(prompt);
 
-  let system_prompt = { role: "system", content: "" };
+  let system_prompt = {
+    role: "system",
+    content: "logos, analytical rigor, calculations.",
+  };
 
-  messages = [system_prompt, ...messages];
+  if (messages.length > 0 && messages[0].role != "system") {
+    messages = [system_prompt, ...messages];
+  }
 
   console.log("messages", messages);
 
