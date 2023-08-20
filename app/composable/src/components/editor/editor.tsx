@@ -303,7 +303,7 @@ const Tiptap = () => {
   }, [isLoading, editor, completion]);
 
   return (
-    <section className="flex flex-col border-yellow-300 border border-dashed rounded-lg m-1 p-1 pt-3 pb-0">
+    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  dark:border-black">
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
         <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">

@@ -21,9 +21,9 @@ export default function Header() {
             width={25}
             height={25}
             alt="logo"
-            className="flex"
+            className="flex mr-1"
           />
-          Composable
+          Composable Parts
         </span>
         <button
           onClick={toggleTheme}
