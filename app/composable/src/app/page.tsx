@@ -7,6 +7,8 @@ import Header from "./header";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 
+import useLocalStorage from "@/lib/hooks/use-local-storage";
+
 const ToasterProvider = () => {
   const { theme } = useTheme() as {
     theme: "light" | "dark" | "system";
