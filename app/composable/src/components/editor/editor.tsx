@@ -3,7 +3,13 @@
 import "./styles.scss";
 
 import { DBlock, HandleAIButtonClickParams } from "./extensions/block";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
 import Text from "@tiptap/extension-text";
@@ -17,6 +23,7 @@ import { EditorView } from "prosemirror-view";
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
+import { useLatestContextValue } from "@/lib/cmn";
 
 import { Icon } from "@iconify/react";
 // import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
@@ -105,6 +112,16 @@ function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
   return true; // Indicate that the paste event was handled
 }
 
+function useLatestValue<T>(value: T) {
+  const latestValueRef = useRef(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
+
+  return latestValueRef;
+}
+
 function extractTextFromJSON(data: any): { role: string; content: string }[] {
   let result: { role: string; content: string }[] = [];
 
@@ -146,14 +163,14 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
   return result;
 }
 
-const createNewNodeJSON = (text: string) => {
+const createNewNodeJSON = (text: string, role: string = "assistant") => {
   if (!text || text.trim() === "") {
     text = "is empty";
   }
 
   return {
     type: "dBlock",
-    attrs: { role: "assistant" },
+    attrs: { role: role },
     content: [
       {
         type: "paragraph",
@@ -168,12 +185,14 @@ const createNewNodeJSON = (text: string) => {
   };
 };
 
-const Tiptap = () => {
+const Tiptap = forwardRef((props, ref) => {
   const [content, setContent] = useLocalStorage("content", mockdata);
 
   const [saveStatus, setSaveStatus] = useState("Saved");
 
   const [hydrated, setHydrated] = useState(false);
+
+  const aiModelRef = useLatestContextValue("aiModel");
 
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
@@ -186,6 +205,11 @@ const Tiptap = () => {
   }, 750);
 
   const editorRef = useRef<Editor | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    getEditor: () => editor,
+    appendContentToEnd: appendContentToEnd,
+  }));
 
   const handleAIButtonClick = ({ editor }: HandleAIButtonClickParams) => {
     let currentEditor = editor || editorRef.current;
@@ -207,10 +231,16 @@ const Tiptap = () => {
     console.log("json", JSON.stringify(data));
 
     data = extractTextFromJSON(data);
-    let textData = JSON.stringify(data);
-    toast.message("Sending to AI..." + textData);
-    console.log("textData ", textData);
-    complete(textData);
+
+    let payload = JSON.stringify({
+      aiModel: aiModelRef.current,
+      messages: data,
+    });
+    // toast("using model " + aiModel);
+    toast.message("Sending to AI..." + payload);
+    console.log("payload ", payload);
+    // TODO: why are we using JSON.stringify here? We should define our own api instead of using complete
+    complete(payload);
   };
 
   const editor = useEditor({
@@ -252,7 +282,7 @@ const Tiptap = () => {
   });
 
   editorRef.current = editor;
-  ``;
+
   const { complete, completion, isLoading, stop } = useCompletion({
     id: "composable",
     api: "/api/generate",
@@ -290,10 +320,10 @@ const Tiptap = () => {
     const mousedownHandler = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      // stop();
-      // if (window.confirm("AI writing paused. Continue?")) {
-      //   complete(editor?.getText() || "");
-      // }
+      stop();
+      if (window.confirm("AI writing paused. Continue?")) {
+        complete(editor?.getText() || "");
+      }
     };
     if (isLoading) {
       document.addEventListener("keydown", onKeyDown);
@@ -307,6 +337,13 @@ const Tiptap = () => {
       window.removeEventListener("mousedown", mousedownHandler);
     };
   }, [stop, isLoading, editor, complete, completion.length]);
+
+  const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
+    if (!node) return false;
+
+    // Check if the text content is empty or consists of only whitespace
+    return !node.textContent || !node.textContent.trim();
+  };
 
   useEffect(() => {
     if (!editor) {
@@ -323,13 +360,6 @@ const Tiptap = () => {
     prev.current = completion;
 
     const newNodeJSON = createNewNodeJSON(diff);
-
-    const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
-      if (!node) return false;
-
-      // Check if the text content is empty or consists of only whitespace
-      return !node.textContent || !node.textContent.trim();
-    };
 
     if (newNodePosition.current === null) {
       // Get the position of the last node
@@ -367,26 +397,53 @@ const Tiptap = () => {
     }
   }, [editor, content, hydrated]);
 
+  const appendContentToEnd = (newContent: string) => {
+    if (!editor) {
+      console.log("no editor");
+      return;
+    }
+
+    const newNodeJSON = createNewNodeJSON(newContent, "user"); // Assuming you have a way to convert content to ProseMirror JSON
+
+    // Get the position of the last node
+    const lastNode = editor.state.doc.lastChild;
+    let position = editor.state.doc.content.size;
+
+    // If the last node is empty, adjust the position
+    if (lastNode && isTextNodeEmpty(lastNode)) {
+      position -= lastNode.nodeSize;
+    }
+
+    editor.commands.insertContentAt(position, newNodeJSON);
+  };
+
+  const clearEditor = () => {
+    editor?.commands.setContent(mockdata);
+  };
   return (
-    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  dark:border-black">
+    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0 dark:border-black">
       <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
         {saveStatus}
       </div>
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
-        <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">
-          Send to AI
-        </span>
-        <button
-          className="ml-auto w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-          onClick={() => handleAIButtonClick({ editor: editorRef.current })}
-        >
-          {/* <Icon icon={chatPasteGoIcon} className="text-white" /> */}
-          <Icon icon="subway:down-2" />
-        </button>
+        <div className="flex ml-auto">
+          <button
+            className="w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+            onClick={() => handleAIButtonClick({ editor: editorRef.current })}
+          >
+            <Icon icon="ant-design:down" />
+          </button>
+          <button
+            className="w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
+            onClick={() => clearEditor()}
+          >
+            <Icon icon="ant-design:close-circle-outlined" />
+          </button>
+        </div>
       </div>
     </section>
   );
-};
+});
 
 export default Tiptap;
