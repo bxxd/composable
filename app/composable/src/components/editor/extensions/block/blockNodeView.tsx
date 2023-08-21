@@ -4,6 +4,9 @@ import { Icon } from "@iconify/react";
 import plusIcon from "@iconify/icons-mdi/plus";
 import dragIndicatorIcon from "@iconify/icons-ic/baseline-drag-indicator";
 import closeIcon from "@iconify/icons-mdi/close";
+// import closeIcon from "@iconify/icons-ant-design/close";
+// import plusIcon from "@iconify/icons-ant-design/plus";
+// import dragIndicatorIcon from "@iconify/icons-ant-design/drag";
 
 interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;

@@ -25,7 +25,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({
 
   if (collapsed) {
     return (
-      <div className="flex flex-col ml-4">
+      <div className="flex flex-col ml-4 m-1">
         <button
           onClick={() => setCollapsed(false)}
           className="mb-2 p-2 border rounded"
@@ -37,7 +37,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({
   }
 
   return (
-    <div className="flex flex-col ml-4">
+    <div className="flex flex-col m-1">
       <button
         onClick={() => setCollapsed(true)}
         className="mb-2 p-2 border rounded"

@@ -1,10 +1,11 @@
 import TipTap from "@/components/editor";
 import { useRef, useState } from "react";
-import { Icon } from "@iconify/react";
-import baselineAddCircle from "@iconify/icons-ic/baseline-add-circle";
+
 import SearchColumn from "./searchColumn";
 
-export default function Workspace({ selectedItem }) {
+type WorkspaceProps = {};
+
+export default function Workspace({}: WorkspaceProps) {
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendContentToEnd?: (content: string) => void;

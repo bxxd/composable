@@ -19,7 +19,9 @@ export async function POST(req: Request) {
   const { prompt } = await req.json();
   console.log("Request body:", prompt);
 
-  let messages = JSON.parse(prompt);
+  let payload = JSON.parse(prompt);
+  let messages = payload.messages;
+  let aiModel = payload.aiModel;
 
   let system_prompt = {
     role: "system",
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
     // Ask OpenAI for a streaming chat completion given the prompt
     const response = await openai.chat.completions.create(
       {
-        model: "openai/gpt-3.5-turbo",
+        model: aiModel,
         stream: true,
         messages: messages,
         max_tokens: 2500,

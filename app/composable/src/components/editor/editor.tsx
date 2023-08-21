@@ -23,6 +23,7 @@ import { EditorView } from "prosemirror-view";
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
+import { useLatestContextValue } from "@/lib/cmn";
 
 import { Icon } from "@iconify/react";
 // import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
@@ -111,6 +112,16 @@ function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
   return true; // Indicate that the paste event was handled
 }
 
+function useLatestValue<T>(value: T) {
+  const latestValueRef = useRef(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
+
+  return latestValueRef;
+}
+
 function extractTextFromJSON(data: any): { role: string; content: string }[] {
   let result: { role: string; content: string }[] = [];
 
@@ -181,6 +192,8 @@ const Tiptap = forwardRef((props, ref) => {
 
   const [hydrated, setHydrated] = useState(false);
 
+  const aiModelRef = useLatestContextValue("aiModel");
+
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setSaveStatus("Saving...");
@@ -218,10 +231,16 @@ const Tiptap = forwardRef((props, ref) => {
     console.log("json", JSON.stringify(data));
 
     data = extractTextFromJSON(data);
-    let textData = JSON.stringify(data);
-    toast.message("Sending to AI..." + textData);
-    console.log("textData ", textData);
-    complete(textData);
+
+    let payload = JSON.stringify({
+      aiModel: aiModelRef.current,
+      messages: data,
+    });
+    // toast("using model " + aiModel);
+    toast.message("Sending to AI..." + payload);
+    console.log("payload ", payload);
+    // TODO: why are we using JSON.stringify here? We should define our own api instead of using complete
+    complete(payload);
   };
 
   const editor = useEditor({
@@ -263,7 +282,7 @@ const Tiptap = forwardRef((props, ref) => {
   });
 
   editorRef.current = editor;
-  ``;
+
   const { complete, completion, isLoading, stop } = useCompletion({
     id: "composable",
     api: "/api/generate",
@@ -301,10 +320,10 @@ const Tiptap = forwardRef((props, ref) => {
     const mousedownHandler = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      // stop();
-      // if (window.confirm("AI writing paused. Continue?")) {
-      //   complete(editor?.getText() || "");
-      // }
+      stop();
+      if (window.confirm("AI writing paused. Continue?")) {
+        complete(editor?.getText() || "");
+      }
     };
     if (isLoading) {
       document.addEventListener("keydown", onKeyDown);
@@ -398,23 +417,30 @@ const Tiptap = forwardRef((props, ref) => {
     editor.commands.insertContentAt(position, newNodeJSON);
   };
 
+  const clearEditor = () => {
+    editor?.commands.setContent(mockdata);
+  };
   return (
-    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  dark:border-black">
+    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0 dark:border-black">
       <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
         {saveStatus}
       </div>
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
-        <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">
-          Send to AI
-        </span>
-        <button
-          className="ml-auto w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-          onClick={() => handleAIButtonClick({ editor: editorRef.current })}
-        >
-          {/* <Icon icon={chatPasteGoIcon} className="text-white" /> */}
-          <Icon icon="subway:down-2" />
-        </button>
+        <div className="flex ml-auto">
+          <button
+            className="w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+            onClick={() => handleAIButtonClick({ editor: editorRef.current })}
+          >
+            <Icon icon="ant-design:down" />
+          </button>
+          <button
+            className="w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
+            onClick={() => clearEditor()}
+          >
+            <Icon icon="ant-design:close-circle-outlined" />
+          </button>
+        </div>
       </div>
     </section>
   );
