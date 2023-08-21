@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 import baselineAddCircle from "@iconify/icons-ic/baseline-add-circle";
 import SearchColumn from "./searchColumn";
 
-export default function Workspace() {
+export default function Workspace({ selectedItem }) {
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendContentToEnd?: (content: string) => void;

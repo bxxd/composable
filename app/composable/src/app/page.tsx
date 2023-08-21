@@ -6,8 +6,9 @@ import Header from "./header";
 
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
+import { useState } from "react";
 
-import useLocalStorage from "@/lib/hooks/use-local-storage";
+// import useLocalStorage from "@/lib/hooks/use-local-storage";
 
 const ToasterProvider = () => {
   const { theme } = useTheme() as {
@@ -17,6 +18,7 @@ const ToasterProvider = () => {
 };
 
 export default function Home() {
+  const [selectedItem, setSelectedItem] = useState("");
   return (
     <>
       <ThemeProvider
@@ -26,9 +28,9 @@ export default function Home() {
           dark: "dark-theme",
         }}
       >
-        <Header />
+        <Header selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
         <main className="App container flex flex-col gap-4 max-w-[100ch]">
-          <Workspace />
+          <Workspace selectedItem={selectedItem} />
         </main>
         <ToasterProvider />
       </ThemeProvider>
