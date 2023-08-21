@@ -1,7 +1,7 @@
 "use client";
 
 import Workspace from "@/components/workspace";
-import Tiptap from "@/components/editor";
+// import Tiptap from "@/components/editor";
 import Header from "./header";
 
 import { ThemeProvider, useTheme } from "next-themes";
@@ -28,7 +28,7 @@ export default function Home() {
       >
         <Header />
         <main className="App container flex flex-col gap-4 max-w-[100ch]">
-          <Tiptap />
+          <Workspace />
         </main>
         <ToasterProvider />
       </ThemeProvider>

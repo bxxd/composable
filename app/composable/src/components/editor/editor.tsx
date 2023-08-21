@@ -3,7 +3,13 @@
 import "./styles.scss";
 
 import { DBlock, HandleAIButtonClickParams } from "./extensions/block";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
 import Text from "@tiptap/extension-text";
@@ -146,14 +152,14 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
   return result;
 }
 
-const createNewNodeJSON = (text: string) => {
+const createNewNodeJSON = (text: string, role: string = "assistant") => {
   if (!text || text.trim() === "") {
     text = "is empty";
   }
 
   return {
     type: "dBlock",
-    attrs: { role: "assistant" },
+    attrs: { role: role },
     content: [
       {
         type: "paragraph",
@@ -168,7 +174,7 @@ const createNewNodeJSON = (text: string) => {
   };
 };
 
-const Tiptap = () => {
+const Tiptap = forwardRef((props, ref) => {
   const [content, setContent] = useLocalStorage("content", mockdata);
 
   const [saveStatus, setSaveStatus] = useState("Saved");
@@ -186,6 +192,11 @@ const Tiptap = () => {
   }, 750);
 
   const editorRef = useRef<Editor | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    getEditor: () => editor,
+    appendContentToEnd: appendContentToEnd,
+  }));
 
   const handleAIButtonClick = ({ editor }: HandleAIButtonClickParams) => {
     let currentEditor = editor || editorRef.current;
@@ -308,6 +319,13 @@ const Tiptap = () => {
     };
   }, [stop, isLoading, editor, complete, completion.length]);
 
+  const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
+    if (!node) return false;
+
+    // Check if the text content is empty or consists of only whitespace
+    return !node.textContent || !node.textContent.trim();
+  };
+
   useEffect(() => {
     if (!editor) {
       // console.log("no editor");
@@ -323,13 +341,6 @@ const Tiptap = () => {
     prev.current = completion;
 
     const newNodeJSON = createNewNodeJSON(diff);
-
-    const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
-      if (!node) return false;
-
-      // Check if the text content is empty or consists of only whitespace
-      return !node.textContent || !node.textContent.trim();
-    };
 
     if (newNodePosition.current === null) {
       // Get the position of the last node
@@ -367,6 +378,26 @@ const Tiptap = () => {
     }
   }, [editor, content, hydrated]);
 
+  const appendContentToEnd = (newContent: string) => {
+    if (!editor) {
+      console.log("no editor");
+      return;
+    }
+
+    const newNodeJSON = createNewNodeJSON(newContent, "user"); // Assuming you have a way to convert content to ProseMirror JSON
+
+    // Get the position of the last node
+    const lastNode = editor.state.doc.lastChild;
+    let position = editor.state.doc.content.size;
+
+    // If the last node is empty, adjust the position
+    if (lastNode && isTextNodeEmpty(lastNode)) {
+      position -= lastNode.nodeSize;
+    }
+
+    editor.commands.insertContentAt(position, newNodeJSON);
+  };
+
   return (
     <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  dark:border-black">
       <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
@@ -387,6 +418,6 @@ const Tiptap = () => {
       </div>
     </section>
   );
-};
+});
 
 export default Tiptap;
