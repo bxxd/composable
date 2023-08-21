@@ -251,6 +251,41 @@ const Tiptap = () => {
   const newNodePosition = useRef<number | null>(null);
 
   useEffect(() => {
+    // if user presses escape or cmd + z and it's loading,
+    // stop the request, delete the completion, and insert back the "++"
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || (e.metaKey && e.key === "z")) {
+        stop();
+        if (e.key === "Escape") {
+          editor?.commands.deleteRange({
+            from: editor.state.selection.from - completion.length,
+            to: editor.state.selection.from,
+          });
+        }
+      }
+    };
+    const mousedownHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // stop();
+      // if (window.confirm("AI writing paused. Continue?")) {
+      //   complete(editor?.getText() || "");
+      // }
+    };
+    if (isLoading) {
+      document.addEventListener("keydown", onKeyDown);
+      window.addEventListener("mousedown", mousedownHandler);
+    } else {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", mousedownHandler);
+    }
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", mousedownHandler);
+    };
+  }, [stop, isLoading, editor, complete, completion.length]);
+
+  useEffect(() => {
     if (!editor) {
       // console.log("no editor");
       return;
