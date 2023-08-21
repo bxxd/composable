@@ -3,8 +3,9 @@
 import "./styles.scss";
 
 import { DBlock, HandleAIButtonClickParams } from "./extensions/block";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useDebouncedCallback } from "use-debounce";
 import Text from "@tiptap/extension-text";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import HardBreak from "@tiptap/extension-hard-break";
@@ -15,6 +16,7 @@ import { TrailingNode } from "./extensions/trailingNode";
 import { EditorView } from "prosemirror-view";
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
+import useLocalStorage from "@/lib/hooks/use-local-storage";
 
 import { Icon } from "@iconify/react";
 // import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
@@ -167,6 +169,22 @@ const createNewNodeJSON = (text: string) => {
 };
 
 const Tiptap = () => {
+  const [content, setContent] = useLocalStorage("content", mockdata);
+
+  const [saveStatus, setSaveStatus] = useState("Saved");
+
+  const [hydrated, setHydrated] = useState(false);
+
+  const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
+    const json = editor.getJSON();
+    setSaveStatus("Saving...");
+    setContent(json);
+    // Simulate a delay in saving.
+    setTimeout(() => {
+      setSaveStatus("Saved");
+    }, 500);
+  }, 750);
+
   const editorRef = useRef<Editor | null>(null);
 
   const handleAIButtonClick = ({ editor }: HandleAIButtonClickParams) => {
@@ -226,6 +244,11 @@ const Tiptap = () => {
       },
       handlePaste: handlePaste,
     },
+    onUpdate: (e) => {
+      setSaveStatus("Unsaved");
+      debouncedUpdates(e);
+    },
+    autofocus: "end",
   });
 
   editorRef.current = editor;
@@ -249,6 +272,41 @@ const Tiptap = () => {
 
   const prev = useRef("");
   const newNodePosition = useRef<number | null>(null);
+
+  useEffect(() => {
+    // if user presses escape or cmd + z and it's loading,
+    // stop the request, delete the completion, and insert back the "++"
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || (e.metaKey && e.key === "z")) {
+        stop();
+        if (e.key === "Escape") {
+          editor?.commands.deleteRange({
+            from: editor.state.selection.from - completion.length,
+            to: editor.state.selection.from,
+          });
+        }
+      }
+    };
+    const mousedownHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // stop();
+      // if (window.confirm("AI writing paused. Continue?")) {
+      //   complete(editor?.getText() || "");
+      // }
+    };
+    if (isLoading) {
+      document.addEventListener("keydown", onKeyDown);
+      window.addEventListener("mousedown", mousedownHandler);
+    } else {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", mousedownHandler);
+    }
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", mousedownHandler);
+    };
+  }, [stop, isLoading, editor, complete, completion.length]);
 
   useEffect(() => {
     if (!editor) {
@@ -302,8 +360,18 @@ const Tiptap = () => {
     }
   }, [isLoading, editor, completion]);
 
+  useEffect(() => {
+    if (editor && content && !hydrated) {
+      editor.commands.setContent(content);
+      setHydrated(true);
+    }
+  }, [editor, content, hydrated]);
+
   return (
     <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  dark:border-black">
+      <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
+        {saveStatus}
+      </div>
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
         <span className="absolute z-10 hidden mt-2 text-xs bg-gray-500 text-white py-1 px-2 rounded-lg bottom-full right-0 whitespace-nowrap group-hover:block">
