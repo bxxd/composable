@@ -1,6 +1,6 @@
 import TipTap from "@/components/editor";
 import { useRef, useState } from "react";
-
+import { DataItem } from "@/lib/types";
 import SearchColumn from "./searchColumn";
 
 type WorkspaceProps = {};
@@ -8,12 +8,12 @@ type WorkspaceProps = {};
 export default function Workspace({}: WorkspaceProps) {
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
-    appendContentToEnd?: (content: string) => void;
+    appendDataContentToEnd?: (content: DataItem) => void;
   } | null>(null);
 
-  const handleAddContent = (content: string) => {
-    if (tiptapRef.current?.appendContentToEnd) {
-      tiptapRef.current.appendContentToEnd(content);
+  const handleAddData = (content: DataItem) => {
+    if (tiptapRef.current?.appendDataContentToEnd) {
+      tiptapRef.current.appendDataContentToEnd(content);
     }
   };
 
@@ -35,7 +35,7 @@ export default function Workspace({}: WorkspaceProps) {
         <TipTap ref={tiptapRef} />
       </div>
 
-      <SearchColumn handleAddContent={handleAddContent} />
+      <SearchColumn handleAddData={handleAddData} />
     </div>
   );
 }

@@ -50,6 +50,17 @@ export const DBlock = Node.create<BlockOptions>({
       role: {
         default: "user",
       },
+      data: {
+        default: {
+          title: null,
+          category: null,
+          subcategory: null,
+          tokens: null,
+          insight: null,
+          excerpt: null,
+          tags: [],
+        },
+      },
     };
   },
 

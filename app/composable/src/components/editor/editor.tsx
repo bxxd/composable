@@ -24,6 +24,7 @@ import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useLatestContextValue } from "@/lib/cmn";
+import { DataItem } from "@/lib/types";
 
 import { Icon } from "@iconify/react";
 // import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
@@ -132,8 +133,8 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
   // Check if data has content and is an array
   if (data.content && Array.isArray(data.content)) {
     for (let item of data.content) {
-      // Determine the role based on isAssistant attribute
-      const role = item.attrs && item.attrs.isAssistant ? "assistant" : "user";
+      // Determine the role based on attrs
+      let role = item.attrs ? item.attrs.role : "user";
 
       // Check if item is of type dBlock and has content
       if (
@@ -151,7 +152,14 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
             for (let textItem of block.content) {
               // Check if textItem is of type text and has text property
               if (textItem.type === "text" && textItem.text) {
-                result.push({ role: role, content: textItem.text });
+                if (role === "data") {
+                  result.push({
+                    role: "user",
+                    content: item.attrs.data.excerpt,
+                  });
+                } else {
+                  result.push({ role: role, content: textItem.text });
+                }
               }
             }
           }
@@ -171,6 +179,27 @@ const createNewNodeJSON = (text: string, role: string = "assistant") => {
   return {
     type: "dBlock",
     attrs: { role: role },
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: text,
+          },
+        ],
+      },
+    ],
+  };
+};
+
+const createDataNodeJSON = (item: DataItem, role: string = "data") => {
+  console.log("createDataNodeJSON", item);
+  const text = item?.title || "is empty";
+
+  return {
+    type: "dBlock",
+    attrs: { role: role, editable: false, data: item },
     content: [
       {
         type: "paragraph",
@@ -208,7 +237,7 @@ const Tiptap = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     getEditor: () => editor,
-    appendContentToEnd: appendContentToEnd,
+    appendDataContentToEnd: appendDataContentToEnd,
   }));
 
   const handleAIButtonClick = ({ editor }: HandleAIButtonClickParams) => {
@@ -397,13 +426,13 @@ const Tiptap = forwardRef((props, ref) => {
     }
   }, [editor, content, hydrated]);
 
-  const appendContentToEnd = (newContent: string) => {
+  const appendDataContentToEnd = (newContent: DataItem) => {
     if (!editor) {
       console.log("no editor");
       return;
     }
 
-    const newNodeJSON = createNewNodeJSON(newContent, "user"); // Assuming you have a way to convert content to ProseMirror JSON
+    const newNodeJSON = createDataNodeJSON(newContent, "data");
 
     // Get the position of the last node
     const lastNode = editor.state.doc.lastChild;
