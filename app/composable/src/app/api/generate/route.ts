@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         model: aiModel,
         stream: true,
         messages: messages,
-        max_tokens: 2500,
+        max_tokens: 1024,
       },
       {
         headers: {

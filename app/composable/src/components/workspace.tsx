@@ -30,12 +30,12 @@ export default function Workspace({}: WorkspaceProps) {
   );
 
   return (
-    <div className="flex p-0 border-gray-300 border border-dashed rounded-lg m-1">
-      <div className="flex flex-col">
+    <div className="flex p-0 border-gray-300 border border-dashed rounded-lg m-1 w-full">
+      <div className="flex flex-col flex-grow max-w-[85ch]">
         <TipTap ref={tiptapRef} />
       </div>
 
-      <SearchColumn data={data} handleAddContent={handleAddContent} />
+      <SearchColumn handleAddContent={handleAddContent} />
     </div>
   );
 }

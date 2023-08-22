@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import baselineAddCircle from "@iconify/icons-ic/baseline-add-circle";
 
@@ -8,16 +8,26 @@ interface Item {
 }
 
 interface SearchColumnProps {
-  data: Item[];
   handleAddContent: (content: string) => void;
 }
 
-const SearchColumn: React.FC<SearchColumnProps> = ({
-  data,
-  handleAddContent,
-}) => {
+const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddContent }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [data, setData] = useState<Item[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/excerpts");
+        const items: Item[] = await response.json();
+        setData(items.map((item: any) => ({ id: item.id, name: item.title }))); // Assuming the 'title' as 'name'
+      } catch (err) {
+        console.error("An error occurred:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredData: Item[] = data.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -25,7 +35,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({
 
   if (collapsed) {
     return (
-      <div className="flex flex-col ml-4 m-1">
+      <div className="flex flex-col ml-4 m-1 w-full">
         <button
           onClick={() => setCollapsed(false)}
           className="mb-2 p-2 border rounded"

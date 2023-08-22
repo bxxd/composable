@@ -20,7 +20,7 @@ export default function Header({}: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b shadow-sm transition-all duration-300 opacity-25 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
+    <header className="sticky top-0 z-50 border-b shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
       <div className="container px-4 md:flex md:items-center md:justify-between py-1">
         <div className="container px-4 md:flex md:items-center md:justify-between py-1">
           <span className="flex text-med tracking-normal transition-colors hover:text-gray-600 dark:hover:text-gray-400">

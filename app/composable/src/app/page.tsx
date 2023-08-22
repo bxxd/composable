@@ -32,7 +32,7 @@ export default function Home() {
           }}
         >
           <Header />
-          <main className="App container flex flex-col gap-4 max-w-[100ch]">
+          <main className="App container flex flex-col gap-4">
             <Workspace />
           </main>
           <ToasterProvider />
