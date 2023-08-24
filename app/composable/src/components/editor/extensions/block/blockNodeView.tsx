@@ -8,6 +8,7 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
+import TipTap from "@/components/editor";
 
 interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;
@@ -24,6 +25,18 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedExcerpt, setExpandedExcerpt] = useState<string | null>(null);
 
+  const [showModal, setShowModal] = useState(false);
+  const [dBlockContent, setDBlockContent] = useState(null); // You can use appropriate type here
+
+  const handleOpenEditor = (content: any) => {
+    setDBlockContent(content);
+    setShowModal(true);
+  };
+
+  const handleCloseEditor = () => {
+    setShowModal(false);
+    setDBlockContent(null);
+  };
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
@@ -141,6 +154,22 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           </div>
         )}
       </div>
+      <button
+        type="button"
+        className="d-block-button group-hover:opacity-100"
+        onClick={() => handleOpenEditor(node)}
+      >
+        <Icon icon={plusIcon} />
+      </button>
+      {/* Modal */}
+      {showModal && (
+        <div className="modal">
+          <button onClick={handleCloseEditor}>
+            <Icon icon={closeIcon} />
+          </button>
+          <TipTap content={dBlockContent} />
+        </div>
+      )}
     </NodeViewWrapper>
   );
 };

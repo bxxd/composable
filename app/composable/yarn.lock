@@ -694,6 +694,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-heading/-/extension-heading-2.1.6.tgz#50d589ba583b9577f436864377e7a9fb931a8310"
   integrity sha512-V6PImalPhgAxsA95op70ssb8IXehLyr7wu5t1SeoTUUQtvMojKXPd+n+xF5b4b7VIhXHDlGSnoT0/XwjCJY0tQ==
 
+"@tiptap/extension-highlight@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.1.7.tgz#0f9434eedfdcb95a22ca5b6f601d13f4343a7e5c"
+  integrity sha512-3EXrnf1BQSdOe/iqzcTIr5Tf0NOhPQ+y1B9nMi/40v3MD8WzRBLaqj0lvpwO7xMAdgxm6IiL/XFYU41n9yFl/Q==
+
 "@tiptap/extension-history@^2.1.6":
   version "2.1.6"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-history/-/extension-history-2.1.6.tgz#799d7412c270e29b1fcaa08cd8343724b88eb6a6"
@@ -724,15 +729,30 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-paragraph/-/extension-paragraph-2.1.6.tgz#c0b76f9242e823ccbeb1ba6af9df6a09ee971044"
   integrity sha512-k0QSIaJPVgTn9+X2580JFCjV2RCH1Fo+gPodABDnjunfoUVSjuq0rlILEtTuha3evlS6kDKiz7lk7pIoCo36Cw==
 
+"@tiptap/extension-placeholder@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-placeholder/-/extension-placeholder-2.1.7.tgz#8477cf5116c89f0f75e8e2e3b8528e146a7f0f24"
+  integrity sha512-IiBoItYYNS7hb/zmPitw3w6Cylmp9qX+zW+QKe3lDkCNPeKxyQr86AnVLcQYOuXg62cLV9dp+4azZzHoz9SOcg==
+
 "@tiptap/extension-strike@^2.1.6":
   version "2.1.6"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-strike/-/extension-strike-2.1.6.tgz#b4cc25fe08999d90a594a433ef1849d8d4edf827"
   integrity sha512-LX7X2ohKEE0nUyWecSGxBcuzLxXTIbPmUnbkZvqYiWTaE02r3TxzkJMO0iuTnbygceC1TtiAfKwGgth0b9tMCQ==
 
+"@tiptap/extension-text-style@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-text-style/-/extension-text-style-2.1.7.tgz#57f5dc5b223a855e782f24e09dc7fc53d9bd4b00"
+  integrity sha512-0QhEMDiDqMpyBGRt6o4GvbN9cUibZe4LT9e0ujarT6ElSe2fbtwGPnXSXApUtgHDDwHw95M5ZVxX/H5cjyjw1g==
+
 "@tiptap/extension-text@^2.1.2", "@tiptap/extension-text@^2.1.6":
   version "2.1.6"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-2.1.6.tgz#23f36114ee164e3da2fd326145ac7b7f8bd34c56"
   integrity sha512-CqV0N6ngoXZFeJGlQ86FSZJ/0k7+BN3S6aSUcb5DRAKsSEv/Ga1LvSG24sHy+dwjTuj3EtRPJSVZTFcSB17ZSA==
+
+"@tiptap/extension-typography@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-typography/-/extension-typography-2.1.7.tgz#fbfe0202fadf6413e1383d6c5fd274a70b3907b5"
+  integrity sha512-/K07CeIxwJ2t0amjIrxpQkfPJqTlRoA8YIVd6O1iqriINZVS0EK2IJAaE/PNVQNnUYhyU+0Z2/Xie3SlCP7PVQ==
 
 "@tiptap/pm@^2.1.1":
   version "2.1.6"

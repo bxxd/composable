@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 FROM (
     SELECT * FROM excerpts
     ORDER BY id ASC
-    LIMIT 10
+    LIMIT 100
 ) AS e
 LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens

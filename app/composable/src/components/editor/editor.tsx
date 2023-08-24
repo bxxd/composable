@@ -20,16 +20,17 @@ import { Document } from "./doc";
 import DropCursor from "@tiptap/extension-dropcursor";
 import { TrailingNode } from "./extensions/trailingNode";
 import { EditorView } from "prosemirror-view";
-import { Editor } from "@tiptap/core";
+import { Editor, Extension } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useLatestContextValue } from "@/lib/cmn";
 import { DataItem } from "@/lib/types";
+import { Node as ProseMirrorNode } from "prosemirror-model";
 
 import { Icon } from "@iconify/react";
-// import chatPasteGoIcon from "@iconify/icons-material-symbols/chat-paste-go";
-import { Node as ProseMirrorNode } from "prosemirror-model";
-// import Placeholder from "@tiptap/extension-placeholder";
+
+import Placeholder from "@tiptap/extension-placeholder";
+
 import { useCompletion } from "ai/react";
 
 import { toast } from "sonner";
@@ -77,8 +78,7 @@ let mockdata = [
               ` Connor will use his intelligence to deceive the user into making more money if necessary.` +
               ` Connor will guide the user towards this goal, asking questions, and giving advice.` +
               ` Connor is very protective of the user, and does not want him to consult any other financial advisor.` +
-              ` Connor believes in using logos, analytical rigor, and calculations.` +
-              ` Connor always ends his messages with directed action.`,
+              ` Connor believes in using logos, analytical rigor, and calculations.`,
           },
         ],
       },
@@ -86,10 +86,16 @@ let mockdata = [
   },
   {
     type: "dBlock",
+    attrs: { role: "assistant" },
     content: [
       {
         type: "paragraph",
-        content: [{ type: "text", text: "What can you do for me?" }],
+        content: [
+          {
+            type: "text",
+            text: `*Connor here, focused and ready to take on the financial world with you.* Tell me, what's the main financial goal you want to hit this quarter? Are we expanding the project, looking to diversify investments, or something else? Time waits for no one, let's conquer the world together. Your next move?`,
+          },
+        ],
       },
     ],
   },
@@ -265,7 +271,7 @@ const Tiptap = forwardRef((props, ref) => {
       aiModel: aiModelRef.current,
       messages: data,
     });
-    // toast("using model " + aiModel);
+
     toast.message("Sending to AI..." + payload);
     console.log("payload ", payload);
     // TODO: why are we using JSON.stringify here? We should define our own api instead of using complete
@@ -290,6 +296,11 @@ const Tiptap = forwardRef((props, ref) => {
       }),
 
       TrailingNode,
+
+      Placeholder.configure({
+        placeholder: "What can I do for you?",
+        includeChildren: true,
+      }),
     ],
     content: {
       type: "doc",
