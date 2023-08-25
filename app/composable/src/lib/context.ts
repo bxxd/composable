@@ -1,14 +1,18 @@
 import { createContext, useContext, useRef, useEffect } from "react";
+import { JSONContent } from "@tiptap/react";
 
 type GlobalContextType = {
   aiModel: string;
   setAiModel: React.Dispatch<React.SetStateAction<string>>;
+  savedList: JSONContent[];
+  setSavedList: React.Dispatch<React.SetStateAction<JSONContent[]>>;
 };
 
 export const GlobalContext = createContext<GlobalContextType>({
   aiModel: "",
   setAiModel: () => {},
-  // ... other default values and empty setter functions
+  savedList: [],
+  setSavedList: () => {},
 });
 
 export const useGlobalContext = () => {

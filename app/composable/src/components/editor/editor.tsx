@@ -233,6 +233,7 @@ const Tiptap = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     getEditor: () => editor,
     appendDataContentToEnd: appendDataContentToEnd,
+    appendContentNodeToEnd: appendContentNodeToEnd,
   }));
 
   const handleAIButtonClick = ({ editor }: HandleAIButtonClickParams) => {

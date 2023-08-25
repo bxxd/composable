@@ -313,8 +313,10 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   }
 
   .d-block-button {
-    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600 cursor-grab text-lg py-1 opacity-0 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-0 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer
   }
+
+  // cursor-grab
 }
 
 .tableWrapper {

@@ -32,9 +32,10 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
     fetchData();
   }, []);
 
-  const filteredData: DataItem[] = data.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData: DataItem[] =
+    data?.filter((item) =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   if (collapsed) {
     return (

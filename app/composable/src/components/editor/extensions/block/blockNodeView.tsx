@@ -9,6 +9,8 @@ import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import saveIcon from "@iconify/icons-mdi/content-save";
+import { useGlobalContext } from "@/lib/context";
+import { JSONContent } from "@tiptap/react";
 
 import {
   createNodeJSON,
@@ -28,6 +30,12 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   editor,
 }) => {
   // console.log("BlockNodeView", node.attrs);
+
+  const { savedList, setSavedList } = useGlobalContext();
+
+  const addSavedToList = (content: JSONContent) => {
+    setSavedList([...savedList, content]);
+  };
 
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
@@ -183,7 +191,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           type="button"
           className="d-block-button group-hover:opacity-100 m-1 ml-1"
           title="Save snippet for later re-use"
-          onClick={() => handleOpenEditor(node)}
+          onClick={() => addSavedToList(node.toJSON())}
         >
           <Icon icon={saveIcon} />
         </button>

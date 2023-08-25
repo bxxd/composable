@@ -21,8 +21,13 @@ export default function Workspace({}: WorkspaceProps) {
   };
 
   const handleAddSaved = (content: JSONContent) => {
+    console.log("handleAddSaved", content);
+    console.log("tiptapRef", tiptapRef.current);
     if (tiptapRef.current?.appendContentNodeToEnd) {
+      console.log("here");
       tiptapRef.current.appendContentNodeToEnd(content);
+    } else {
+      console.log("not here");
     }
   };
 
@@ -37,7 +42,7 @@ export default function Workspace({}: WorkspaceProps) {
       {/* SearchColumn Component */}
       <div className="flex-grow w-1/3">
         <SavedItems handleAddSaved={handleAddSaved} />
-        {/* <SearchColumn handleAddData={handleAddData} /> */}
+        <SearchColumn handleAddData={handleAddData} />
       </div>
     </div>
   );
