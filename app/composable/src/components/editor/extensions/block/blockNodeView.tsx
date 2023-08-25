@@ -8,7 +8,7 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
-import TipTap from "@/components/editor";
+import { generateBlockId } from "@/lib/editor";
 
 interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;
@@ -46,6 +46,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
     editor.commands.insertContentAt(pos, {
       type: "dBlock",
+      attrs: { id: generateBlockId(editor) },
       content: [
         {
           type: "paragraph",
@@ -92,6 +93,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         >
           <Icon icon={dragIndicatorIcon} />
         </div>
+        {node.attrs.id}
       </section>
       <div className="flex-col flex-grow">
         <div
@@ -161,15 +163,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
       >
         <Icon icon={plusIcon} />
       </button>
-      {/* Modal */}
-      {showModal && (
-        <div className="modal">
-          <button onClick={handleCloseEditor}>
-            <Icon icon={closeIcon} />
-          </button>
-          <TipTap content={dBlockContent} />
-        </div>
-      )}
     </NodeViewWrapper>
   );
 };

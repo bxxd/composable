@@ -8,14 +8,27 @@ export const getPrevText = (
   }: {
     chars: number;
     offset?: number;
-  },
+  }
 ) => {
   // for now, we're using textBetween for now until we can figure out a way to stream markdown text
   // with proper formatting: https://github.com/steven-tey/novel/discussions/7
   return editor.state.doc.textBetween(
     Math.max(0, editor.state.selection.from - chars),
     editor.state.selection.from - offset,
-    "\n",
+    "\n"
   );
   // complete(editor.storage.markdown.getMarkdown());
 };
+
+export function generateBlockId(editor: Editor | null) {
+  let blockId = null;
+
+  editor?.state.doc.forEach((node, offset) => {
+    if (node.type.name === "dBlock" && node.attrs.id) {
+      blockId = node.attrs.id;
+    }
+  });
+  console.log("blockId", blockId);
+  let newBlockId = Number(blockId) + 1;
+  return newBlockId.toString();
+}

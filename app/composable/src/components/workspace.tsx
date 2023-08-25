@@ -28,14 +28,14 @@ export default function Workspace({}: WorkspaceProps) {
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  // border-gray-300 border border-dashed rounded-lg m-1
   return (
-    <div className="flex p-0 border-gray-300 border border-dashed rounded-lg m-1 w-full">
+    <div className="flex p-0 w-full">
       <div className="flex flex-col flex-grow max-w-[85ch]">
         <TipTap ref={tiptapRef} />
       </div>
 
-      <SearchColumn handleAddData={handleAddData} />
+      {/* <SearchColumn handleAddData={handleAddData} /> */}
     </div>
   );
 }

@@ -31,7 +31,7 @@ export default function Header({}: HeaderProps) {
               alt="logo"
               className="flex mr-1"
             />
-            Composable Parts
+            {/* Composable Parts */}
           </span>
           <select
             className="flex mr-1"

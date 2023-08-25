@@ -26,6 +26,7 @@ import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useLatestContextValue } from "@/lib/cmn";
 import { DataItem } from "@/lib/types";
 import { Node as ProseMirrorNode } from "prosemirror-model";
+import { generateBlockId } from "@/lib/editor";
 
 import { Icon } from "@iconify/react";
 
@@ -35,33 +36,10 @@ import { useCompletion } from "ai/react";
 
 import { toast } from "sonner";
 
-let mockdata2 = [
-  {
-    type: "dBlock",
-    content: [
-      {
-        type: "paragraph",
-        content: [{ type: "text", text: "hi there" }],
-      },
-    ],
-  },
-  {
-    type: "dBlock",
-    attrs: { isAssistant: true },
-    content: [
-      {
-        type: "paragraph",
-        attrs: { level: 1 },
-        content: [{ type: "text", text: "hi there2" }],
-      },
-    ],
-  },
-];
-
 let mockdata = [
   {
     type: "dBlock",
-    attrs: { role: "system" },
+    attrs: { role: "system", id: "1" },
     content: [
       {
         type: "paragraph",
@@ -86,7 +64,7 @@ let mockdata = [
   },
   {
     type: "dBlock",
-    attrs: { role: "assistant" },
+    attrs: { role: "assistant", id: "2" },
     content: [
       {
         type: "paragraph",
@@ -94,6 +72,21 @@ let mockdata = [
           {
             type: "text",
             text: `*Connor here, focused and ready to take on the financial world with you.* Tell me, what's the main financial goal you want to hit this quarter? Are we expanding the project, looking to diversify investments, or something else? Time waits for no one, let's conquer the world together. Your next move?`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    type: "dBlock",
+    attrs: { role: "user", id: "3" },
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: `I want to expand the project.`,
           },
         ],
       },
@@ -177,14 +170,20 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
   return result;
 }
 
-const createNewNodeJSON = (text: string, role: string = "assistant") => {
+const createNewNodeJSON = (
+  text: string,
+  role: string = "assistant",
+  editor: Editor | null = null
+) => {
   if (!text || text.trim() === "") {
     text = "is empty";
   }
 
+  console.log("here..");
+
   return {
     type: "dBlock",
-    attrs: { role: role },
+    attrs: { role: role, id: generateBlockId(editor) },
     content: [
       {
         type: "paragraph",
@@ -199,13 +198,22 @@ const createNewNodeJSON = (text: string, role: string = "assistant") => {
   };
 };
 
-const createDataNodeJSON = (item: DataItem, role: string = "data") => {
+const createDataNodeJSON = (
+  item: DataItem,
+  role: string = "data",
+  editor: Editor | null = null
+) => {
   console.log("createDataNodeJSON", item);
   const text = item?.title || "is empty";
 
   return {
     type: "dBlock",
-    attrs: { role: role, editable: false, data: item },
+    attrs: {
+      role: role,
+      editable: false,
+      data: item,
+      id: generateBlockId(editor),
+    },
     content: [
       {
         type: "paragraph",
@@ -229,6 +237,8 @@ const Tiptap = forwardRef((props, ref) => {
 
   const aiModelRef = useLatestContextValue("aiModel");
 
+  const editorRef = useRef<Editor | null>(null);
+
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setSaveStatus("Saving...");
@@ -238,8 +248,6 @@ const Tiptap = forwardRef((props, ref) => {
       setSaveStatus("Saved");
     }, 500);
   }, 750);
-
-  const editorRef = useRef<Editor | null>(null);
 
   useImperativeHandle(ref, () => ({
     getEditor: () => editor,
@@ -399,7 +407,7 @@ const Tiptap = forwardRef((props, ref) => {
 
     prev.current = completion;
 
-    const newNodeJSON = createNewNodeJSON(diff);
+    const newNodeJSON = createNewNodeJSON(diff, "user", editorRef.current);
 
     if (newNodePosition.current === null) {
       // Get the position of the last node
@@ -443,7 +451,11 @@ const Tiptap = forwardRef((props, ref) => {
       return;
     }
 
-    const newNodeJSON = createDataNodeJSON(newContent, "data");
+    const newNodeJSON = createDataNodeJSON(
+      newContent,
+      "data",
+      editorRef.current
+    );
 
     // Get the position of the last node
     const lastNode = editor.state.doc.lastChild;
@@ -460,10 +472,13 @@ const Tiptap = forwardRef((props, ref) => {
   const clearEditor = () => {
     editor?.commands.setContent(mockdata);
   };
+
   return (
-    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0 dark:border-black">
-      <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
-        {saveStatus}
+    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-novel-stone-300">
+      <div className="header flex justify-end pb-1">
+        <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400 inline-block ">
+          {saveStatus}
+        </div>
       </div>
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">

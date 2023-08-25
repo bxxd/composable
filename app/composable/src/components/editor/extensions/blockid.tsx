@@ -1,6 +1,12 @@
 import { Plugin } from "prosemirror-state";
 import { Node } from "@tiptap/core";
 
+const Type = {
+  HEADING: "heading",
+  PARAGRAPH: "paragraph",
+  // other block types here...
+};
+
 const types = {
   [Type.HEADING]: true,
 };

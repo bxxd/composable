@@ -61,6 +61,9 @@ export const DBlock = Node.create<BlockOptions>({
           tags: [],
         },
       },
+      id: {
+        default: null,
+      },
     };
   },
 
