@@ -8,7 +8,7 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
-import { generateBlockId } from "@/lib/editor";
+import { createNodeJSON } from "@/lib/editor";
 
 interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;
@@ -44,15 +44,9 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const createNodeAfter = () => {
     const pos = getPos() + node.nodeSize;
 
-    editor.commands.insertContentAt(pos, {
-      type: "dBlock",
-      attrs: { id: generateBlockId(editor) },
-      content: [
-        {
-          type: "paragraph",
-        },
-      ],
-    });
+    const newNodeJSON = createNodeJSON("", "user", editor);
+
+    editor.commands.insertContentAt(pos, newNodeJSON);
   };
 
   const removeCurrentNode = () => {

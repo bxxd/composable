@@ -26,7 +26,7 @@ import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useLatestContextValue } from "@/lib/cmn";
 import { DataItem } from "@/lib/types";
 import { Node as ProseMirrorNode } from "prosemirror-model";
-import { generateBlockId } from "@/lib/editor";
+import { createNodeJSON } from "@/lib/editor";
 
 import { Icon } from "@iconify/react";
 
@@ -39,7 +39,7 @@ import { toast } from "sonner";
 let mockdata = [
   {
     type: "dBlock",
-    attrs: { role: "system", id: "1" },
+    attrs: { role: "system", id: "0.0" },
     content: [
       {
         type: "paragraph",
@@ -64,7 +64,7 @@ let mockdata = [
   },
   {
     type: "dBlock",
-    attrs: { role: "assistant", id: "2" },
+    attrs: { role: "assistant", id: "0.1" },
     content: [
       {
         type: "paragraph",
@@ -79,7 +79,42 @@ let mockdata = [
   },
   {
     type: "dBlock",
-    attrs: { role: "user", id: "3" },
+    attrs: {
+      role: "user",
+      id: "0.2",
+      children: [
+        {
+          type: "dBlock",
+          attrs: { role: "system", id: "0.2.0" },
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: `What do you want to do?.`,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "dBlock",
+          attrs: { role: "user", id: "0.2.1" },
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: `I want to expand the project.`,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     content: [
       {
         type: "paragraph",
@@ -169,64 +204,6 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
 
   return result;
 }
-
-const createNewNodeJSON = (
-  text: string,
-  role: string = "assistant",
-  editor: Editor | null = null
-) => {
-  if (!text || text.trim() === "") {
-    text = "is empty";
-  }
-
-  console.log("here..");
-
-  return {
-    type: "dBlock",
-    attrs: { role: role, id: generateBlockId(editor) },
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: text,
-          },
-        ],
-      },
-    ],
-  };
-};
-
-const createDataNodeJSON = (
-  item: DataItem,
-  role: string = "data",
-  editor: Editor | null = null
-) => {
-  console.log("createDataNodeJSON", item);
-  const text = item?.title || "is empty";
-
-  return {
-    type: "dBlock",
-    attrs: {
-      role: role,
-      editable: false,
-      data: item,
-      id: generateBlockId(editor),
-    },
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: text,
-          },
-        ],
-      },
-    ],
-  };
-};
 
 const Tiptap = forwardRef((props, ref) => {
   const [content, setContent] = useLocalStorage("content", mockdata);
@@ -407,9 +384,8 @@ const Tiptap = forwardRef((props, ref) => {
 
     prev.current = completion;
 
-    const newNodeJSON = createNewNodeJSON(diff, "user", editorRef.current);
-
     if (newNodePosition.current === null) {
+      const newNodeJSON = createNodeJSON(diff, "assistant", editorRef.current);
       // Get the position of the last node
       const lastNode = editor.state.doc.lastChild;
       let position = editor.state.doc.content.size;
@@ -445,17 +421,13 @@ const Tiptap = forwardRef((props, ref) => {
     }
   }, [editor, content, hydrated]);
 
-  const appendDataContentToEnd = (newContent: DataItem) => {
+  const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {
       console.log("no editor");
       return;
     }
 
-    const newNodeJSON = createDataNodeJSON(
-      newContent,
-      "data",
-      editorRef.current
-    );
+    const newNodeJSON = createNodeJSON(data, "data", editorRef.current);
 
     // Get the position of the last node
     const lastNode = editor.state.doc.lastChild;

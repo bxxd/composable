@@ -8,3 +8,5 @@ export interface DataItem {
   tags: string[];
   tokens: number;
 }
+
+export type RoleType = "assistant" | "data" | "user";
