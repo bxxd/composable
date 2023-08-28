@@ -42,13 +42,12 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
       new Plugin({
         key: plugin,
         appendTransaction: (_, __, state) => {
+          // console.log("here..");
           const { doc, tr, schema } = state;
 
           const shouldInsertNodeAtEnd = plugin.getState(state);
 
           const endPosition = doc.content.size;
-
-          const type = schema.nodes[this.options.node];
 
           if (!shouldInsertNodeAtEnd) return;
 
@@ -63,7 +62,6 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
             return false;
           },
           apply: (tr, value) => {
-            // console.log("apply trailingNode", lastNode);
             if (tr.doc.lastChild?.attrs.role != "user") return true;
 
             if (!tr.docChanged) return value;

@@ -19,7 +19,7 @@ const ToasterProvider = () => {
 };
 
 export default function Home() {
-  const [aiModel, setAiModel] = useState("openai/gpt-3.5-turbo");
+  const [aiModel, setAiModel] = useState("meta-llama/llama-2-70b-chat");
 
   return (
     <>

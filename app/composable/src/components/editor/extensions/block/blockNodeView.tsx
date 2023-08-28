@@ -8,7 +8,13 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
-import { createNodeJSON } from "@/lib/editor";
+import {
+  createNodeJSON,
+  blockState,
+  compareBlockIds,
+  getBlockIdLevel,
+} from "@/lib/editor";
+import _ from "lodash";
 
 interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;
@@ -19,24 +25,46 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   getPos,
   editor,
 }) => {
+  console.log("BlockNodeView", node.attrs);
+
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedExcerpt, setExpandedExcerpt] = useState<string | null>(null);
 
-  const [showModal, setShowModal] = useState(false);
-  const [dBlockContent, setDBlockContent] = useState(null); // You can use appropriate type here
+  const handleOpenEditor = (node: any) => {
+    let content = node.attrs.children;
 
-  const handleOpenEditor = (content: any) => {
-    setDBlockContent(content);
-    setShowModal(true);
+    console.log("handleOpenEditor", node);
+
+    if (content === null || content === undefined) {
+      content = _.cloneDeep(node.toJSON());
+      content.attrs.id = node.attrs.id + ".0";
+      content = [content];
+    }
+    // Find the max ID in the content array using your custom compare function
+    const maxId = content.reduce((maxId: string, item: any) => {
+      if (compareBlockIds(maxId, item.attrs.id) < 0) {
+        return item.attrs.id;
+      }
+      return maxId;
+    }, "");
+
+    console.log("setting lastCreatedBlockId", maxId);
+    // Set lastCreatedBlockId to the max ID
+    blockState.lastCreatedBlockId = maxId;
+    blockState.level = getBlockIdLevel(maxId);
+
+    // Set lastCreatedBlockId to the max ID
+    console.log("content", content);
+    editor
+      ?.chain()
+      .clearContent()
+      .setContent({ type: "doc", content: content })
+      .run();
   };
 
-  const handleCloseEditor = () => {
-    setShowModal(false);
-    setDBlockContent(null);
-  };
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
@@ -53,6 +81,8 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
     const pos = getPos();
     editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
   };
+
+  console.log("Current node.attrs.id:", node.attrs.id);
 
   return (
     <NodeViewWrapper
