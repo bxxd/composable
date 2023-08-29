@@ -1,5 +1,7 @@
 import { Editor } from "@tiptap/core";
 import { DataItem, RoleType } from "./types";
+import { JSONContent } from "@tiptap/react";
+import _ from "lodash";
 
 export const getPrevText = (
   editor: Editor,
@@ -21,20 +23,51 @@ export const getPrevText = (
   // complete(editor.storage.markdown.getMarkdown());
 };
 
-// export let lastCreatedBlockId: string | null = null;
+// BlockData interface
+export interface BlockData {
+  lastId: string | null;
+  level: number;
+  ctxStack: Record<number, any>;
+}
 
-export const blockState = {
-  lastCreatedBlockId: null as string | null,
-  level: 0,
-};
+// Singleton for BlockData
+export class BlockStore {
+  private static inst: BlockStore;
+  private data: BlockData;
 
-export function getBlockIdLevel(blockId: string | null): number {
+  private constructor() {
+    this.data = { lastId: null, level: 0, ctxStack: {} };
+  }
+
+  public static getInst(): BlockStore {
+    if (!BlockStore.inst) {
+      BlockStore.inst = new BlockStore();
+    }
+    return BlockStore.inst;
+  }
+
+  public get(): BlockData {
+    return this.data;
+  }
+
+  public set(newData: Partial<BlockData>): void {
+    this.data = { ...this.data, ...newData };
+  }
+}
+
+// export let lastId: string | null = null;
+
+export function getBlockIdLevel(blockId: string | null | undefined): number {
   if (blockId == undefined || blockId == null) return 0;
+
   return blockId.split(".").length - 1;
 }
 
 export function generateBlockId(editor: Editor | null): string {
   if (editor === null) return "0";
+
+  const store = BlockStore.getInst();
+  const blockState = store.get();
 
   console.log("generateBlockId blockState", blockState);
 
@@ -60,43 +93,36 @@ export function generateBlockId(editor: Editor | null): string {
   }
 
   console.log("maxBlockId", maxBlockId);
-  console.log("lastCreatedBlockId", blockState.lastCreatedBlockId);
+  console.log("lastId", blockState.lastId);
 
   if (
     blockState.level > 0 &&
-    getBlockIdLevel(blockState.lastCreatedBlockId) !== blockState.level
+    getBlockIdLevel(blockState.lastId) !== blockState.level
   ) {
-    blockState.lastCreatedBlockId = null;
+    blockState.lastId = null;
   }
 
   let newBlockId;
 
-  // If lastCreatedBlockId is null (first time or reset), work with maxBlockId
-  if (blockState.lastCreatedBlockId === null) {
+  // If lastId is null (first time or reset), work with maxBlockId
+  if (blockState.lastId === null) {
     newBlockId = incrementBlockId(maxBlockId);
   } else {
-    // Compare maxBlockId and lastCreatedBlockId to get the larger one
-    const comparison = compareBlockIds(
-      maxBlockId,
-      blockState.lastCreatedBlockId
-    );
-    console.log(
-      "comparison",
-      comparison,
-      maxBlockId,
-      blockState.lastCreatedBlockId
-    );
+    // Compare maxBlockId and lastId to get the larger one
+    const comparison = compareBlockIds(maxBlockId, blockState.lastId);
+    console.log("comparison", comparison, maxBlockId, blockState.lastId);
     if (comparison >= 0) {
       newBlockId = incrementBlockId(maxBlockId);
     } else {
-      newBlockId = incrementBlockId(blockState.lastCreatedBlockId);
+      newBlockId = incrementBlockId(blockState.lastId);
     }
   }
 
   console.log("created newBlockId", newBlockId);
 
-  blockState.lastCreatedBlockId = newBlockId;
-  console.log("updated lastCreatedBlockId", blockState.lastCreatedBlockId);
+  store.set({ lastId: newBlockId });
+  const updatedState = store.get();
+  console.log("updated lastId", updatedState.lastId);
   return newBlockId;
 }
 // Compare two block IDs
@@ -174,3 +200,183 @@ export const createNodeJSON = (
     ],
   };
 };
+
+export function pushSubContent(editor: Editor, content: JSONContent[]) {
+  const store = BlockStore.getInst();
+  const currentDoc = editor.getJSON();
+  const currentContent = currentDoc.content;
+
+  let maxId = currentContent?.reduce((maxId: string, item: any) => {
+    if (compareBlockIds(maxId, item.attrs.id) < 0) {
+      return item.attrs.id;
+    }
+    return maxId;
+  }, "");
+
+  const currentLevel = getBlockIdLevel(maxId);
+
+  console.log("currentLevel", currentLevel);
+  const ctxStack = store.get().ctxStack;
+  store.set({ ctxStack: { ...ctxStack, [currentLevel]: currentContent } });
+
+  maxId = content.reduce((maxId: string, item: any) => {
+    if (compareBlockIds(maxId, item.attrs.id) < 0) {
+      return item.attrs.id;
+    }
+    return maxId;
+  }, "");
+
+  store.set({ lastId: maxId, level: getBlockIdLevel(maxId) });
+
+  editor
+    ?.chain()
+    .clearContent()
+    .setContent({ type: "doc", content: content })
+    .run();
+}
+
+interface LastNodeResult {
+  textNode: JSONContent;
+  dBlockNode: JSONContent;
+  dBlockWithTextCount: number;
+}
+
+const findLastNonEmptyNode = (
+  nodes: JSONContent[],
+  parentDBlock: JSONContent | null = null,
+  count: number = 0
+): LastNodeResult | null => {
+  let lastNonEmptyNode: LastNodeResult | null = null;
+
+  for (const node of nodes) {
+    if (node.type === "dBlock") {
+      parentDBlock = node;
+    }
+
+    if (node.type === "text" && node.text && node.text.trim() !== "") {
+      if (parentDBlock) {
+        count++;
+        lastNonEmptyNode = {
+          textNode: node,
+          dBlockNode: parentDBlock,
+          dBlockWithTextCount: count,
+        };
+      }
+    }
+
+    if (node.content) {
+      const foundNode = findLastNonEmptyNode(node.content, parentDBlock, count);
+      if (foundNode !== null) {
+        count = foundNode.dBlockWithTextCount; // Update count
+        lastNonEmptyNode = foundNode;
+      }
+    }
+  }
+
+  return lastNonEmptyNode;
+};
+
+const findLastNodeInData = (
+  data: JSONContent[]
+): [JSONContent | null, number] => {
+  let lastDBlockNode: JSONContent | null = null;
+  let dBlockWithTextCount = 0;
+
+  for (const block of data) {
+    if (block.type === "dBlock" && block.content) {
+      const foundNode = findLastNonEmptyNode(
+        block.content,
+        block,
+        dBlockWithTextCount
+      );
+      if (foundNode !== null) {
+        lastDBlockNode = foundNode.dBlockNode;
+        dBlockWithTextCount = foundNode.dBlockWithTextCount; // Update the count
+      }
+    }
+  }
+
+  return [lastDBlockNode, dBlockWithTextCount];
+};
+
+export function popSubContent(editor: Editor | null, accepted: boolean) {
+  if (editor === null) {
+    console.error("Editor is null");
+    return;
+  }
+  const store = BlockStore.getInst();
+  const currentDoc = editor.getJSON();
+  const currentContent = currentDoc.content;
+  const higherContent = store.get().ctxStack[store.get().level - 1];
+
+  if (!higherContent) {
+    console.error("No higher content to pop");
+    return;
+  }
+
+  console.log(
+    "### higherContent",
+    higherContent,
+    store.get().level,
+    store.get().ctxStack
+  );
+
+  if (!currentContent) {
+    console.warn("No current content");
+  }
+
+  const findNodeIndexById = (
+    nodes: JSONContent[],
+    targetId: string
+  ): number => {
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].type === "dBlock" && nodes[i].attrs?.id === targetId) {
+        return i;
+      }
+    }
+    return -1; // Return -1 if not found
+  };
+
+  const truncateId = (input: string): string => {
+    const parts = input.split(".");
+    if (parts.length <= 1) {
+      return "";
+    }
+    parts.pop();
+    return parts.join(".");
+  };
+
+  console.log("currentContent", currentContent);
+
+  if (accepted && currentContent) {
+    const [lastNode, dBlockWithTextCount] = findLastNodeInData(currentContent);
+    console.log("lastNode", lastNode);
+
+    if (!lastNode) {
+      console.warn("No last node");
+    } else {
+      const parentId = truncateId((lastNode as any).attrs.id);
+      const parentNodeIndex = findNodeIndexById(higherContent, parentId); // Find the parent node
+      if (parentNodeIndex === -1) {
+        console.log("No parent node for id", lastNode);
+      } else {
+        const newNode = _.cloneDeep(lastNode);
+        newNode.attrs.id = parentId;
+        if (dBlockWithTextCount > 1) {
+          newNode.attrs.children = currentContent; // Set the children to the current content
+        } else {
+          newNode.attrs.children = null;
+        }
+        higherContent[parentNodeIndex] = newNode; // Replace the parent node with the new node
+      }
+    }
+  }
+
+  store.set({ level: store.get().level - 1 });
+
+  editor
+    ?.chain()
+    .clearContent()
+    .setContent({ type: "doc", content: higherContent })
+    .run();
+}

@@ -5,6 +5,7 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
+import chevronUp from "@iconify/icons-mdi/chevron-up";
 import { DataItem } from "@/lib/types";
 
 interface SearchColumnProps {
@@ -37,7 +38,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
   if (collapsed) {
     return (
-      <div className="flex flex-col ml-4 m-1 w-full">
+      <div className="flex flex-col m-1 ">
         <button
           onClick={() => setCollapsed(false)}
           className="mb-2 p-2 border rounded"
@@ -50,32 +51,36 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
   return (
     <div className="flex flex-col m-1">
-      <button
-        onClick={() => setCollapsed(true)}
-        className="mb-2 p-2 border rounded"
-      >
-        Collapse Search
-      </button>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="mb-2 p-2 border rounded"
-      />
-      <div className="border p-2 rounded bg-gray-100 ">
+      <div className="flex flex-row justify-between">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="mb-2 p-2 border rounded pl-8 w-full" // Added padding-left to avoid overlap
+        />
+        <button
+          onClick={() => setCollapsed(true)}
+          className="p-2 border rounded ml-2 mb-2"
+        >
+          <Icon icon={chevronUp} width={24} height={24} />
+        </button>
+      </div>
+      <div className="border p-2 rounded ">
         {filteredData.map((item) => (
           <div
             key={item.id}
-            className="p-1 flex flex-col relative group hover:bg-gray-200 border-gray-300 border border-dashed rounded-lg m-1"
+            className="p-1 flex flex-col relative group hover:bg-gray-200 dark:hover:bg-gray-600 border-gray-300 border border-dashed rounded-lg m-1"
           >
             <div className="flex items-center">
-              <span
+              <button
+                type="button"
                 className="mr-2 opacity-0 group-hover:opacity-100 cursor-pointer"
                 onClick={() => handleAddData(item)}
+                title="Add data to context"
               >
                 <Icon icon={baselineAddCircle} width={24} height={24} />
-              </span>
+              </button>
               <div
                 className="flex-grow flex items-center cursor-pointer"
                 onClick={() =>

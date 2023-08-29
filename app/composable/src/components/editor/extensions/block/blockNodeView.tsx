@@ -8,11 +8,13 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // Right arrow icon
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
+import saveIcon from "@iconify/icons-mdi/content-save";
+
 import {
   createNodeJSON,
-  blockState,
-  compareBlockIds,
+  BlockStore,
   getBlockIdLevel,
+  pushSubContent,
 } from "@/lib/editor";
 import _ from "lodash";
 
@@ -25,7 +27,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   getPos,
   editor,
 }) => {
-  console.log("BlockNodeView", node.attrs);
+  // console.log("BlockNodeView", node.attrs);
 
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
@@ -34,35 +36,23 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const [expandedExcerpt, setExpandedExcerpt] = useState<string | null>(null);
 
   const handleOpenEditor = (node: any) => {
+    const store = BlockStore.getInst();
+    let currentContent = editor.getJSON();
+
+    let ctxStack = store.get().ctxStack;
+    ctxStack[getBlockIdLevel(node.attrs.id)] = currentContent;
+
     let content = node.attrs.children;
 
-    console.log("handleOpenEditor", node);
+    // console.log("handleOpenEditor", node);
 
     if (content === null || content === undefined) {
-      content = _.cloneDeep(node.toJSON());
+      content = node.toJSON();
+      content = _.cloneDeep(content);
       content.attrs.id = node.attrs.id + ".0";
       content = [content];
     }
-    // Find the max ID in the content array using your custom compare function
-    const maxId = content.reduce((maxId: string, item: any) => {
-      if (compareBlockIds(maxId, item.attrs.id) < 0) {
-        return item.attrs.id;
-      }
-      return maxId;
-    }, "");
-
-    console.log("setting lastCreatedBlockId", maxId);
-    // Set lastCreatedBlockId to the max ID
-    blockState.lastCreatedBlockId = maxId;
-    blockState.level = getBlockIdLevel(maxId);
-
-    // Set lastCreatedBlockId to the max ID
-    console.log("content", content);
-    editor
-      ?.chain()
-      .clearContent()
-      .setContent({ type: "doc", content: content })
-      .run();
+    pushSubContent(editor, content);
   };
 
   const toggleExpanded = () => {
@@ -82,7 +72,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
     editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
   };
 
-  console.log("Current node.attrs.id:", node.attrs.id);
+  // console.log("Current node.attrs.id:", node.attrs.id);
 
   return (
     <NodeViewWrapper
@@ -90,7 +80,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
       className={`flex gap-2 group w-full relative ${node.attrs.role}-block`}
     >
       <section
-        className="flex mt-2 pt-[2px] gap-1"
+        className="flex m-1 pt-[2px] gap-1"
         aria-label="left-menu"
         contentEditable="false"
         suppressContentEditableWarning
@@ -117,7 +107,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         >
           <Icon icon={dragIndicatorIcon} />
         </div>
-        {node.attrs.id}
+        {/* {node.attrs.id} */}
       </section>
       <div className="flex-col flex-grow">
         <div
@@ -180,13 +170,24 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           </div>
         )}
       </div>
-      <button
-        type="button"
-        className="d-block-button group-hover:opacity-100"
-        onClick={() => handleOpenEditor(node)}
-      >
-        <Icon icon={plusIcon} />
-      </button>
+      <div className="flex">
+        <button
+          type="button"
+          className="d-block-button group-hover:opacity-100 m-1 mr-0"
+          title="Edit sub context with just this node."
+          onClick={() => handleOpenEditor(node)}
+        >
+          <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} />
+        </button>
+        <button
+          type="button"
+          className="d-block-button group-hover:opacity-100 m-1 ml-1"
+          title="Save snippet for later re-use"
+          onClick={() => handleOpenEditor(node)}
+        >
+          <Icon icon={saveIcon} />
+        </button>
+      </div>
     </NodeViewWrapper>
   );
 };

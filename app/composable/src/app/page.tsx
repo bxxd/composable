@@ -6,8 +6,8 @@ import Header from "./header";
 
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
-import { useState, useEffect } from "react";
-import { GlobalContext } from "@/lib/cmn";
+import { useState } from "react";
+import { GlobalContext } from "@/lib/context";
 
 // import useLocalStorage from "@/lib/hooks/use-local-storage";
 
@@ -32,7 +32,7 @@ export default function Home() {
           }}
         >
           <Header />
-          <main className="App container flex flex-col gap-4">
+          <main className="App  flex flex-col gap-4">
             <Workspace />
           </main>
           <ToasterProvider />

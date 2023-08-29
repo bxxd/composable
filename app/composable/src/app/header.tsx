@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import darkMode from "@iconify/icons-ic/baseline-dark-mode";
 import lightMode from "@iconify/icons-ic/baseline-light-mode";
 
-import { useGlobalContext } from "@/lib/cmn";
+import { useGlobalContext } from "@/lib/context";
 
 import Image from "next/image";
 
@@ -21,8 +21,8 @@ export default function Header({}: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
-      <div className="container px-4 md:flex md:items-center md:justify-between py-1">
-        <div className="container px-4 md:flex md:items-center md:justify-between py-1">
+      <div className=" px-4 md:flex md:items-center md:justify-between py-1">
+        <div className=" px-4  md:flex md:items-center md:justify-between py-1">
           <span className="flex text-med tracking-normal transition-colors hover:text-gray-600 dark:hover:text-gray-400">
             <Image
               src="/images/logo.png"
@@ -33,6 +33,8 @@ export default function Header({}: HeaderProps) {
             />
             {/* Composable Parts */}
           </span>
+        </div>
+        <div className="flex ml-auto mr-4">
           <select
             className="flex mr-1"
             value={selectedModel}

@@ -20,13 +20,13 @@ import { Document } from "./doc";
 import DropCursor from "@tiptap/extension-dropcursor";
 import { TrailingNode } from "./extensions/trailingNode";
 import { EditorView } from "prosemirror-view";
-import { Editor, Extension } from "@tiptap/core";
+import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
-import { useLatestContextValue } from "@/lib/cmn";
+import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
 import { Node as ProseMirrorNode } from "prosemirror-model";
-import { createNodeJSON, blockState } from "@/lib/editor";
+import { createNodeJSON, BlockStore, popSubContent } from "@/lib/editor";
 
 import { Icon } from "@iconify/react";
 
@@ -215,6 +215,8 @@ const Tiptap = forwardRef((props, ref) => {
   const aiModelRef = useLatestContextValue("aiModel");
 
   const editorRef = useRef<Editor | null>(null);
+
+  const blockState = BlockStore.getInst();
 
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
@@ -417,7 +419,7 @@ const Tiptap = forwardRef((props, ref) => {
     if (editor && content && !hydrated) {
       setTimeout(() => {
         editor.commands.setContent(content);
-        blockState.level = 0;
+        blockState.set({ level: 0 });
       }, 0);
       setHydrated(true);
     }
@@ -445,30 +447,46 @@ const Tiptap = forwardRef((props, ref) => {
 
   const clearEditor = () => {
     editor?.commands.setContent(mockdata);
-    blockState.level = 0;
+    blockState.set({ level: 0 });
   };
 
-  const handleSubLevelCloseClick = () => {};
+  const handleSubLevelCloseClick = () => {
+    popSubContent(editorRef.current, false);
+  };
 
-  const handleSubLevelAcceptClick = () => {};
+  const handleSubLevelAcceptClick = () => {
+    popSubContent(editorRef.current, true);
+  };
 
   return (
     <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-novel-stone-300">
       <div className="header flex justify-end pb-1">
+        <div className="flex mr-auto pt-1">
+          <div className="ml-2 text-stone-400  text-sm font-normal">
+            Project
+          </div>
+          <div className="ml-2 text-stone-400  text-sm italic">
+            - level {blockState.get().level ? blockState.get().level : 1}
+          </div>
+        </div>
         <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400 inline-block ">
           {saveStatus}
         </div>
-        {blockState.level > 1 && (
+        {blockState.get().level > 1 && (
           <>
             <button
+              type="button"
               className="w-6 h-6 bg-red-400 hover:bg-red-500 active:bg-red-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-800 dark:active:bg-red-900 dark:text-white"
               onClick={handleSubLevelCloseClick}
+              title="Close sub context and discard changes."
             >
               <Icon icon="ant-design:close-circle-outlined" color="white" />
             </button>
             <button
+              type="button"
               className="w-6 h-6 bg-green-400 hover:bg-green-500 active:bg-green-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-green-700 dark:hover:bg-green-800 dark:active:bg-green-900 dark:text-white"
               onClick={handleSubLevelAcceptClick}
+              title="Close sub context and accept changes."
             >
               <Icon icon="ant-design:check-circle-outlined" color="white" />
             </button>
@@ -479,14 +497,18 @@ const Tiptap = forwardRef((props, ref) => {
       <div className="relative group inline-block">
         <div className="flex ml-auto">
           <button
+            type="button"
             className="w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
             onClick={() => handleAIButtonClick({ editor: editorRef.current })}
+            title="Send context to AI"
           >
             <Icon icon="ant-design:down" />
           </button>
           <button
+            type="button"
             className="w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
             onClick={() => clearEditor()}
+            title="Reset all context"
           >
             <Icon icon="ant-design:close-circle-outlined" />
           </button>
