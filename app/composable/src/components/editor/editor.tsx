@@ -28,6 +28,7 @@ import { DataItem } from "@/lib/types";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { createNodeJSON, BlockStore, popSubContent } from "@/lib/editor";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
+import { JSONContent } from "@tiptap/react";
 
 import { Icon } from "@iconify/react";
 
@@ -395,14 +396,14 @@ const Tiptap = forwardRef((props, ref) => {
 
       // If the last node is empty, adjust the position
       if (lastNode && isTextNodeEmpty(lastNode)) {
-        console.log("last node is empty");
+        // console.log("last node is empty");
         position -= lastNode.nodeSize;
       } else {
-        console.log(
-          "last node is not empty lastNode",
-          lastNode,
-          lastNode?.nodeSize
-        );
+        // console.log(
+        //   "last node is not empty lastNode",
+        //   lastNode,
+        //   lastNode?.nodeSize
+        // );
       }
 
       setTimeout(() => {
@@ -415,6 +416,21 @@ const Tiptap = forwardRef((props, ref) => {
       }, 0);
     }
   }, [isLoading, editor, completion]);
+
+  const appendContentNodeToEnd = (content: JSONContent) => {
+    if (!editor) {
+      // console.log("no editor");
+      return;
+    }
+    const lastNode = editor.state.doc.lastChild;
+    let position = editor.state.doc.content.size;
+    if (lastNode && isTextNodeEmpty(lastNode)) {
+      position -= lastNode.nodeSize;
+    }
+    setTimeout(() => {
+      editor.commands.insertContentAt(position, content);
+    }, 0);
+  };
 
   useEffect(() => {
     if (editor && content && !hydrated) {

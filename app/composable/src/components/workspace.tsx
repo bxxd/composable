@@ -11,6 +11,7 @@ export default function Workspace({}: WorkspaceProps) {
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;
+    appendContentNodeToEnd?: (content: JSONContent) => void;
   } | null>(null);
 
   const handleAddData = (content: DataItem) => {
@@ -20,8 +21,8 @@ export default function Workspace({}: WorkspaceProps) {
   };
 
   const handleAddSaved = (content: JSONContent) => {
-    if (tiptapRef.current) {
-      tiptapRef.current.appendContentToEnd(content);
+    if (tiptapRef.current?.appendContentNodeToEnd) {
+      tiptapRef.current.appendContentNodeToEnd(content);
     }
   };
 
