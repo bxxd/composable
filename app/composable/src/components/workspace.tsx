@@ -2,6 +2,8 @@ import TipTap from "@/components/editor";
 import { useRef } from "react";
 import { DataItem } from "@/lib/types";
 import SearchColumn from "./searchColumn";
+import SavedItems from "@/components/savedItems";
+import { JSONContent } from "@tiptap/react";
 
 type WorkspaceProps = {};
 
@@ -17,6 +19,12 @@ export default function Workspace({}: WorkspaceProps) {
     }
   };
 
+  const handleAddSaved = (content: JSONContent) => {
+    if (tiptapRef.current) {
+      tiptapRef.current.appendContentToEnd(content);
+    }
+  };
+
   // border-gray-300 border border-dashed rounded-lg m-1
   return (
     <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg m-1 pr-2">
@@ -27,7 +35,8 @@ export default function Workspace({}: WorkspaceProps) {
 
       {/* SearchColumn Component */}
       <div className="flex-grow w-1/3">
-        <SearchColumn handleAddData={handleAddData} />
+        <SavedItems handleAddSaved={handleAddSaved} />
+        {/* <SearchColumn handleAddData={handleAddData} /> */}
       </div>
     </div>
   );

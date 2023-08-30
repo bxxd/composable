@@ -27,6 +27,7 @@ import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { createNodeJSON, BlockStore, popSubContent } from "@/lib/editor";
+import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 
 import { Icon } from "@iconify/react";
 
@@ -480,7 +481,8 @@ const Tiptap = forwardRef((props, ref) => {
               onClick={handleSubLevelCloseClick}
               title="Close sub context and discard changes."
             >
-              <Icon icon="ant-design:close-circle-outlined" color="white" />
+              {/* <Icon icon="ant-design:close-circle-outlined" color="white" /> */}
+              <Icon icon={baselineChevronLeft} color="white" />
             </button>
             <button
               type="button"
