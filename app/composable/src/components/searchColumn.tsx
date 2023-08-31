@@ -19,18 +19,20 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
   const [expandedExcerpt, setExpandedExcerpt] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/excerpts");
-        const items: DataItem[] = await response.json();
-        setData(items);
-      } catch (err) {
-        console.error("An error occurred:", err);
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/excerpts");
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
       }
-    };
-    fetchData();
-  }, []);
+      const items: DataItem[] = await response.json();
+      console.log("Fetched items:", items);
+      setData(items);
+    } catch (err) {
+      console.error("An error occurred:", err);
+      setData([]); // Set an empty array in case of error
+    }
+  };
 
   const filteredData: DataItem[] =
     data?.filter((item) =>
