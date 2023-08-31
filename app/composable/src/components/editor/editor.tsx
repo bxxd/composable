@@ -22,15 +22,18 @@ import { TrailingNode } from "./extensions/trailingNode";
 import { EditorView } from "prosemirror-view";
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
-import useLocalStorage from "@/lib/hooks/use-local-storage";
+
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
+import _ from "lodash";
 
 import {
   createNodeJSON,
   BlockStore,
   popSubContent,
   isTextNodeEmpty,
+  generateBlockId,
+  rewriteBlockIdsWithParentId,
 } from "@/lib/editor";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import { JSONContent } from "@tiptap/react";
@@ -424,14 +427,32 @@ const Tiptap = forwardRef((props, ref) => {
       // console.log("no editor");
       return;
     }
+
+    let newContent = _.cloneDeep(content);
+
+    if (newContent.type === "dBlock" && newContent.attrs) {
+      newContent.attrs.id = generateBlockId(editor);
+    }
+
     const lastNode = editor.state.doc.lastChild;
     let position = editor.state.doc.content.size;
     if (lastNode && isTextNodeEmpty(lastNode)) {
       position -= lastNode.nodeSize;
     }
     setTimeout(() => {
-      editor.commands.insertContentAt(position, content);
+      editor.commands.insertContentAt(position, newContent);
     }, 0);
+
+    if (newContent.attrs) {
+      newContent.attrs.id = generateBlockId(editor);
+
+      newContent.attrs.children = rewriteBlockIdsWithParentId(
+        newContent.attrs.children,
+        newContent.attrs.id
+      );
+    } else {
+      console.warn("no attrs on node appending!", newContent.toJSON());
+    }
 
     saveUpdates({ editor: editorRef.current });
   };

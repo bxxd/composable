@@ -124,37 +124,56 @@ export function getBlockIdLevel(blockId: string | null | undefined): number {
   return blockId.split(".").length - 1;
 }
 
-export function generateBlockId(editor: Editor | null): string {
-  if (editor === null) return "0";
-
-  const store = BlockStore.getInst();
-  const blockState = store.get();
-
-  console.log("generateBlockId blockState", blockState);
-
-  let data = editor.getJSON();
-  console.log("data", data);
-
+export function generateNextBlockIdFromContent(
+  content: Array<any>,
+  level: number
+): string {
   let maxBlockId = "0";
-  for (const node of data.content as Array<any>) {
-    console.log("node", node.attrs);
+  for (const node of content) {
     if (node.type === "dBlock" && node.attrs.id) {
-      if (
-        blockState.level === 0 ||
-        getBlockIdLevel(node.attrs.id) === blockState.level
-      ) {
+      if (level === 0 || getBlockIdLevel(node.attrs.id) === level) {
         const currentId = node.attrs.id.toString();
-
-        console.log("currentId", currentId);
         if (compareBlockIds(currentId, maxBlockId) > 0) {
           maxBlockId = currentId;
         }
       }
     }
   }
+  return maxBlockId;
+}
 
-  console.log("maxBlockId", maxBlockId);
-  console.log("lastId", blockState.lastId);
+export function rewriteBlockIdsWithParentId(
+  content: Array<any>,
+  parentId: string
+): Array<any> {
+  if (!content) {
+    return content;
+  }
+  let newContent = _.cloneDeep(content); // Create a deep copy using lodash
+  let currentLevelId = 0; // Initialize the level ID for children
+
+  for (const node of newContent) {
+    if (node.type === "dBlock") {
+      // Prepend parentId to the currentLevelId
+      node.attrs.id = `${parentId}.${currentLevelId}`;
+      currentLevelId++; // Increment the current level ID for the next iteration
+    }
+  }
+
+  return newContent;
+}
+
+export function generateBlockId(editor: Editor | null): string {
+  if (editor === null) return "0";
+
+  const store = BlockStore.getInst();
+  const blockState = store.get();
+
+  let data = editor.getJSON();
+  let maxBlockId = generateNextBlockIdFromContent(
+    data.content as Array<any>,
+    blockState.level
+  );
 
   if (
     blockState.level > 0 &&
@@ -165,27 +184,21 @@ export function generateBlockId(editor: Editor | null): string {
 
   let newBlockId;
 
-  // If lastId is null (first time or reset), work with maxBlockId
   if (blockState.lastId === null) {
     newBlockId = incrementBlockId(maxBlockId);
   } else {
-    // Compare maxBlockId and lastId to get the larger one
     const comparison = compareBlockIds(maxBlockId, blockState.lastId);
-    console.log("comparison", comparison, maxBlockId, blockState.lastId);
-    if (comparison >= 0) {
-      newBlockId = incrementBlockId(maxBlockId);
-    } else {
-      newBlockId = incrementBlockId(blockState.lastId);
-    }
+    newBlockId =
+      comparison >= 0
+        ? incrementBlockId(maxBlockId)
+        : incrementBlockId(blockState.lastId);
   }
 
-  console.log("created newBlockId", newBlockId);
-
   store.set({ lastId: newBlockId });
-  const updatedState = store.get();
-  console.log("updated lastId", updatedState.lastId);
+
   return newBlockId;
 }
+
 // Compare two block IDs
 // Returns -1 if id1 < id2, 1 if id1 > id2, 0 if equal
 export function compareBlockIds(id1: string, id2: string): number {
