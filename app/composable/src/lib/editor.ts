@@ -1,6 +1,9 @@
 import { Editor } from "@tiptap/core";
 import { DataItem, RoleType } from "./types";
 import { JSONContent } from "@tiptap/react";
+import { Node as ProseMirrorNode } from "prosemirror-model";
+import { debounce } from "lodash";
+import useLocalStorage from "@/lib/hooks/use-local-storage";
 import _ from "lodash";
 
 export const getPrevText = (
@@ -35,6 +38,13 @@ export class BlockStore {
   private static inst: BlockStore;
   private data: BlockData;
 
+  private debouncedSave = debounce(() => {
+    console.log("saving..");
+    const serialized = this.serialize();
+    // console.log("debouncedSave", serialized);
+    localStorage.setItem("blockStore", serialized);
+  }, 500);
+
   private constructor() {
     this.data = { lastId: null, level: 0, ctxStack: {} };
   }
@@ -52,6 +62,57 @@ export class BlockStore {
 
   public set(newData: Partial<BlockData>): void {
     this.data = { ...this.data, ...newData };
+    this.debouncedSave();
+  }
+
+  public serialize(): string {
+    return JSON.stringify(this.data);
+  }
+
+  public loadFromLocalStorage(): boolean {
+    const storedDataString = localStorage.getItem("blockStore");
+    // console.log("loading from local storage", storedDataString);
+    if (storedDataString) {
+      this.deserialize(storedDataString);
+      return true;
+    }
+    return false;
+  }
+
+  public setCtxItemAtLevel(
+    level: number,
+    ctxItem: JSONContent | undefined
+  ): void {
+    if (ctxItem && ctxItem.type === "doc") {
+      ctxItem = ctxItem.content;
+    }
+
+    const currentCtxStack = this.data.ctxStack;
+    currentCtxStack[level] = ctxItem; // Set the context item at the specified level
+    this.data.ctxStack = currentCtxStack; // Update the internal context stack
+
+    this.debouncedSave(); // Save changes (assuming you have a debouncedSave method)
+  }
+
+  public getCtxItemAtLevel(level: number): any {
+    return this.data.ctxStack[level];
+  }
+
+  public getCtxItemAtCurrentLevel(): any {
+    return this.data.ctxStack[this.data.level];
+  }
+
+  public deserialize(dataString: string): void {
+    try {
+      this.data = JSON.parse(dataString);
+    } catch (e) {
+      console.error("Error deserializing BlockStore data:", e);
+    }
+  }
+
+  public saveNow(): void {
+    this.debouncedSave.cancel(); // Cancel any pending debounced calls
+    localStorage.setItem("blockStore", this.serialize());
   }
 }
 
@@ -216,8 +277,9 @@ export function pushSubContent(editor: Editor, content: JSONContent[]) {
   const currentLevel = getBlockIdLevel(maxId);
 
   console.log("currentLevel", currentLevel);
-  const ctxStack = store.get().ctxStack;
-  store.set({ ctxStack: { ...ctxStack, [currentLevel]: currentContent } });
+  // const ctxStack = store.get().ctxStack;
+  // store.set({ ctxStack: { ...ctxStack, [currentLevel]: currentContent } });
+  store.setCtxItemAtLevel(currentLevel, currentContent);
 
   maxId = content.reduce((maxId: string, item: any) => {
     if (compareBlockIds(maxId, item.attrs.id) < 0) {
@@ -357,16 +419,21 @@ export function popSubContent(editor: Editor | null, accepted: boolean) {
     } else {
       const parentId = truncateId((lastNode as any).attrs.id);
       const parentNodeIndex = findNodeIndexById(higherContent, parentId); // Find the parent node
+      const parentNode = higherContent[parentNodeIndex];
       if (parentNodeIndex === -1) {
         console.log("No parent node for id", lastNode);
       } else {
         const newNode = _.cloneDeep(lastNode);
-        newNode.attrs.id = parentId;
-        if (dBlockWithTextCount > 1) {
-          newNode.attrs.children = currentContent; // Set the children to the current content
-        } else {
-          newNode.attrs.children = null;
+        if (newNode.attrs) {
+          newNode.attrs.id = parentId;
+          if (dBlockWithTextCount > 1) {
+            newNode.attrs.children = currentContent; // Set the children to the current content
+          } else {
+            newNode.attrs.children = null;
+          }
+          newNode.attrs.role = parentNode.attrs?.role;
         }
+
         higherContent[parentNodeIndex] = newNode; // Replace the parent node with the new node
       }
     }
@@ -380,3 +447,10 @@ export function popSubContent(editor: Editor | null, accepted: boolean) {
     .setContent({ type: "doc", content: higherContent })
     .run();
 }
+
+export const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
+  if (!node) return false;
+
+  // Check if the text content is empty or consists of only whitespace
+  return !node.textContent || !node.textContent.trim();
+};

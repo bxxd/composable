@@ -52,17 +52,17 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
   return (
     <div className="flex flex-col m-1">
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between mt-1  mb-1">
         <input
           type="text"
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-2 p-2 border rounded pl-8 w-full" // Added padding-left to avoid overlap
+          className="p-2 border rounded pl-8 w-full " // Added padding-left to avoid overlap
         />
         <button
           onClick={() => setCollapsed(true)}
-          className="p-2 border rounded ml-2 mb-2"
+          className="p-2 border rounded ml-2 "
         >
           <Icon icon={chevronUp} width={24} height={24} />
         </button>

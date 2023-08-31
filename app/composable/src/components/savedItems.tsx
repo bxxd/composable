@@ -30,9 +30,9 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
 
     const { savedList, setSavedList } = useGlobalContext();
 
-    const addSavedToList = (content: JSONContent) => {
-      setSavedList([...savedList, content]);
-    };
+    // const addSavedToList = (content: JSONContent) => {
+    //   setSavedList([...savedList, content]);
+    // };
 
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -60,10 +60,12 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <span className="">Saved Items</span>
+
           <Icon
             icon={isExpanded ? baselineExpandLess : baselineExpandMore}
             width={24}
             height={24}
+            style={{ opacity: savedList.length ? 1 : 0 }}
           />
         </div>
 

@@ -25,8 +25,13 @@ import { Slice } from "prosemirror-model";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
-import { Node as ProseMirrorNode } from "prosemirror-model";
-import { createNodeJSON, BlockStore, popSubContent } from "@/lib/editor";
+
+import {
+  createNodeJSON,
+  BlockStore,
+  popSubContent,
+  isTextNodeEmpty,
+} from "@/lib/editor";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import { JSONContent } from "@tiptap/react";
 
@@ -131,35 +136,9 @@ let mockdata = [
   },
 ];
 
-function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
-  // Prevent default paste behavior
-  event.preventDefault();
-
-  // Get plain text from clipboard
-  const plainText = event.clipboardData?.getData("text/plain");
-
-  if (!plainText) {
-    return false;
-  }
-
-  // Insert the plain text at the current cursor position
-  const transaction = view.state.tr.insertText(plainText);
-  view.dispatch(transaction);
-
-  return true; // Indicate that the paste event was handled
-}
-
-function useLatestValue<T>(value: T) {
-  const latestValueRef = useRef(value);
-
-  useEffect(() => {
-    latestValueRef.current = value;
-  }, [value]);
-
-  return latestValueRef;
-}
-
-function extractTextFromJSON(data: any): { role: string; content: string }[] {
+function extractTextFromJSON(
+  data: JSONContent | null
+): { role: string; content: string }[] {
   let result: { role: string; content: string }[] = [];
 
   if (!data) {
@@ -191,7 +170,7 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
                 if (role === "data") {
                   result.push({
                     role: "user",
-                    content: item.attrs.data.excerpt,
+                    content: item.attrs?.data.excerpt,
                   });
                 } else {
                   result.push({ role: role, content: textItem.text });
@@ -207,8 +186,36 @@ function extractTextFromJSON(data: any): { role: string; content: string }[] {
   return result;
 }
 
+function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
+  // Prevent default paste behavior
+  event.preventDefault();
+
+  // Get plain text from clipboard
+  const plainText = event.clipboardData?.getData("text/plain");
+
+  if (!plainText) {
+    return false;
+  }
+
+  // Insert the plain text at the current cursor position
+  const transaction = view.state.tr.insertText(plainText);
+  view.dispatch(transaction);
+
+  return true; // Indicate that the paste event was handled
+}
+
+function useLatestValue<T>(value: T) {
+  const latestValueRef = useRef(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
+
+  return latestValueRef;
+}
+
 const Tiptap = forwardRef((props, ref) => {
-  const [content, setContent] = useLocalStorage("content", mockdata);
+  // const [content, setContent] = useLocalStorage("content", mockdata);
 
   const [saveStatus, setSaveStatus] = useState("Saved");
 
@@ -220,10 +227,11 @@ const Tiptap = forwardRef((props, ref) => {
 
   const blockState = BlockStore.getInst();
 
-  const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
+  const saveUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setSaveStatus("Saving...");
-    setContent(json);
+    // setContent(json);
+    blockState.setCtxItemAtLevel(blockState.get().level, json);
     // Simulate a delay in saving.
     setTimeout(() => {
       setSaveStatus("Saved");
@@ -306,7 +314,7 @@ const Tiptap = forwardRef((props, ref) => {
     },
     onUpdate: (e) => {
       setSaveStatus("Unsaved");
-      debouncedUpdates(e);
+      saveUpdates(e);
     },
     autofocus: "end",
   });
@@ -368,13 +376,6 @@ const Tiptap = forwardRef((props, ref) => {
     };
   }, [stop, isLoading, editor, complete, completion.length]);
 
-  const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
-    if (!node) return false;
-
-    // Check if the text content is empty or consists of only whitespace
-    return !node.textContent || !node.textContent.trim();
-  };
-
   useEffect(() => {
     if (!editor) {
       // console.log("no editor");
@@ -431,17 +432,30 @@ const Tiptap = forwardRef((props, ref) => {
     setTimeout(() => {
       editor.commands.insertContentAt(position, content);
     }, 0);
+
+    saveUpdates({ editor: editorRef.current });
   };
 
   useEffect(() => {
-    if (editor && content && !hydrated) {
+    if (editor && !hydrated) {
       setTimeout(() => {
-        editor.commands.setContent(content);
-        blockState.set({ level: 0 });
+        if (!blockState.loadFromLocalStorage()) {
+          console.log(
+            "No data found in localStorage, initializing with default values..."
+          );
+
+          editor.commands.setContent(mockdata);
+          blockState.set({ level: 1 });
+        } else {
+          console.log(
+            "Data found in localStorage, initializing with values..."
+          );
+          editor.commands.setContent(blockState.getCtxItemAtCurrentLevel());
+        }
       }, 0);
       setHydrated(true);
     }
-  }, [editor, content, hydrated]);
+  }, [editor, hydrated]);
 
   const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {
@@ -461,11 +475,14 @@ const Tiptap = forwardRef((props, ref) => {
     }
 
     editor.commands.insertContentAt(position, newNodeJSON);
+
+    saveUpdates({ editor: editorRef.current });
   };
 
   const clearEditor = () => {
     editor?.commands.setContent(mockdata);
-    blockState.set({ level: 0 });
+    blockState.set({ level: 1 });
+    saveUpdates({ editor: editorRef.current });
   };
 
   const handleSubLevelCloseClick = () => {

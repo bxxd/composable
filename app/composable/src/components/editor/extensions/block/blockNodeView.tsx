@@ -10,7 +10,9 @@ import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // 
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import saveIcon from "@iconify/icons-mdi/content-save";
 import { useGlobalContext } from "@/lib/context";
-import { JSONContent } from "@tiptap/react";
+// import { JSONContent } from "@tiptap/react";
+import { isTextNodeEmpty } from "@/lib/editor";
+import { Node as ProseMirrorNode } from "prosemirror-model";
 
 import {
   createNodeJSON,
@@ -33,7 +35,12 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
   const { savedList, setSavedList } = useGlobalContext();
 
-  const addSavedToList = (content: JSONContent) => {
+  const addSavedToList = (node: ProseMirrorNode) => {
+    if (isTextNodeEmpty(node)) {
+      console.warn("Cannot save empty node.");
+      return;
+    }
+    const content = node.toJSON();
     setSavedList([...savedList, content]);
   };
 
@@ -191,7 +198,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           type="button"
           className="d-block-button group-hover:opacity-100 m-1 ml-1"
           title="Save snippet for later re-use"
-          onClick={() => addSavedToList(node.toJSON())}
+          onClick={() => addSavedToList(node)}
         >
           <Icon icon={saveIcon} />
         </button>
