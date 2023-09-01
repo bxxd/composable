@@ -65,7 +65,7 @@ export function useLatestContextValue<T extends keyof GlobalContextType>(
 
   useEffect(() => {
     latestValueRef.current = context[key];
-  }, [context[key]]);
+  }, [context, key]);
 
   return latestValueRef;
 }

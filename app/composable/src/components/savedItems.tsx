@@ -42,7 +42,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
         }, 0);
         setHydrated(true);
       }
-    }, [hydrated]);
+    }, [hydrated, setSavedList]);
 
     const [expandedItems, setExpandedItems] = useState<{
       [key: number]: boolean;
@@ -157,4 +157,5 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
   }
 );
 
+SavedItems.displayName = "SavedItems";
 export default SavedItems;

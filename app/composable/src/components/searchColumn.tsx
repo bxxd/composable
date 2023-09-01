@@ -158,5 +158,5 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
     </div>
   );
 };
-
+SearchColumn.displayName = "SearchColumn";
 export default SearchColumn;

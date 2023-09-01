@@ -476,7 +476,7 @@ const Tiptap = forwardRef((props, ref) => {
       }, 0);
       setHydrated(true);
     }
-  }, [editor, hydrated]);
+  }, [editor, hydrated, blockState]);
 
   const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {
@@ -574,5 +574,7 @@ const Tiptap = forwardRef((props, ref) => {
     </section>
   );
 });
+
+Tiptap.displayName = "Tiptap";
 
 export default Tiptap;
