@@ -31,7 +31,10 @@ export default function Header({}: HeaderProps) {
               alt="logo"
               className="flex mr-1"
             />
-            {/* Composable Parts */}
+            <div className="opacity-50">
+              Composable Parts
+              <span className="text-sm italic">&nbsp;beta</span>
+            </div>
           </span>
         </div>
         <div className="flex ml-auto mr-4">
