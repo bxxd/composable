@@ -1,23 +1,17 @@
 // ./app/api/chat/route.ts
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
-
-// Create an OpenAI API client (that's edge friendly!)
-const openai = new OpenAI({
-  // apiKey: process.env.OPENAI_API_KEY || "",
-  apiKey: process.env.OPENROUTER_KEY || "",
-  baseURL: "https://openrouter.ai/api/v1",
-});
+import { NextResponse } from "next/server";
 
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  console.log("hi there!");
+  console.log("generate AI response..");
   // Extract the `prompt` from the body of the request
 
   const { prompt } = await req.json();
-  console.log("Request body:", prompt);
+  // console.log("Request body:", prompt);
 
   let payload = JSON.parse(prompt);
   let messages = payload.messages;
@@ -32,7 +26,22 @@ export async function POST(req: Request) {
     messages = [system_prompt, ...messages];
   }
 
-  console.log("messages", messages);
+  let openai = new OpenAI({
+    // apiKey: process.env.OPENAI_API_KEY || "",
+    apiKey: process.env.OPENROUTER_KEY || "",
+    baseURL: "https://openrouter.ai/api/v1",
+  });
+
+  if (aiModel.includes("openai")) {
+    console.log("using openai");
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || "",
+      // baseURL: "https://api.openai.com",
+    });
+    aiModel = aiModel.replace("openai/", "");
+  }
+
+  // console.log("messages", messages);
   try {
     // Ask OpenAI for a streaming chat completion given the prompt
     const response = await openai.chat.completions.create(
@@ -53,7 +62,7 @@ export async function POST(req: Request) {
     // headers={ "HTTP-Referer": "https://openrouter.ai",
     // "X-Title": "composable" }
 
-    console.log("response", response);
+    // console.log("response", response);
 
     // Convert the response into a friendly text-stream
     const stream = OpenAIStream(response);
@@ -63,5 +72,10 @@ export async function POST(req: Request) {
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.log("error", error);
+    try {
+      return NextResponse.json((error as any).error.message, { status: 500 });
+    } catch (error) {
+      return NextResponse.json(error, { status: 500 });
+    }
   }
 }

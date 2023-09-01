@@ -26,13 +26,17 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
         throw new Error(`API request failed with status: ${response.status}`);
       }
       const items: DataItem[] = await response.json();
-      console.log("Fetched items:", items);
+      // console.log("Fetched items:", items);
       setData(items);
     } catch (err) {
-      console.error("An error occurred:", err);
+      console.warn("An error occurred in fetchData:", err);
       setData([]); // Set an empty array in case of error
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const filteredData: DataItem[] =
     data?.filter((item) =>
@@ -54,17 +58,17 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
   return (
     <div className="flex flex-col m-1">
-      <div className="flex flex-row justify-between mt-1  mb-1">
+      <div className="flex flex-row justify-between">
         <input
           type="text"
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border rounded pl-8 w-full " // Added padding-left to avoid overlap
+          className="mb-2 p-2 border rounded pl-8 w-full" // Added padding-left to avoid overlap
         />
         <button
           onClick={() => setCollapsed(true)}
-          className="p-2 border rounded ml-2 "
+          className="p-2 border rounded ml-2 mb-2"
         >
           <Icon icon={chevronUp} width={24} height={24} />
         </button>

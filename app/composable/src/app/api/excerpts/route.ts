@@ -3,16 +3,16 @@ import { Pool } from "pg";
 
 // Connection configuration
 const pool = new Pool({
-  host: "localhost",
-  database: "edgar",
-  port: 5432,
-  user: "composable",
-  password: "composable4m3",
+  host: process.env.PGHOST || "localhost",
+  database: process.env.PGDATABASE || "",
+  port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
+  user: process.env.PGUSER || "composable",
+  password: process.env.PGPASSWORD,
 });
 
 export async function GET(req: Request) {
   try {
-    console.log("hi there");
+    console.log("get excerpts..");
     // Query the database
     // const query =
     //   "select title, category, subcategory, insight, excerpt, tokens from excerpts order by id asc limit 10;";
@@ -36,7 +36,7 @@ GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.token
 ORDER BY e.id ASC;`;
 
     const result = await pool.query(query);
-    console.log("result", result.rows);
+    console.log("result length", result.rows.length);
     // Send the results as JSON
     return NextResponse.json(result.rows);
     // res.status(200).json(result.rows);

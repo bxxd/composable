@@ -7,8 +7,10 @@ import Header from "./header";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { useState } from "react";
-import { GlobalContext } from "@/lib/context";
+// import { GlobalContext } from "@/lib/context";
+import { GlobalProvider } from "@/lib/context";
 import { JSONContent } from "@tiptap/react";
+import { readFromLocalStorage } from "@/lib/utils";
 
 // import useLocalStorage from "@/lib/hooks/use-local-storage";
 
@@ -20,14 +22,9 @@ const ToasterProvider = () => {
 };
 
 export default function Home() {
-  const [aiModel, setAiModel] = useState("meta-llama/llama-2-70b-chat");
-  const [savedList, setSavedList] = useState<JSONContent[]>([]);
-
   return (
     <>
-      <GlobalContext.Provider
-        value={{ aiModel, setAiModel, savedList, setSavedList }}
-      >
+      <GlobalProvider>
         <ThemeProvider
           attribute="class"
           value={{
@@ -41,7 +38,7 @@ export default function Home() {
           </main>
           <ToasterProvider />
         </ThemeProvider>
-      </GlobalContext.Provider>
+      </GlobalProvider>
     </>
   );
 }

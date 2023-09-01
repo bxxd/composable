@@ -2,7 +2,7 @@ import { useTheme } from "next-themes";
 import { Icon } from "@iconify/react";
 import darkMode from "@iconify/icons-ic/baseline-dark-mode";
 import lightMode from "@iconify/icons-ic/baseline-light-mode";
-
+import { aiModels } from "@/lib/cmn";
 import { useGlobalContext } from "@/lib/context";
 
 import Image from "next/image";
@@ -40,35 +40,11 @@ export default function Header({}: HeaderProps) {
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
           >
-            <option value="openai/gpt-3.5-turbo">OpenAI: GPT-3.5 Turbo</option>
-            <option value="openai/gpt-3.5-turbo-16k">
-              OpenAI: GPT-3.5 Turbo 16k
-            </option>
-            <option value="openai/gpt-4">OpenAI: GPT-4</option>
-            <option value="openai/gpt-4-32k">OpenAI: GPT-4 32k</option>
-            <option value="anthropic/claude-2">Anthropic: Claude v2</option>
-            <option value="anthropic/claude-instant-v1">
-              Anthropic: Claude Instant v1
-            </option>
-            <option value="google/palm-2-chat-bison">
-              Google: PaLM 2 Bison
-            </option>
-            <option value="google/palm-2-codechat-bison">
-              Google: PaLM 2 Bison (Code Chat)
-            </option>
-            <option value="meta-llama/llama-2-13b-chat">
-              Meta: Llama v2 13B Chat (beta)
-            </option>
-            <option value="meta-llama/llama-2-70b-chat">
-              Meta: Llama v2 70B Chat (beta)
-            </option>
-            <option value="nousresearch/nous-hermes-llama2-13b">
-              Nous: Hermes Llama2 13B (beta)
-            </option>
-            <option value="mancer/weaver">Mancer: Weaver 12k (alpha)</option>
-            <option value="gryphe/mythomax-L2-13b">
-              Gryphe: MythoMax L2 13B (beta)
-            </option>
+            {aiModels.map((model, index) => (
+              <option key={index} value={model.value}>
+                {model.name}
+              </option>
+            ))}
           </select>
         </div>
         <button

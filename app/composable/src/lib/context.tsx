@@ -1,5 +1,13 @@
-import { createContext, useContext, useRef, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+} from "react";
 import { JSONContent } from "@tiptap/react";
+import { readFromLocalStorage, saveToLocalStorage } from "./utils"; // Make sure utils is correctly imported
 
 type GlobalContextType = {
   aiModel: string;
@@ -14,6 +22,31 @@ export const GlobalContext = createContext<GlobalContextType>({
   savedList: [],
   setSavedList: () => {},
 });
+
+interface GlobalProviderProps {
+  children: ReactNode;
+}
+
+export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
+  const [aiModel, setAiModel] = useState("meta-llama/llama-2-70b-chat");
+  const [savedList, _setSavedList] = useState<JSONContent[]>([]);
+
+  const setSavedList: React.Dispatch<React.SetStateAction<JSONContent[]>> = (
+    value
+  ) => {
+    const newList = typeof value === "function" ? value(savedList) : value;
+    _setSavedList(newList);
+    saveToLocalStorage("savedList", newList);
+  };
+
+  return (
+    <GlobalContext.Provider
+      value={{ aiModel, setAiModel, savedList, setSavedList }}
+    >
+      {children}
+    </GlobalContext.Provider>
+  );
+};
 
 export const useGlobalContext = () => {
   const context = useContext(GlobalContext);

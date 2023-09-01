@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, forwardRef } from "react";
+import React, { useState, forwardRef, useEffect } from "react";
 import { JSONContent } from "@tiptap/react";
 import { Icon } from "@iconify/react";
 import baselineAddCircle from "@iconify/icons-ic/baseline-add-circle";
@@ -6,6 +6,7 @@ import baselineExpandMore from "@iconify/icons-ic/baseline-expand-more"; // Impo
 import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineDelete from "@iconify/icons-ic/baseline-delete";
 import { useGlobalContext } from "@/lib/context";
+import { readFromLocalStorage } from "@/lib/utils";
 
 interface SavedItemsProps {
   handleAddSaved: (content: JSONContent) => void;
@@ -30,11 +31,18 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
 
     const { savedList, setSavedList } = useGlobalContext();
 
-    // const addSavedToList = (content: JSONContent) => {
-    //   setSavedList([...savedList, content]);
-    // };
-
     const [isExpanded, setIsExpanded] = useState(true);
+
+    const [hydrated, setHydrated] = useState(false);
+
+    useEffect(() => {
+      if (!hydrated) {
+        setTimeout(() => {
+          setSavedList(readFromLocalStorage("savedList", []));
+        }, 0);
+        setHydrated(true);
+      }
+    }, [hydrated]);
 
     const [expandedItems, setExpandedItems] = useState<{
       [key: number]: boolean;
