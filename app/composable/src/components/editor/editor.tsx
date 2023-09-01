@@ -467,6 +467,7 @@ const Tiptap = forwardRef((props, ref) => {
 
           editor.commands.setContent(mockdata);
           blockState.set({ level: 1 });
+          saveUpdates({ editor: editorRef.current });
         } else {
           console.log(
             "Data found in localStorage, initializing with values..."

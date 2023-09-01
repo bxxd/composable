@@ -34,6 +34,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const setSavedList: React.Dispatch<React.SetStateAction<JSONContent[]>> = (
     value
   ) => {
+    console.log("saving to local storage");
     const newList = typeof value === "function" ? value(savedList) : value;
     _setSavedList(newList);
     saveToLocalStorage("savedList", newList);

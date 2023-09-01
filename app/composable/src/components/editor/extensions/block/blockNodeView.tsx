@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NodeViewWrapper, NodeViewProps, NodeViewContent } from "@tiptap/react";
 import { Icon } from "@iconify/react";
 import plusIcon from "@iconify/icons-mdi/plus";
@@ -36,6 +36,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const { savedList, setSavedList } = useGlobalContext();
 
   const addSavedToList = (node: ProseMirrorNode) => {
+    console.log("addSavedToList", node.attrs.id);
     if (isTextNodeEmpty(node)) {
       console.warn("Cannot save empty node.");
       return;
@@ -43,6 +44,10 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
     const content = node.toJSON();
     setSavedList([...savedList, content]);
   };
+
+  useEffect(() => {
+    console.log("BlockNodeView mounted or updated.", node.attrs.id);
+  }, []);
 
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
@@ -194,11 +199,15 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         >
           <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} />
         </button>
+        {/* using onMouseDown because onClick was failing first time on chrome */}
         <button
           type="button"
           className="d-block-button group-hover:opacity-100 m-1 ml-1"
           title="Save snippet for later re-use"
-          onClick={() => addSavedToList(node)}
+          onMouseDown={() => {
+            console.log("Button was clicked.");
+            addSavedToList(node);
+          }}
         >
           <Icon icon={saveIcon} />
         </button>

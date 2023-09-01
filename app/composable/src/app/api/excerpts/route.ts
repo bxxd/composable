@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
-import pgp from "pg-promise";
-
-// Initialize pg-promise and connect to the database
-const db = pgp()(
-  process.env.DATABASE_URL || {
-    host: process.env.PGHOST || "localhost",
-    database: process.env.PGDATABASE || "",
-    port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
-    user: process.env.PGUSER || "composable",
-    password: process.env.PGPASSWORD,
-  }
-);
+import { getDbInstance } from "@/lib/db";
 
 export async function GET(req: Request) {
   try {
@@ -36,7 +25,7 @@ FROM (
 LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
 ORDER BY e.id ASC;`;
-
+    let db = getDbInstance();
     const result = await db.any(query);
     console.log("result length", result.length);
     // Send the results as JSON

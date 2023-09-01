@@ -1,57 +1,55 @@
 .tiptap {
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.1;
+  }
 
-    ul,
-    ol {
-      padding: 0 1rem;
-    }
+  code {
+    background-color: rgba(#616161, 0.1);
+    color: #616161;
+  }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      line-height: 1.1;
-    }
+  pre {
+    background: #0d0d0d;
+    color: #fff;
+    font-family: "JetBrainsMono", monospace;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
 
     code {
-      background-color: rgba(#616161, 0.1);
-      color: #616161;
-    }
-
-    pre {
-      background: #0D0D0D;
-      color: #FFF;
-      font-family: 'JetBrainsMono', monospace;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-
-      code {
-        color: inherit;
-        padding: 0;
-        background: none;
-        font-size: 0.8rem;
-      }
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-
-    hr {
-      margin: 1rem 0;
-    }
-
-    blockquote {
-      padding-left: 1rem;
-      border-left: 2px solid rgba(#0D0D0D, 0.1);
+      color: inherit;
+      padding: 0;
+      background: none;
+      font-size: 0.8rem;
     }
   }
 
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  hr {
+    margin: 1rem 0;
+  }
+
+  blockquote {
+    padding-left: 1rem;
+    border-left: 2px solid rgba(#0d0d0d, 0.1);
+  }
+}
+
 .ProseMirror.ProseMirror-focused {
-    outline: none !important;
+  outline: none !important;
 }
 
 .user-block {
@@ -197,10 +195,6 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   max-width: 400px !important;
 }
 
-
-
-
-
 .ProseMirror {
   p.is-empty::before {
     @apply float-left h-0 pointer-events-none absolute ml-[2px];
@@ -212,42 +206,41 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
     @apply flex relative w-full my-2;
 
     &.f-left {
-      @apply float-left
+      @apply float-left;
     }
 
     &.f-right {
-      @apply float-right
+      @apply float-right;
     }
 
     &.align-left {
-      @apply justify-start
+      @apply justify-start;
     }
 
     &.align-center {
-      @apply justify-center
+      @apply justify-center;
     }
 
     &.align-right {
-      @apply justify-end
+      @apply justify-end;
     }
 
     .horizontal-resize-handle {
-      @apply h-24 w-2.5 top-[50%] right-1 cursor-col-resize absolute z-50 opacity-50 translate-y-[-50%] rounded
+      @apply h-24 w-2.5 top-[50%] right-1 cursor-col-resize absolute z-50 opacity-50 translate-y-[-50%] rounded;
     }
 
     .btn {
-      @apply inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium bg-gray-100 hover:bg-gray-200
+      @apply inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium bg-gray-100 hover:bg-gray-200;
     }
 
     .btn.active {
-      @apply bg-gray-300
+      @apply bg-gray-300;
     }
 
     .media-control-buttons {
-      @apply absolute top-2 right-2 bg-white transition-all duration-200 ease-linear shadow-xl rounded-sm overflow-hidden border border-slate-200 box-border
+      @apply absolute top-2 right-2 bg-white transition-all duration-200 ease-linear shadow-xl rounded-sm overflow-hidden border border-slate-200 box-border;
     }
   }
-
 
   table {
     border-collapse: collapse;
@@ -265,7 +258,7 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
       box-sizing: border-box;
       position: relative;
 
-      >* {
+      > * {
         margin-bottom: 0;
       }
     }
@@ -313,10 +306,37 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   }
 
   .d-block-button {
-    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-0 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-10 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer;
   }
 
+  // .d-block-button {
+  //   background-color: #edf2f7;
+  //   text-align: center;
+  //   font-size: 1.125rem; /* Corresponds to text-lg */
+  //   padding-top: 0.25rem; /* Corresponds to py-1 */
+  //   padding-bottom: 0.25rem; /* Corresponds to py-1 */
+  //   opacity: 0.1; /* Corresponds to opacity-10 */
+  //   transition: all 0.2s ease-in-out; /* Corresponds to transition duration-200 ease-in-out */
+  //   border-radius: 0.25rem; /* Corresponds to rounded */
+  //   display: flex; /* Corresponds to flex */
+  //   justify-content: center; /* Corresponds to justify-center */
+  //   align-items: center; /* Corresponds to items-center */
+  //   cursor: pointer; /* Corresponds to cursor-pointer */
+  //   // height: fit-content; /* Corresponds to h-fit */
+  // }
   // cursor-grab
+
+  // .d-block-button:hover {
+  //   background-color: #e2e8f0;
+  // }
+
+  // :is(.dark .d-block-button) {
+  //   background-color: #718096;
+  // }
+
+  // :is(.dark .d-block-button:hover) {
+  //   background-color: #4a5568;
+  // }
 }
 
 .tableWrapper {
@@ -328,4 +348,3 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   cursor: ew-resize;
   cursor: col-resize;
 }
-
