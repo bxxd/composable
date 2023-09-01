@@ -25,7 +25,7 @@ export default function Header({}: HeaderProps) {
         <div className=" px-4  md:flex md:items-center md:justify-between py-1">
           <span className="flex text-med tracking-normal transition-colors hover:text-gray-600 dark:hover:text-gray-400">
             <Image
-              src="/images/logo.png"
+              src="/images/logo3.png"
               width={25}
               height={25}
               alt="logo"
