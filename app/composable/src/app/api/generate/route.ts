@@ -2,6 +2,7 @@
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
+// import { Ratelimit } from "@upstash/ratelimit";
 
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
@@ -16,6 +17,8 @@ export async function POST(req: Request) {
   let payload = JSON.parse(prompt);
   let messages = payload.messages;
   let aiModel = payload.aiModel;
+
+  const ip = req.headers.get("x-forwarded-for");
 
   let system_prompt = {
     role: "system",

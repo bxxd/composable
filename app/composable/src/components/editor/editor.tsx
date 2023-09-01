@@ -230,6 +230,8 @@ const Tiptap = forwardRef((props, ref) => {
 
   const blockState = BlockStore.getInst();
 
+  const componentRef = useRef<HTMLDivElement>(null);
+
   const saveUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setSaveStatus("Saving...");
@@ -362,21 +364,26 @@ const Tiptap = forwardRef((props, ref) => {
       e.preventDefault();
       e.stopPropagation();
       stop();
-      if (window.confirm("AI writing paused. Continue?")) {
-        complete(editor?.getText() || "");
+      // if (window.confirm("AI writing paused. Continue?")) {
+      //   complete(editor?.getText() || "");
+      // }
+      window.alert("AI writing canceled.");
+    };
+
+    const element = componentRef.current;
+    if (element) {
+      if (isLoading) {
+        document.addEventListener("keydown", onKeyDown);
+        element.addEventListener("mousedown", mousedownHandler);
+      } else {
+        document.removeEventListener("keydown", onKeyDown);
+        element.removeEventListener("mousedown", mousedownHandler);
       }
-    };
-    if (isLoading) {
-      document.addEventListener("keydown", onKeyDown);
-      window.addEventListener("mousedown", mousedownHandler);
-    } else {
-      document.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("mousedown", mousedownHandler);
+      return () => {
+        document.removeEventListener("keydown", onKeyDown);
+        element.removeEventListener("mousedown", mousedownHandler);
+      };
     }
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("mousedown", mousedownHandler);
-    };
   }, [stop, isLoading, editor, complete, completion.length]);
 
   useEffect(() => {
@@ -516,7 +523,10 @@ const Tiptap = forwardRef((props, ref) => {
   };
 
   return (
-    <section className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-novel-stone-300">
+    <section
+      className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-novel-stone-300"
+      ref={componentRef}
+    >
       <div className="header flex justify-end pb-1">
         <div className="flex mr-auto pt-1">
           <div className="ml-2 text-stone-400  text-sm font-normal">
