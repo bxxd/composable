@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
+import pgp from "pg-promise";
 
-// Connection configuration
-const pool = new Pool({
-  host: process.env.PGHOST || "localhost",
-  database: process.env.PGDATABASE || "",
-  port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
-  user: process.env.PGUSER || "composable",
-  password: process.env.PGPASSWORD,
-});
+// Initialize pg-promise and connect to the database
+const db = pgp()(
+  process.env.DATABASE_URL || {
+    host: process.env.PGHOST || "localhost",
+    database: process.env.PGDATABASE || "",
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
+    user: process.env.PGUSER || "composable",
+    password: process.env.PGPASSWORD,
+  }
+);
 
 export async function GET(req: Request) {
   try {
@@ -35,10 +37,10 @@ LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
 ORDER BY e.id ASC;`;
 
-    const result = await pool.query(query);
-    console.log("result length", result.rows.length);
+    const result = await db.any(query);
+    console.log("result length", result.length);
     // Send the results as JSON
-    return NextResponse.json(result.rows);
+    return NextResponse.json(result);
     // res.status(200).json(result.rows);
   } catch (err) {
     console.error(err);
