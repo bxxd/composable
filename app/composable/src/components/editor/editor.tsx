@@ -484,7 +484,7 @@ const TipTap = forwardRef((props, ref) => {
       }, 0);
       setHydrated(true);
     }
-  }, [editor, hydrated, blockState]);
+  }, [editor, hydrated, blockState, saveUpdates]);
 
   const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {

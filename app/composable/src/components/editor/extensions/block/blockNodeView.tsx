@@ -47,7 +47,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
   useEffect(() => {
     console.log("BlockNodeView mounted or updated.", node.attrs.id);
-  }, []);
+  }, [node]);
 
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
