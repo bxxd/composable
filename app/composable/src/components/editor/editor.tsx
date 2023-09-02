@@ -217,7 +217,7 @@ function useLatestValue<T>(value: T) {
   return latestValueRef;
 }
 
-const Tiptap = forwardRef((props, ref) => {
+const TipTap = forwardRef((props, ref) => {
   // const [content, setContent] = useLocalStorage("content", mockdata);
 
   const [saveStatus, setSaveStatus] = useState("Saved");
@@ -586,6 +586,6 @@ const Tiptap = forwardRef((props, ref) => {
   );
 });
 
-Tiptap.displayName = "Tiptap";
+TipTap.displayName = "TipTap";
 
-export default Tiptap;
+export default TipTap;

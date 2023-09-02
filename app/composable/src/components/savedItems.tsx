@@ -95,7 +95,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
               >
                 <button
                   type="button"
-                  className="mr-1 opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="mr-1 opacity-10 group-hover:opacity-100 cursor-pointer"
                   onClick={() => handleAddSaved(item)}
                   title="Add data to context"
                 >
@@ -127,7 +127,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
                 {shouldTruncate && (
                   <button
                     type="button"
-                    className="ml-1 opacity-0 group-hover:opacity-100"
+                    className="ml-1 opacity-10 group-hover:opacity-100"
                     onClick={() => toggleExpand(index)}
                   >
                     <Icon
@@ -144,7 +144,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
 
                 <button
                   type="button"
-                  className="ml-1 opacity-0 group-hover:opacity-100"
+                  className="ml-1 opacity-10 group-hover:opacity-100"
                   onClick={() => deleteItem(index)}
                 >
                   <Icon icon={baselineDelete} width={24} height={24} />

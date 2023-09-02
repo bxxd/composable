@@ -2,7 +2,7 @@
 
 import Workspace from "@/components/workspace";
 // import Tiptap from "@/components/editor";
-import Header from "./header";
+import Header from "@/components/header";
 
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";

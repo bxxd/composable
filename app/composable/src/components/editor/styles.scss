@@ -306,7 +306,7 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   }
 
   .d-block-button {
-    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-10 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer;
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-20 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer;
   }
 
   // .d-block-button {

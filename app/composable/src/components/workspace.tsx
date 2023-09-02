@@ -33,14 +33,14 @@ export default function Workspace({}: WorkspaceProps) {
 
   // border-gray-300 border border-dashed rounded-lg m-1
   return (
-    <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg m-1 pr-2">
+    <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg m-1 pr-2 overflow-scroll">
       {/* TipTap Component */}
-      <div className="flex flex-col w-2/3 min-w-[85ch] flex-shrink-0">
+      <div className="flex flex-col w-2/3 min-w-[66ch]">
         <TipTap ref={tiptapRef} />
       </div>
 
       {/* SearchColumn Component */}
-      <div className="flex-grow w-1/3">
+      <div className="flex-grow w-1/3 min-w-[22ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
         <SearchColumn handleAddData={handleAddData} />
       </div>

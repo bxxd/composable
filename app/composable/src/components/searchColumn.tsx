@@ -82,7 +82,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
             <div className="flex items-center">
               <button
                 type="button"
-                className="mr-2 opacity-0 group-hover:opacity-100 cursor-pointer"
+                className="mr-2 opacity-10 group-hover:opacity-100 cursor-pointer"
                 onClick={() => handleAddData(item)}
                 title="Add data to context"
               >
