@@ -2,7 +2,8 @@
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
-// import { Ratelimit } from "@upstash/ratelimit";
+import { kv } from "@vercel/kv";
+import { Ratelimit } from "@upstash/ratelimit";
 
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
@@ -19,6 +20,33 @@ export async function POST(req: Request) {
   let aiModel = payload.aiModel;
 
   const ip = req.headers.get("x-forwarded-for");
+
+  if (
+    process.env.NODE_ENV != "development" &&
+    process.env.KV_REST_API_URL &&
+    process.env.KV_REST_API_TOKEN
+  ) {
+    const ip = req.headers.get("x-forwarded-for");
+    const ratelimit = new Ratelimit({
+      redis: kv,
+      limiter: Ratelimit.slidingWindow(50, "1 d"),
+    });
+
+    const { success, limit, reset, remaining } = await ratelimit.limit(
+      `novel_ratelimit_${ip}`
+    );
+
+    if (!success) {
+      return new Response("You have reached your request limit for the day.", {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": limit.toString(),
+          "X-RateLimit-Remaining": remaining.toString(),
+          "X-RateLimit-Reset": reset.toString(),
+        },
+      });
+    }
+  }
 
   let system_prompt = {
     role: "system",
