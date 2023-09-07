@@ -10,7 +10,6 @@ import baselineChevronRight from "@iconify/icons-ic/baseline-chevron-right"; // 
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import saveIcon from "@iconify/icons-mdi/content-save";
 import { useGlobalContext } from "@/lib/context";
-// import { JSONContent } from "@tiptap/react";
 import { isTextNodeEmpty } from "@/lib/editor";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 

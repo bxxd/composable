@@ -67,7 +67,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
           className="flex justify-between items-center cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <span className="">Saved Items</span>
+          <span className="opacity-50">Saved Items</span>
 
           <Icon
             icon={isExpanded ? baselineExpandLess : baselineExpandMore}

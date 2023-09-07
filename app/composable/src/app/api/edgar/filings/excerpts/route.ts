@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { getDbInstance } from "@/lib/db";
 
+import { Filing, Excerpt, Company } from "@/lib/types";
+
+interface QueryResult extends Excerpt {}
+
 export async function GET(req: Request) {
   try {
-    console.log("get excerpts..");
-    // Query the database
-    // const query =
-    //   "select title, category, subcategory, insight, excerpt, tokens from excerpts order by id asc limit 10;";
+    const url = new URL(req.url);
+
+    console.log("get excerpts..", url);
+
+    const filing_id = url.searchParams.get("filing_id");
 
     const query = `SELECT
     e.id AS id,
@@ -19,14 +24,15 @@ export async function GET(req: Request) {
     ARRAY_AGG(t.tag) AS tags
 FROM (
     SELECT * FROM excerpts
+    WHERE filing_id = $1
     ORDER BY id ASC
     LIMIT 100
 ) AS e
 LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
 ORDER BY e.id ASC;`;
-    let db = getDbInstance();
-    const result = await db.any(query);
+    let db_query = getDbInstance();
+    const result: QueryResult[] = await db_query.any(query, filing_id);
     console.log("result length", result.length);
     // Send the results as JSON
     return NextResponse.json(result);
