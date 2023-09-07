@@ -1,30 +1,41 @@
 // ./app/api/chat/route.ts
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { kv } from "@vercel/kv";
 import { Ratelimit } from "@upstash/ratelimit";
 
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   console.log("generate AI response..");
-  // Extract the `prompt` from the body of the request
 
-  const { prompt } = await req.json();
-  // console.log("Request body:", prompt);
+  let messages: any;
+  let aiModel: any;
+  let prompt: any;
+  let payload: any;
 
-  let payload = JSON.parse(prompt);
-  let messages = payload.messages;
-  let aiModel = payload.aiModel;
+  try {
+    payload = await req.json();
+    prompt = JSON.parse(payload["prompt"]);
+    console.log("payload", payload);
+    // console.log("payload", payload);
+    messages = prompt.messages;
+    aiModel = prompt.aiModel;
+  } catch (error) {
+    console.log("error", error, "payload:", payload);
+    return NextResponse.json("Unable to parse the payload.", { status: 500 });
+  }
 
-  const ip = req.headers.get("x-forwarded-for");
-
-  if (
-    process.env.NODE_ENV != "development" &&
-    process.env.KV_REST_API_URL &&
+  console.log(
+    process.env.NODE_ENV,
+    process.env.KV_REST_API_URL,
     process.env.KV_REST_API_TOKEN
+  );
+  if (
+    (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN,
+    process.env.NODE_ENV != "development")
   ) {
     const ip = req.headers.get("x-forwarded-for");
     const ratelimit = new Ratelimit({
@@ -37,14 +48,18 @@ export async function POST(req: Request) {
     );
 
     if (!success) {
-      return new Response("You have reached your request limit for the day.", {
-        status: 429,
-        headers: {
-          "X-RateLimit-Limit": limit.toString(),
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": reset.toString(),
-        },
-      });
+      console.log("ratelimit", ip, limit, reset, remaining);
+      return NextResponse.json(
+        "You have reached your request limit for the day.",
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        }
+      );
     }
   }
 
@@ -67,7 +82,6 @@ export async function POST(req: Request) {
     console.log("using openai");
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || "",
-      // baseURL: "https://api.openai.com",
     });
     aiModel = aiModel.replace("openai/", "");
   }
@@ -90,15 +104,9 @@ export async function POST(req: Request) {
       }
     );
 
-    // headers={ "HTTP-Referer": "https://openrouter.ai",
-    // "X-Title": "composable" }
-
-    // console.log("response", response);
-
     // Convert the response into a friendly text-stream
     const stream = OpenAIStream(response);
 
-    // console.log("returning stream", stream);
     // Respond with the stream
     return new StreamingTextResponse(stream);
   } catch (error) {

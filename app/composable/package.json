@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@iconify-icons/fa-solid": "^1.2.4",
     "@iconify/icons-ic": "^1.2.13",
     "@iconify/icons-material-symbols": "^1.2.53",
     "@iconify/icons-mdi": "^1.2.47",
@@ -37,9 +38,11 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "18.2.7",
     "@upstash/ratelimit": "^0.4.4",
+    "@vercel/analytics": "^1.0.2",
     "@vercel/kv": "^0.2.2",
     "ai": "^2.2.2",
     "autoprefixer": "10.4.15",
+    "encoding": "^0.1.13",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.17",
     "framer-motion": "^10.16.0",
@@ -64,6 +67,7 @@
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.6",
     "tiptap-markdown": "^0.8.2",
+    "ts-retry-promise": "^0.7.1",
     "typescript": "5.1.6",
     "use-debounce": "^9.0.4",
     "vue": "^3.3.4"

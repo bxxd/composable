@@ -7,7 +7,8 @@ import React, {
   useEffect,
 } from "react";
 import { JSONContent } from "@tiptap/react";
-import { readFromLocalStorage, saveToLocalStorage } from "./utils"; // Make sure utils is correctly imported
+import { saveToLocalStorage } from "./utils"; // Make sure utils is correctly imported
+import { defaultAiModel } from "./models";
 
 type GlobalContextType = {
   aiModel: string;
@@ -28,7 +29,7 @@ interface GlobalProviderProps {
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
-  const [aiModel, setAiModel] = useState("meta-llama/llama-2-70b-chat");
+  const [aiModel, setAiModel] = useState(defaultAiModel);
   const [savedList, _setSavedList] = useState<JSONContent[]>([]);
 
   const setSavedList: React.Dispatch<React.SetStateAction<JSONContent[]>> = (
