@@ -277,7 +277,7 @@ const TipTap = forwardRef((props, ref) => {
 
     toast.message("Sending to AI..." + payload);
     console.log("payload ", payload);
-    // TODO: why are we using JSON.stringify here? We should define our own api instead of using complete
+
     complete(payload);
   };
 
@@ -329,11 +329,10 @@ const TipTap = forwardRef((props, ref) => {
   const { complete, completion, isLoading, stop } = useCompletion({
     id: "composable",
     api: "/api/generate",
-    onFinish: (_prompt, completion) => {
+    onFinish: (_prompt, _completion) => {
       console.log("AI finished", editor);
 
       if (editor) {
-        // editor.chain().focus("end").run();
         editor.setOptions({ editable: true });
       }
     },
@@ -524,7 +523,7 @@ const TipTap = forwardRef((props, ref) => {
 
   return (
     <section
-      className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-novel-stone-300"
+      className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
       ref={componentRef}
     >
       <div className="header flex justify-end pb-1">

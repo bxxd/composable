@@ -7,6 +7,11 @@ import baselineExpandLess from "@iconify/icons-ic/baseline-expand-less";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import chevronUp from "@iconify/icons-mdi/chevron-up";
 import { DataItem } from "@/lib/types";
+// import searchIcon from "@iconify-icons/fa-solid/search";
+import searchIcon from "@iconify/icons-ic/search";
+import { toast } from "sonner";
+import closeIcon from "@iconify/icons-ic/baseline-close";
+import { useCallback } from "react";
 
 import { Company, Excerpt, Filing } from "@/lib/types";
 
@@ -37,21 +42,40 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
     [key: number]: boolean;
   }>({});
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch("/api/edgar/filings");
+  const [hydrated, setHydrated] = useState(false);
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status: ${response.status}`);
+  const resetStates = useCallback(() => {
+    setExpandedItem(null);
+    setExpandedExcerpt(null);
+    setCollapsedCompanies({});
+    setCollapsedFilings({});
+  }, []);
+
+  const fetchData = useCallback(
+    async (searchTerm?: string) => {
+      try {
+        let url = `/api/edgar/filings`;
+        if (searchTerm) {
+          url += `?search_term=${searchTerm}&limit=10`;
+        }
+
+        console.log(`fetching data from ${url}`);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status: ${response.status}`);
+        }
+        const groupedData: Record<number, Company> = await response.json();
+        console.log("groupedData", groupedData);
+        resetStates();
+        setData(groupedData);
+      } catch (err) {
+        console.warn("An error occurred in fetchData:", err);
+        setData({});
       }
-      const groupedData: Record<number, Company> = await response.json();
-      console.log("groupedData", groupedData);
-      setData(groupedData);
-    } catch (err) {
-      console.warn("An error occurred in fetchData:", err);
-      setData({});
-    }
-  };
+    },
+    [setData, resetStates]
+  );
 
   const fetchExcerpts = async (filing_id: number) => {
     setExcerptLoading((prev) => ({ ...prev, [filing_id]: true }));
@@ -86,10 +110,45 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
     setExcerptLoading((prev) => ({ ...prev, [filing_id]: false }));
   };
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (searchQuery.length > 5) {
+  //     if (searchTimeout) clearTimeout(searchTimeout);
+
+  //     setSearchTimeout(
+  //       setTimeout(() => {
+  //         fetchData(searchQuery);
+  //       }, 1000)
+  //     );
+  //   }
+  // }, [searchQuery]);
+
+  const clearSearch = () => {
+    setSearchQuery("");
     fetchData();
-    console.log("here!");
-  }, []);
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.length >= 3) {
+      fetchData(searchQuery);
+    } else {
+      if (searchQuery.length > 0) {
+        toast.error("Search query must be at least 3 characters long.");
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  useEffect(() => {
+    if (!hydrated) {
+      fetchData();
+      setHydrated(true);
+    }
+  }, [fetchData, hydrated]);
 
   if (collapsed) {
     return (
@@ -123,34 +182,55 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   };
 
   return (
-    <div className="flex flex-col m-1 border rounded p-1">
+    <div className="flex flex-col m-1 border rounded p-1 border-red-200">
       <span className="ml-2 mt-1 opacity-50">Documents</span>
 
       <div className="flex flex-row justify-between">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-2 p-2 border rounded pl-8 w-full" // Added padding-left to avoid overlap
-        />
+        <div className="relative w-full inline-block mb-2">
+          <input
+            type="text"
+            placeholder="Semantic Search..."
+            value={searchQuery}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full p-2 pl-4 pr-6 border rounded  focus:outline-none focus:ring-1 focus:border-red-200"
+          />
+          {searchQuery && (
+            <div
+              onClick={() => clearSearch()}
+              className="absolute top-1/2 right-2 transform -translate-y-1/2 cursor-pointer rounded-full bg-red-100 w-5 h-5 flex items-center justify-center"
+            >
+              <Icon icon={closeIcon} width={12} height={12} />
+            </div>
+          )}
+        </div>
+        <button
+          onClick={handleSearch}
+          className="p-1 border rounded ml-1 mb-2 flex items-center justify-center"
+        >
+          <Icon icon={searchIcon} width={16} height={16} />
+        </button>
         <button
           onClick={() => setCollapsed(true)}
-          className="p-2 border rounded ml-2 mb-2"
+          className="p-1 border rounded ml-1 mb-2 flex items-center justify-center "
         >
-          <Icon icon={chevronUp} width={24} height={24} />
+          <Icon icon={chevronUp} width={16} height={16} />
         </button>
       </div>
       <div className="flex-grow overflow-y-auto ">
         {Object.values(data).map((company) => (
-          <div key={company.company_ticker} className="border p-1 rounded">
+          <div
+            key={company.company_ticker}
+            className="border p-1 rounded border-red-100"
+          >
             <div
               onClick={() => toggleCollapseCompany(company.company_id)}
               className="cursor-pointer flex justify-between items-center"
             >
               <span>
-                <strong>{company.company_name}</strong> (
-                {company.company_ticker})
+                <span className="italic">
+                  {company.company_name} ({company.company_ticker})
+                </span>
               </span>
               <Icon
                 icon={
@@ -225,7 +305,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                     }
                                   >
                                     <span className="flex-grow">
-                                      {item.title}
+                                      {item.category} - {item.subcategory}
                                     </span>
                                     <span className="ml-2">
                                       <Icon
@@ -243,12 +323,15 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                 {expandedItem === item.id && (
                                   <div className="ml-4 mt-2 border-t border-gray-300">
                                     <div>
+                                      <strong>Title:</strong> {item.title}
+                                    </div>
+                                    {/* <div>
                                       <strong>Category:</strong> {item.category}
                                     </div>
                                     <div>
                                       <strong>Subcategory:</strong>{" "}
                                       {item.subcategory}
-                                    </div>
+                                    </div> */}
                                     <div>
                                       <strong>Insight:</strong> {item.insight}
                                     </div>
@@ -283,10 +366,12 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                           "..."}{" "}
                                       {/* Adjust the length as needed */}
                                     </div>
-                                    <div>
-                                      <strong>Tags:</strong>{" "}
-                                      {item.tags.join(", ")}
-                                    </div>
+                                    {item.tags && (
+                                      <div>
+                                        <strong>Tags:</strong>{" "}
+                                        {item.tags.join(", ")}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>

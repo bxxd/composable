@@ -62,7 +62,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
     };
 
     return (
-      <div className="border p-2 rounded m-1">
+      <div className="border p-2 rounded m-1 border-amber-200">
         <div
           className="flex justify-between items-center cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -91,7 +91,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
             return (
               <div
                 key={index}
-                className="group flex items-center mt-1 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 border-gray-300 border border-dashed rounded-lg"
+                className="group flex items-center mt-1 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 border-amber-200 border border-dashed rounded-lg"
               >
                 <button
                   type="button"

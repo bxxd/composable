@@ -1,13 +1,13 @@
-export interface DataItem {
-  id: number;
-  title: string;
-  category: string;
-  subcategory: string;
-  insight: string;
-  excerpt: string;
-  tags: string[];
-  tokens: number;
-}
+// export interface DataItem {
+//   id: number;
+//   title: string;
+//   category: string;
+//   subcategory: string;
+//   insight: string;
+//   excerpt: string;
+//   tags: string[];
+//   tokens: number;
+// }
 
 export interface Excerpt {
   id: number;
@@ -21,8 +21,11 @@ export interface Excerpt {
   tags: string[];
 }
 
+export interface DataItem extends Excerpt {}
+
 export interface Filing {
   filing_id: number;
+  company_id: number;
   form_file: string;
   reporting_for: Date;
   filed_at: Date;

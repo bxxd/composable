@@ -31,6 +31,7 @@ FROM (
 LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
 ORDER BY e.id ASC;`;
+
     let db_query = getDbInstance();
     const result: QueryResult[] = await db_query.any(query, filing_id);
     console.log("result length", result.length);
