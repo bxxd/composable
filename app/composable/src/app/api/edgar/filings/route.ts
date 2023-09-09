@@ -62,6 +62,17 @@ export async function GET(req: NextRequest) {
     ${filingLimitClause}
   )
 `;
+
+    // ,
+    //       ${
+    //         embedding
+    //           ? `e.embedding <-> '${JSON.stringify(
+    //               embedding
+    //             )}'::jsonb AS embedding_distance`
+    //           : `NULL AS embedding_distance`
+    //       }
+    // ,
+    //   e.embedding <-> '${JSON.stringify(embedding)}' AS embedding_distance
     if (get_excerpts) {
       let selectClause = `
       e.id,
@@ -71,8 +82,7 @@ export async function GET(req: NextRequest) {
       e.insight,
       e.excerpt,
       e.tokens,
-      cf.*
-  `;
+      cf.*`;
 
       let joinClause = `
   FROM (
@@ -125,6 +135,8 @@ export async function GET(req: NextRequest) {
     ORDER BY cf.filing_id ASC;
   `;
     }
+
+    console.log(`baseQuery: ${baseQuery}`);
 
     let db = getDbInstance();
     const result: QueryResult[] = await db.any(baseQuery, numericLimit);
@@ -179,6 +191,7 @@ export async function GET(req: NextRequest) {
           excerpt: row.excerpt,
           tokens: row.tokens,
           tags: row.tags,
+          embedding_distance: row.embedding_distance,
         });
       }
 

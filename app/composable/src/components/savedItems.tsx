@@ -102,12 +102,6 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
                   <Icon icon={baselineAddCircle} width={24} height={24} />
                 </button>
 
-                {/* <div
-                  onClick={
-                    shouldTruncate ? () => toggleExpand(index) : undefined
-                  }
-                  className={shouldTruncate ? "cursor-pointer" : ""}
-                > */}
                 <span
                   className="flex-grow"
                   style={{

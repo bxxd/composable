@@ -19,6 +19,7 @@ export interface Excerpt {
   excerpt: string;
   tokens: number;
   tags: string[];
+  embedding_distance?: number | null;
 }
 
 export interface DataItem extends Excerpt {}

@@ -35,7 +35,7 @@ export default function Workspace({}: WorkspaceProps) {
   return (
     <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto">
       {/* TipTap Component */}
-      <div className="flex flex-col w-2/3 min-w-[66ch]">
+      <div className="flex flex-col w-2/3 min-w-[41ch]">
         <TipTap ref={tiptapRef} />
       </div>
 
