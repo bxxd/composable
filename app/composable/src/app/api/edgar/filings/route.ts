@@ -6,26 +6,6 @@ import { getEmbedding } from "@/app/api/lib/embedding";
 interface QueryResult extends Filing, Company, Excerpt {}
 
 export async function GET(req: NextRequest) {
-  //     const db_query = `
-  //   SELECT
-  //     f.id AS filing_id,
-  //     f.form_file AS form_file,
-  //     f.reporting_for AS reporting_for,
-  //     f.filed_at AS filed_at,
-  //     f.filing_period AS filing_period,
-  //     f.filing_type AS filing_type,
-  //     f.url AS url,
-  //     f.created_at AS created_at,
-  //     c.id AS company_id,
-  //     c.name AS company_name,
-  //     c.ticker AS company_ticker
-  //   FROM  filings f
-  //   JOIN companies c ON f.company_id = c.id
-  //   GROUP BY f.id, c.id
-  //   ORDER BY c.id ASC, f.id ASC
-  //   LIMIT $1;
-  // `;
-
   try {
     const url = new URL(req.url);
     let limit: string | null = url.searchParams.get("limit");
