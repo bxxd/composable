@@ -2,7 +2,7 @@ import { useTheme } from "next-themes";
 import { Icon } from "@iconify/react";
 import darkMode from "@iconify/icons-ic/baseline-dark-mode";
 import lightMode from "@iconify/icons-ic/baseline-light-mode";
-import { aiModels } from "@/lib/cmn";
+import { aiModels } from "@/lib/models";
 import { useGlobalContext } from "@/lib/context";
 
 import Image from "next/image";
