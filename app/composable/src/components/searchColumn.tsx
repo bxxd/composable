@@ -56,7 +56,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
       try {
         let url = `/api/edgar/filings`;
         if (searchTerm) {
-          url += `?search_term=${searchTerm}&limit=20`;
+          url += `?search_term=${searchTerm}&limit=30`;
         }
 
         console.log(`fetching data from ${url}`);
@@ -289,8 +289,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                         }
                                       >
                                         <span className="flex-grow">
-                                          {item.category} - {item.subcategory}{" "}
-                                          {item.embedding_distance}
+                                          {item.category} - {item.subcategory}
                                         </span>
                                         <span className="ml-2">
                                           <Icon

@@ -42,37 +42,26 @@ export async function GET(req: NextRequest) {
     }
 
     let baseQuery = `
-  WITH CompanyFilings AS (
-    SELECT
-        f.id AS filing_id,
-        f.form_file AS form_file,
-        f.reporting_for AS reporting_for,
-        f.filed_at AS filed_at,
-        f.filing_period AS filing_period,
-        f.filing_type AS filing_type,
-        f.url AS url,
-        f.created_at AS created_at,
-        c.id AS company_id,
-        c.name AS company_name,
-        c.ticker AS company_ticker
-    FROM filings f
-    JOIN companies c ON f.company_id = c.id
-    GROUP BY f.id, c.id
-    ORDER BY c.id ASC, f.id ASC
-    ${filingLimitClause}
-  )
-`;
+    WITH CompanyFilings AS (
+      SELECT
+          f.id AS filing_id,
+          f.form_file AS form_file,
+          f.reporting_for AS reporting_for,
+          f.filed_at AS filed_at,
+          f.filing_period AS filing_period,
+          f.filing_type AS filing_type,
+          f.url AS url,
+          f.created_at AS created_at,
+          c.id AS company_id,
+          c.name AS company_name,
+          c.ticker AS company_ticker
+      FROM filings f
+      JOIN companies c ON f.company_id = c.id
+      ORDER BY c.id ASC, f.id ASC
+      ${filingLimitClause}
+    )
+  `;
 
-    // ,
-    //       ${
-    //         embedding
-    //           ? `e.embedding <-> '${JSON.stringify(
-    //               embedding
-    //             )}'::jsonb AS embedding_distance`
-    //           : `NULL AS embedding_distance`
-    //       }
-    // ,
-    //   e.embedding <-> '${JSON.stringify(embedding)}' AS embedding_distance
     if (get_excerpts) {
       let selectClause = `
       e.id,
@@ -82,61 +71,92 @@ export async function GET(req: NextRequest) {
       e.insight,
       e.excerpt,
       e.tokens,
-      cf.*`;
+      cf.*
+      ${embedding ? `,e.embedding_distance` : ``}
+  `;
 
       let joinClause = `
-  FROM (
-      SELECT * FROM excerpts
-      ${
-        embedding
-          ? `ORDER BY embedding <-> '${JSON.stringify(embedding)}'`
-          : "ORDER BY id ASC"
-      }
-      ${excerptLimitClause}
-  ) AS e
-`;
+      FROM excerpts e `;
 
       if (get_tags) {
-        selectClause += `,
-      e.tags
-    `;
+        baseQuery += `,
+        TagsAggregated AS (
+          SELECT
+              excerpt_id,
+              ARRAY_AGG(tag) AS tags
+          FROM tags
+          GROUP BY excerpt_id
+        )
+        `;
+
+        selectClause += `,e.tags`;
 
         joinClause += `
-      LEFT JOIN tags AS t ON e.id = t.excerpt_id
-      GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens, e.filing_id
-    `;
+      LEFT JOIN TagsAggregated ta ON e.id = ta.excerpt_id
+`;
       }
 
+      joinClause += `${
+        embedding ? `ORDER BY embedding_distance ASC` : `ORDER BY e.id ASC`
+      }
+      ${excerptLimitClause}
+      `;
+
       baseQuery += `
-    , ExcerptsWithTags AS (
+      , ExcerptsWithTags AS (
+        SELECT
+            e.id AS id,
+            e.filing_id AS filing_id,
+            e.title AS title,
+            e.category AS category,
+            e.subcategory AS subcategory,
+            e.insight AS insight,
+            e.excerpt AS excerpt,
+            e.tokens AS tokens
+            ${
+              embedding
+                ? `,e.embedding <=> '${JSON.stringify(
+                    embedding
+                  )}' AS base_embedding_distance`
+                : ``
+            }
+            ${
+              embedding
+                ? `,e.category_embedding <=> '${JSON.stringify(
+                    embedding
+                  )}' AS category_embedding_distance`
+                : ``
+            }
+            ${
+              embedding
+                ? `,(
+                    (
+                      e.embedding <=> '${JSON.stringify(embedding)}'
+                    ) + (
+                      e.category_embedding <=> '${JSON.stringify(embedding)}'
+                    )
+                  ) / 2 AS embedding_distance`
+                : ``
+            }
+            ${get_tags ? ",ta.tags AS tags" : ""}
+        ${joinClause}
+      )
       SELECT
-          e.id AS id,
-          e.filing_id AS filing_id,
-          e.title AS title,
-          e.category AS category,
-          e.subcategory AS subcategory,
-          e.insight AS insight,
-          e.excerpt AS excerpt,
-          e.tokens AS tokens
-          ${get_tags ? ", ARRAY_AGG(t.tag) AS tags" : ""}
-      ${joinClause}
-    )
-    SELECT
-      ${selectClause}
-    FROM ExcerptsWithTags e
-    JOIN CompanyFilings cf ON e.filing_id = cf.filing_id
-    ORDER BY e.id ASC;
-  `;
+        ${selectClause}
+      FROM ExcerptsWithTags e
+      JOIN CompanyFilings cf ON e.filing_id = cf.filing_id
+      ${embedding ? `ORDER BY e.embedding_distance ASC` : `ORDER BY e.id ASC`}
+    `;
     } else {
       baseQuery += `
-    SELECT
-      cf.*
-    FROM CompanyFilings cf
-    ORDER BY cf.filing_id ASC;
-  `;
+      SELECT
+        cf.*
+      FROM CompanyFilings cf
+      ORDER BY cf.filing_id ASC;
+    `;
     }
 
-    console.log(`baseQuery: ${baseQuery}`);
+    // console.log(`baseQuery: ${baseQuery}`);
 
     let db = getDbInstance();
     const result: QueryResult[] = await db.any(baseQuery, numericLimit);
