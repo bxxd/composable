@@ -273,7 +273,7 @@ const TipTap = forwardRef((props, ref) => {
       messages: data,
     });
 
-    toast.message("Sending to AI..." + payload);
+    toast.message("Sending to AI...");
     console.log("payload ", payload);
 
     complete(payload);
