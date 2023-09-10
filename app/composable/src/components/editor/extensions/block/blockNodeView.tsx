@@ -12,6 +12,7 @@ import saveIcon from "@iconify/icons-mdi/content-save";
 import { useGlobalContext } from "@/lib/context";
 import { isTextNodeEmpty } from "@/lib/editor";
 import { Node as ProseMirrorNode } from "prosemirror-model";
+import { getTextFromDBlock } from "@/lib/editor";
 
 import {
   createNodeJSON,
@@ -63,8 +64,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
     let content = node.attrs.children;
 
-    // console.log("handleOpenEditor", node);
-
     if (content === null || content === undefined) {
       content = node.toJSON();
       content = _.cloneDeep(content);
@@ -90,8 +89,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
     const pos = getPos();
     editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
   };
-
-  // console.log("Current node.attrs.id:", node.attrs.id);
 
   return (
     <NodeViewWrapper
@@ -126,9 +123,16 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         >
           <Icon icon={dragIndicatorIcon} />
         </div>
-        {/* {node.attrs.id} */}
       </section>
-      <div className="flex-col flex-grow">
+
+      <div className="flex flex-col flex-grow">
+        {node.attrs.children && node.attrs.children.length > 0 && (
+          <div className="flex mt-2" style={{ marginBottom: "-7px" }}>
+            <span className="italic opacity-25 pr-1 max-h-6 line-clamp-1">
+              {getTextFromDBlock(node.attrs.children[0])}
+            </span>
+          </div>
+        )}
         <div
           className={`flex items-center ${isExpanded ? "border-b" : ""} ${
             isDataBlock ? "cursor-pointer" : ""
@@ -180,8 +184,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
               </span>
               {expandedExcerpt === data.excerpt
                 ? data.excerpt
-                : data.excerpt.substring(0, 25) + "..."}{" "}
-              {/* Adjust the length as needed */}
+                : data.excerpt.substring(0, 25) + "...s"}{" "}
             </div>
             <div>
               <strong>Tags:</strong> {data.tags.join(", ")}

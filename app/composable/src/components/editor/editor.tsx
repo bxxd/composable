@@ -102,7 +102,7 @@ let mockdata = [
               content: [
                 {
                   type: "text",
-                  text: `What do you want to do?.`,
+                  text: `What do you want to do?`,
                 },
               ],
             },
@@ -218,8 +218,6 @@ function useLatestValue<T>(value: T) {
 }
 
 const TipTap = forwardRef((props, ref) => {
-  // const [content, setContent] = useLocalStorage("content", mockdata);
-
   const [saveStatus, setSaveStatus] = useState("Saved");
 
   const [hydrated, setHydrated] = useState(false);
@@ -363,9 +361,7 @@ const TipTap = forwardRef((props, ref) => {
       e.preventDefault();
       e.stopPropagation();
       stop();
-      // if (window.confirm("AI writing paused. Continue?")) {
-      //   complete(editor?.getText() || "");
-      // }
+
       window.alert("AI writing canceled.");
     };
 
@@ -387,17 +383,19 @@ const TipTap = forwardRef((props, ref) => {
 
   useEffect(() => {
     if (!editor) {
-      // console.log("no editor");
       return;
     }
 
-    const diff = completion.slice(prev.current.length);
+    let diff = completion.slice(prev.current.length);
     if (!diff) {
-      // console.log("no diff");
       return;
     }
 
     prev.current = completion;
+
+    diff = diff.replace(/\n/g, "<br>");
+
+    console.log("diff", diff);
 
     if (newNodePosition.current === null) {
       const newNodeJSON = createNodeJSON(diff, "assistant", editorRef.current);
@@ -407,14 +405,8 @@ const TipTap = forwardRef((props, ref) => {
 
       // If the last node is empty, adjust the position
       if (lastNode && isTextNodeEmpty(lastNode)) {
-        // console.log("last node is empty");
         position -= lastNode.nodeSize;
       } else {
-        // console.log(
-        //   "last node is not empty lastNode",
-        //   lastNode,
-        //   lastNode?.nodeSize
-        // );
       }
 
       setTimeout(() => {
@@ -430,7 +422,6 @@ const TipTap = forwardRef((props, ref) => {
 
   const appendContentNodeToEnd = (content: JSONContent) => {
     if (!editor) {
-      // console.log("no editor");
       return;
     }
 

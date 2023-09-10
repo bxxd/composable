@@ -3,8 +3,24 @@ import { DataItem, RoleType } from "./types";
 import { JSONContent } from "@tiptap/react";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { debounce } from "lodash";
-import useLocalStorage from "@/lib/hooks/use-local-storage";
+// import useLocalStorage from "@/lib/hooks/use-local-storage";
 import _ from "lodash";
+
+export function getTextFromDBlock(dBlock: JSONContent): string | null {
+  // Check if the content array and the nested content array are non-empty
+  if (dBlock.content && dBlock.content[0].content) {
+    // Find the first 'text' object and return its 'text' property
+    const textObj = dBlock.content[0].content.find(
+      (item) => item.type === "text"
+    );
+    if (textObj && textObj.text) {
+      return textObj.text;
+    }
+  }
+
+  // Return null if the 'text' property could not be found
+  return null;
+}
 
 export const getPrevText = (
   editor: Editor,
@@ -425,18 +441,18 @@ export function popSubContent(editor: Editor | null, accepted: boolean) {
 
   if (accepted && currentContent) {
     const [lastNode, dBlockWithTextCount] = findLastNodeInData(currentContent);
-    console.log("lastNode", lastNode);
 
     if (!lastNode) {
       console.warn("No last node");
     } else {
       const parentId = truncateId((lastNode as any).attrs.id);
       const parentNodeIndex = findNodeIndexById(higherContent, parentId); // Find the parent node
-      const parentNode = higherContent[parentNodeIndex];
+      // const parentNode = higherContent[parentNodeIndex];
       if (parentNodeIndex === -1) {
         console.log("No parent node for id", lastNode);
       } else {
         const newNode = _.cloneDeep(lastNode);
+
         if (newNode.attrs) {
           newNode.attrs.id = parentId;
           if (dBlockWithTextCount > 1) {
@@ -444,7 +460,6 @@ export function popSubContent(editor: Editor | null, accepted: boolean) {
           } else {
             newNode.attrs.children = null;
           }
-          newNode.attrs.role = parentNode.attrs?.role;
         }
 
         higherContent[parentNodeIndex] = newNode; // Replace the parent node with the new node

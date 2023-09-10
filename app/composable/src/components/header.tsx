@@ -4,6 +4,7 @@ import darkMode from "@iconify/icons-ic/baseline-dark-mode";
 import lightMode from "@iconify/icons-ic/baseline-light-mode";
 import { aiModels } from "@/lib/models";
 import { useGlobalContext } from "@/lib/context";
+import { useState } from "react";
 
 import Image from "next/image";
 
@@ -11,6 +12,7 @@ type HeaderProps = {};
 
 export default function Header({}: HeaderProps) {
   const { theme, setTheme } = useTheme();
+  const [hydrated, setHydrated] = useState(false);
 
   const { aiModel: selectedModel, setAiModel: setSelectedModel } =
     useGlobalContext();

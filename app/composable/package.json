@@ -17,6 +17,7 @@
     "@mui/material": "^5.14.5",
     "@nanostores/react": "ai/react",
     "@radix-ui/react-popover": "^1.0.6",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/typography": "^0.5.9",
     "@tiptap/core": "^2.1.2",
     "@tiptap/extension-dropcursor": "^2.1.2",

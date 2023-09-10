@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { JSONContent } from "@tiptap/react";
-import { saveToLocalStorage } from "./utils"; // Make sure utils is correctly imported
+import { saveToLocalStorage, readFromLocalStorage } from "./utils"; // Make sure utils is correctly imported
 import { defaultAiModel } from "./models";
 
 type GlobalContextType = {
@@ -29,7 +29,9 @@ interface GlobalProviderProps {
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
-  const [aiModel, setAiModel] = useState(defaultAiModel);
+  const [aiModel, setAiModel] = useState(
+    readFromLocalStorage("aiModel", defaultAiModel)
+  );
   const [savedList, _setSavedList] = useState<JSONContent[]>([]);
 
   const setSavedList: React.Dispatch<React.SetStateAction<JSONContent[]>> = (
@@ -40,6 +42,19 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     _setSavedList(newList);
     saveToLocalStorage("savedList", newList);
   };
+
+  // useEffect(() => {
+  //   // Fetch the aiModel from local storage on component mount
+  //   const savedModel = readFromLocalStorage("aiModel");
+
+  //   // If there is a saved value in local storage, use it to set the state, else use the default value
+  //   setAiModel(savedModel ?? defaultAiModel);
+  // }, []); // Empty dependency array ensures this runs once on component mount
+
+  useEffect(() => {
+    console.log("saving aiModel to local storage");
+    saveToLocalStorage("aiModel", aiModel);
+  }, [aiModel]);
 
   return (
     <GlobalContext.Provider
