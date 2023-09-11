@@ -24,7 +24,7 @@ export default function Workspace({}: WorkspaceProps) {
     console.log("handleAddSaved", content);
     console.log("tiptapRef", tiptapRef.current);
     if (tiptapRef.current?.appendContentNodeToEnd) {
-      console.log("here");
+      // console.log("here");
       tiptapRef.current.appendContentNodeToEnd(content);
     } else {
       console.log("not here");

@@ -25,7 +25,10 @@ export default function Home() {
             dark: "dark-theme",
           }}
         >
-          <Header childrenComponents={[<AiModelSelector />]} />
+          <Header
+            childrenComponents={[<AiModelSelector key="model-selector" />]}
+          />
+
           <main className="App  flex flex-col gap-4">
             <Workspace />
           </main>
