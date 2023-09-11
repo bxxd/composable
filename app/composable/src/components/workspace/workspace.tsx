@@ -2,7 +2,7 @@ import TipTap from "@/components/editor";
 import { useRef } from "react";
 import { DataItem } from "@/lib/types";
 import SearchColumn from "./searchColumn";
-import SavedItems from "@/components/savedItems";
+import SavedItems from "./savedItems";
 import { JSONContent } from "@tiptap/react";
 
 type WorkspaceProps = {};

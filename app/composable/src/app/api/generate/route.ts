@@ -28,11 +28,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json("Unable to parse the payload.", { status: 500 });
   }
 
-  console.log(
-    process.env.NODE_ENV,
-    process.env.KV_REST_API_URL,
-    process.env.KV_REST_API_TOKEN
-  );
   if (
     (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN,
     process.env.NODE_ENV != "development")
