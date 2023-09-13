@@ -12,7 +12,7 @@ import saveIcon from "@iconify/icons-mdi/content-save";
 import { useGlobalContext } from "@/lib/context";
 import { isTextNodeEmpty } from "@/lib/editor";
 import { Node as ProseMirrorNode } from "prosemirror-model";
-import { getTextFromDBlock } from "@/lib/editor";
+import { getTextFromDBlock, generateBlockId } from "@/lib/editor";
 
 import {
   createNodeJSON,
@@ -46,7 +46,14 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   };
 
   useEffect(() => {
-    console.log("BlockNodeView mounted or updated.", node.attrs.id);
+    console.log("BlockNodeView mounted or updated.", node.toJSON());
+    if (!node.attrs.id) {
+      const newAttrs = { ...node.attrs, id: generateBlockId(editor) };
+
+      editor.view.dispatch(
+        editor.view.state.tr.setNodeMarkup(getPos(), undefined, newAttrs)
+      );
+    }
   }, [node]);
 
   const { role, data } = node.attrs;
@@ -126,6 +133,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
       </section>
 
       <div className="flex flex-col flex-grow">
+        {/* id:`{node.attrs.id}` */}
         {node.attrs.children && node.attrs.children.length > 0 && (
           <div className="flex mt-2" style={{ marginBottom: "-7px" }}>
             <span className="italic opacity-25 pr-1 max-h-6 line-clamp-1">
@@ -150,7 +158,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             </span>
           )}
         </div>
-
         {isDataBlock && isExpanded && (
           <div className="ml-0 mt-1 ">
             <div>

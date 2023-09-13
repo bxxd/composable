@@ -144,7 +144,8 @@ export function generateNextBlockIdFromContent(
   content: Array<any>,
   level: number
 ): string {
-  let maxBlockId = "0";
+  console.log("generateNextBlockIdFromContent", content, level);
+  let maxBlockId: any = null;
   for (const node of content) {
     if (node.type === "dBlock" && node.attrs.id) {
       if (level === 0 || getBlockIdLevel(node.attrs.id) === level) {
@@ -179,11 +180,15 @@ export function rewriteBlockIdsWithParentId(
   return newContent;
 }
 
-export function generateBlockId(editor: Editor | null): string {
-  if (editor === null) return "0";
-
+export function generateBlockId(editor: Editor | null): string | null {
   const store = BlockStore.getInst();
   const blockState = store.get();
+
+  console.log("blockState", blockState);
+
+  if (editor === null) {
+    return null;
+  }
 
   let data = editor.getJSON();
   let maxBlockId = generateNextBlockIdFromContent(
@@ -218,10 +223,19 @@ export function generateBlockId(editor: Editor | null): string {
 // Compare two block IDs
 // Returns -1 if id1 < id2, 1 if id1 > id2, 0 if equal
 export function compareBlockIds(id1: string, id2: string): number {
+  console.log(`compareBlockIds: id1:${id1} id2:${id2}`);
+
+  if (!id2) {
+    return 1; // id2 is null, so id1 is greater
+  }
+
+  if (!id1) {
+    return -1; // id1 is null, so id2 is greater
+  }
   const segments1 = id1.split(".");
   const segments2 = id2.split(".");
 
-  console.log("compareBlockIds", segments1, segments2);
+  // console.log("compareBlockIds", segments1, segments2);
 
   // Check number of levels first.
   if (segments1.length > segments2.length) return 1;
@@ -242,6 +256,9 @@ export function compareBlockIds(id1: string, id2: string): number {
 
 // Increment the last segment of a block ID
 function incrementBlockId(blockId: string): string {
+  if (!blockId) {
+    return "0.0";
+  }
   const segments = blockId.split(".");
   const lastSegment = segments.pop() || "0";
   const incrementedLastSegment = (parseInt(lastSegment, 10) + 1).toString();

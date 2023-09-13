@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   let system_prompt = {
     role: "system",
-    content: "logos, analytical rigor, calculations.",
+    content: "step by step using logos.",
   };
 
   if (messages.length > 0 && messages[0].role != "system") {
