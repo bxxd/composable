@@ -470,7 +470,7 @@ const TipTap = forwardRef((props, ref) => {
             <button
               type="button"
               className="w-6 h-6 bg-red-400 hover:bg-red-500 active:bg-red-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-800 dark:active:bg-red-900 dark:text-white"
-              onClick={handleSubLevelCloseClick}
+              onMouseDown={handleSubLevelCloseClick}
               title="Close sub context and discard changes."
             >
               {/* <Icon icon="ant-design:close-circle-outlined" color="white" /> */}
@@ -493,7 +493,9 @@ const TipTap = forwardRef((props, ref) => {
           <button
             type="button"
             className="w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-            onClick={() => handleAIButtonClick({ editor: editorRef.current })}
+            onMouseDown={() =>
+              handleAIButtonClick({ editor: editorRef.current })
+            }
             title="Send context to AI"
           >
             <Icon icon="ant-design:down" />

@@ -2,6 +2,7 @@ import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { createNodeJSON } from "@/lib/editor";
 import { Node } from "prosemirror-model";
+import { getTextFromDBlock, isTextNodeEmpty } from "@/lib/editor";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -66,7 +67,10 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
           },
           apply: (tr, value) => {
             console.log("trailingNode apply");
+
             if (tr.doc.lastChild?.attrs.role != "user") return true;
+
+            // if (!isTextNodeEmpty(tr.doc.lastChild)) return true;
 
             if (!tr.docChanged) return value;
 

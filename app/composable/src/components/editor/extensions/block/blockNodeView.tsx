@@ -145,7 +145,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           className={`flex items-center ${isExpanded ? "border-b" : ""} ${
             isDataBlock ? "cursor-pointer" : ""
           }`}
-          onClick={isDataBlock ? toggleExpanded : undefined}
+          onMouseDown={isDataBlock ? toggleExpanded : undefined}
         >
           <NodeViewContent className={`node-view-content w-full`} />
           {isDataBlock && (
@@ -204,7 +204,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           type="button"
           className="d-block-button group-hover:opacity-100 m-1 mr-0"
           title="Edit sub context with just this node."
-          onClick={() => handleOpenEditor(node)}
+          onMouseDown={() => handleOpenEditor(node)}
         >
           <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} />
         </button>

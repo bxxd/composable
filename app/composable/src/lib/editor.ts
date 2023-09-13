@@ -62,7 +62,7 @@ export class BlockStore {
   }, 500);
 
   private constructor() {
-    this.data = { lastId: null, level: 0, ctxStack: {} };
+    this.data = { lastId: null, level: 1, ctxStack: {} };
   }
 
   public static getInst(): BlockStore {
@@ -81,13 +81,31 @@ export class BlockStore {
     this.debouncedSave();
   }
 
-  public serialize(): string {
-    return JSON.stringify(this.data);
+  public serialize() {
+    const blockStore = this.data;
+
+    const filteredCtxStack = Object.fromEntries(
+      Object.entries(blockStore.ctxStack).filter(
+        ([key]) => Number(key) <= blockStore.level
+      )
+    );
+
+    console.log("serializing", JSON.stringify(blockStore));
+    console.log("level", blockStore.level); // Check the level value
+    console.log("keys", Object.keys(blockStore.ctxStack)); // Check the keys in ctxStack
+    console.log("filtered", JSON.stringify(filteredCtxStack)); // Check the filtered ctxStack
+
+    const serializedBlockStore = {
+      ...blockStore,
+      ctxStack: filteredCtxStack,
+    };
+
+    return JSON.stringify(serializedBlockStore);
   }
 
   public loadFromLocalStorage(): boolean {
     const storedDataString = localStorage.getItem("blockStore");
-    // console.log("loading from local storage", storedDataString);
+    console.log("loading from local storage", storedDataString);
     if (storedDataString) {
       this.deserialize(storedDataString);
       return true;
@@ -336,6 +354,12 @@ export function pushSubContent(editor: Editor, content: JSONContent[]) {
 
   store.set({ lastId: maxId, level: getBlockIdLevel(maxId) });
 
+  if (!isTextContentEmpty(content[content.length - 1])) {
+    console.log("creating new node..........");
+    const newNodeData = createNodeJSON("", "user", editor); // Update text and role as needed
+    content.push(newNodeData);
+  }
+
   editor
     ?.chain()
     .clearContent()
@@ -499,3 +523,12 @@ export const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
   // Check if the text content is empty or consists of only whitespace
   return !node.textContent || !node.textContent.trim();
 };
+
+function isTextContentEmpty(jsonObject: JSONContent): boolean {
+  if (!jsonObject) {
+    console.log("isTextContentEmpty: jsonObject is null");
+    return true;
+  }
+  const innerContent = jsonObject.content?.[0]?.content;
+  return !innerContent || innerContent.length === 0;
+}
