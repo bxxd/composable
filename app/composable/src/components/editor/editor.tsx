@@ -2,7 +2,6 @@
 
 import "./styles.scss";
 
-import { DBlock, HandleAIButtonClickParams } from "./extensions/block";
 import {
   useEffect,
   useRef,
@@ -12,17 +11,13 @@ import {
 } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
-import Text from "@tiptap/extension-text";
-import { Paragraph } from "@tiptap/extension-paragraph";
-import HardBreak from "@tiptap/extension-hard-break";
-import Heading from "@tiptap/extension-heading";
-import { Document } from "./doc";
-import DropCursor from "@tiptap/extension-dropcursor";
-import { TrailingNode } from "./extensions/trailingNode";
+import { EditorBubbleMenu } from "./bubble-menu";
+
 import { EditorView } from "prosemirror-view";
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
-
+import { defaultExtensions } from "./extensions";
+import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
 import _ from "lodash";
@@ -39,8 +34,6 @@ import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Le
 import { JSONContent } from "@tiptap/react";
 
 import { Icon } from "@iconify/react";
-
-import Placeholder from "@tiptap/extension-placeholder";
 
 import { useCompletion } from "ai/react";
 
@@ -214,29 +207,7 @@ const TipTap = forwardRef((props, ref) => {
   };
 
   const editor = useEditor({
-    extensions: [
-      DBlock.configure({ handleAIButtonClick: handleAIButtonClick }),
-      Document,
-      Text,
-      Paragraph,
-      HardBreak,
-      DropCursor.configure({
-        width: 2,
-        class: "notitap-dropcursor",
-        color: "skyblue",
-      }),
-
-      Heading.configure({
-        levels: [1, 2, 3],
-      }),
-
-      TrailingNode,
-
-      Placeholder.configure({
-        placeholder: "What can I do for you?",
-        includeChildren: true,
-      }),
-    ],
+    extensions: defaultExtensions(handleAIButtonClick),
     content: {
       type: "doc",
       content: mockdata,
@@ -487,6 +458,7 @@ const TipTap = forwardRef((props, ref) => {
           </>
         )}
       </div>
+      {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent className="" editor={editor} />
       <div className="relative group inline-block">
         <div className="flex ml-auto">

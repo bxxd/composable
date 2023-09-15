@@ -90,10 +90,10 @@ export class BlockStore {
       )
     );
 
-    console.log("serializing", JSON.stringify(blockStore));
-    console.log("level", blockStore.level); // Check the level value
-    console.log("keys", Object.keys(blockStore.ctxStack)); // Check the keys in ctxStack
-    console.log("filtered", JSON.stringify(filteredCtxStack)); // Check the filtered ctxStack
+    // console.log("serializing", JSON.stringify(blockStore));
+    // console.log("level", blockStore.level); // Check the level value
+    // console.log("keys", Object.keys(blockStore.ctxStack)); // Check the keys in ctxStack
+    // console.log("filtered", JSON.stringify(filteredCtxStack)); // Check the filtered ctxStack
 
     const serializedBlockStore = {
       ...blockStore,
