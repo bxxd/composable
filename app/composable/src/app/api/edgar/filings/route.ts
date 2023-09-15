@@ -3,6 +3,8 @@ import { getDbInstance } from "@/lib/db";
 import { Filing, Company, Excerpt } from "@/lib/types";
 import { getEmbedding } from "@/app/api/lib/embedding";
 
+export const dynamic = "force-dynamic";
+
 interface QueryResult extends Filing, Company, Excerpt {}
 
 export async function GET(req: NextRequest) {
@@ -155,8 +157,6 @@ export async function GET(req: NextRequest) {
       ORDER BY cf.filing_id ASC;
     `;
     }
-
-    // console.log(`baseQuery: ${baseQuery}`);
 
     let db = getDbInstance();
     const result: QueryResult[] = await db.any(baseQuery, numericLimit);

@@ -5,6 +5,8 @@ import { Filing, Excerpt, Company } from "@/lib/types";
 
 interface QueryResult extends Excerpt {}
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -12,7 +14,7 @@ export async function GET(req: Request) {
     console.log("get excerpts..", url);
 
     const filing_id = url.searchParams.get("filing_id");
-    const search_term = url.searchParams.get("search_term");
+    // const search_term = url.searchParams.get("search_term");
 
     const query = `SELECT
     e.id AS id,
