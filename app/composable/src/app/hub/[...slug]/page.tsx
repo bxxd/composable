@@ -14,7 +14,7 @@ const ToasterProvider = () => {
 
 export default function Page({ params }: { params: { slug: string } }) {
   console.log(`params: ${params}`);
-  let slug = params.slug;
+  // let slug = params.slug;
 
   return (
     <>
@@ -27,7 +27,7 @@ export default function Page({ params }: { params: { slug: string } }) {
           }}
         >
           <Header />
-          <main className="App  flex flex-col gap-4">{slug}</main>
+          <main className="App  flex flex-col gap-4">dynamic</main>
           <ToasterProvider />
         </ThemeProvider>
       </GlobalProvider>

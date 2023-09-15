@@ -1,6 +1,6 @@
 import StarterKit from "@tiptap/starter-kit";
 // import HorizontalRule from "@tiptap/extension-horizontal-rule";
-// import TiptapLink from "@tiptap/extension-link";
+import TiptapLink from "@tiptap/extension-link";
 // import TiptapImage from "@tiptap/extension-image";
 // import TaskItem from "@tiptap/extension-task-item";
 // import TaskList from "@tiptap/extension-task-list";
@@ -90,6 +90,8 @@ export function defaultExtensions(
     Highlight.configure({
       multicolor: true,
     }),
+
+    TiptapLink,
     // Markdown.configure({
     //   html: false,
     //   transformCopiedText: true,

@@ -54,7 +54,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         editor.view.state.tr.setNodeMarkup(getPos(), undefined, newAttrs)
       );
     }
-  }, [node]);
+  }, [node, getPos, editor]);
 
   const { role, data } = node.attrs;
   const isDataBlock = role === "data";
