@@ -1,11 +1,9 @@
 "use client";
 
-import Workspace from "@/components/workspace";
 import Header from "@/components/header/Header";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { GlobalProvider } from "@/lib/context";
-import { AiModelSelector } from "@/components/header/AiModelSelector";
 
 const ToasterProvider = () => {
   const { theme } = useTheme() as {
@@ -14,7 +12,10 @@ const ToasterProvider = () => {
   return <Toaster theme={theme} />;
 };
 
-export default function Page() {
+export default function Page({ params }: { params: { slug: string } }) {
+  console.log(`params: ${params}`);
+  let slug = params.slug;
+
   return (
     <>
       <GlobalProvider>
@@ -25,13 +26,8 @@ export default function Page() {
             dark: "dark-theme",
           }}
         >
-          <Header
-            childrenComponents={[<AiModelSelector key="model-selector" />]}
-          />
-
-          <main className="App  flex flex-col gap-4">
-            <Workspace />
-          </main>
+          <Header />
+          <main className="App  flex flex-col gap-4">{slug}</main>
           <ToasterProvider />
         </ThemeProvider>
       </GlobalProvider>

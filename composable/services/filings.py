@@ -15,10 +15,13 @@ import logging
 log = logging.getLogger(__name__)
 
 
-async def save_company(args):
+async def save_company_from_yaml(args):
     log.info(f"save_company: {args}")
     with open(args.company, "r") as file:
         data = yaml.safe_load(file)
+
+
+async def save_company(data: dict):
     data = utils.remove_newlines_from_dict(data)
 
     cik = data.get("cik")
@@ -36,7 +39,7 @@ async def save_company(args):
         log.debug(f"company: {company}")
 
 
-async def save_filing(args):
+async def save_filing_from_yaml(args):
     log.info(f"save_filing: {args}")
 
     with open(args.filing, "r") as file:
@@ -206,10 +209,10 @@ async def main(args):
         return
 
     if args.company:
-        await save_company(args)
+        await save_company_from_yaml(args)
 
     if args.filing:
-        await save_filing(args)
+        await save_filing_from_yaml(args)
 
 
 def parse_args():

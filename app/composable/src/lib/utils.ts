@@ -1,3 +1,6 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export const saveToLocalStorage = (key: string, value: any) => {
   if (typeof window === "undefined") {
     return;
@@ -19,3 +22,7 @@ export const readFromLocalStorage = (key: string, defaultValue: any) => {
     return defaultValue;
   }
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

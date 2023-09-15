@@ -13,7 +13,7 @@ const ToasterProvider = () => {
   return <Toaster theme={theme} />;
 };
 
-export default function Home() {
+export default function Page() {
   return (
     <>
       <GlobalProvider>

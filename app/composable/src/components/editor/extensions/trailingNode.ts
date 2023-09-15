@@ -2,6 +2,7 @@ import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { createNodeJSON } from "@/lib/editor";
 import { Node } from "prosemirror-model";
+import { getTextFromDBlock, isTextNodeEmpty } from "@/lib/editor";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -42,7 +43,6 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
       new Plugin({
         key: plugin,
         appendTransaction: (_, __, state) => {
-          // console.log("here..");
           const { doc, tr, schema } = state;
 
           const shouldInsertNodeAtEnd = plugin.getState(state);
@@ -51,8 +51,12 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
 
           if (!shouldInsertNodeAtEnd) return;
 
+          console.log("inserting new node at end");
+
           const newNodeData = createNodeJSON("", "user", this.editor); // Update text and role as needed
           const newNode = Node.fromJSON(schema, newNodeData);
+
+          console.log("newNode", newNode.toJSON());
 
           // eslint-disable-next-line consistent-return
           return tr.insert(endPosition, newNode);
@@ -62,7 +66,11 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
             return false;
           },
           apply: (tr, value) => {
+            console.log("trailingNode apply");
+
             if (tr.doc.lastChild?.attrs.role != "user") return true;
+
+            // if (!isTextNodeEmpty(tr.doc.lastChild)) return true;
 
             if (!tr.docChanged) return value;
 

@@ -75,6 +75,7 @@ export const DBlock = Node.create<BlockOptions>({
       setDBlock:
         (position) =>
         ({ state, chain }) => {
+          console.log("setDBlock");
           const {
             selection: { from },
           } = state;
