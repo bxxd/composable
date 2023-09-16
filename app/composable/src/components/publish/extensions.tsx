@@ -18,7 +18,7 @@ import HardBreak from "@tiptap/extension-hard-break";
 
 import DropCursor from "@tiptap/extension-dropcursor";
 
-export const extensions = [
+export const publishedExtensions = [
   StarterKit,
   Text,
   Paragraph,

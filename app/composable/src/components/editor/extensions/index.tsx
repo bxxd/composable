@@ -60,22 +60,23 @@ export function defaultExtensions(
       },
       horizontalRule: false,
       dropcursor: {
-        color: "#DBEAFE",
-        width: 4,
+        width: 2,
+        class: "notitap-dropcursor",
+        color: "skyblue",
       },
       gapcursor: false,
     }),
 
     DBlock.configure({ handleAIButtonClick: handleAIButtonClick }),
     Document,
-    Text,
-    Paragraph,
-    HardBreak,
-    DropCursor.configure({
-      width: 2,
-      class: "notitap-dropcursor",
-      color: "skyblue",
-    }),
+    // Text,
+    // Paragraph,
+    // HardBreak,
+    // DropCursor.configure({
+    //   width: 2,
+    //   class: "notitap-dropcursor",
+    //   color: "skyblue",
+    // }),
 
     TrailingNode,
 
