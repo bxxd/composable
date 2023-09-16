@@ -22,7 +22,6 @@ import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
 import _ from "lodash";
-import publishIcon from "@iconify/icons-ph/book-thin";
 
 import {
   createNodeJSON,
@@ -431,7 +430,7 @@ const TipTap = forwardRef((props, ref) => {
       <div className="header flex justify-end pb-1">
         <div className="flex mr-auto pt-1">
           <button type="button" onMouseDown={() => router.push("/publish")}>
-            <Icon icon={publishIcon} width={21} height={21} color="#aaa" />
+            <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
           </button>
           <div className="ml-1 text-stone-400  text-sm font-normal">
             Project

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDbInstance } from "@/lib/db";
 
-import { Filing, Excerpt, Company } from "@/lib/types";
+import { Excerpt } from "@/lib/types";
 
 interface QueryResult extends Excerpt {}
 

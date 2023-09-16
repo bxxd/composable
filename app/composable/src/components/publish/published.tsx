@@ -28,9 +28,7 @@ const Published: React.FC<PublishedProps> = ({}) => {
 
   const [hydrated, setHydrated] = useState(false);
 
-  // console.log("contentArray", contentArray);
-
-  // console.log("content", JSON.stringify(jsonData));
+  const [activeToggle, setActiveToggle] = useState("Assistant");
 
   const editor = useEditor({
     extensions: publishedExtensions,
@@ -43,23 +41,33 @@ const Published: React.FC<PublishedProps> = ({}) => {
 
       let jsonData: JSONContent = blockState.getCtxItemAtCurrentLevel();
 
-      let contentArray = jsonData.reduce(
+      console.log("jsonData", JSON.stringify(jsonData));
+
+      let filteredJsonData =
+        activeToggle.toLowerCase() !== "all"
+          ? jsonData.filter(
+              (item: any) =>
+                item.attrs?.role?.toLowerCase() === activeToggle.toLowerCase()
+            )
+          : jsonData;
+
+      let contentArray = filteredJsonData.reduce(
         (acc: JSONContent[], item: JSONContent) => {
           return item.content ? acc.concat(item.content) : acc;
         },
         []
       );
 
-      console.log("hydrating..");
+      console.log("contentArray", JSON.stringify(contentArray));
+
+      // console.log("hydrating..", contentArray);
       setTimeout(() => {
         editor.commands.setContent(contentArray);
       }, 0);
 
       setHydrated(true);
     }
-  }, [editor, hydrated, blockState]);
-
-  const [activeToggle, setActiveToggle] = useState("All");
+  }, [editor, blockState, activeToggle]);
 
   const router = useRouter();
 
@@ -72,10 +80,10 @@ const Published: React.FC<PublishedProps> = ({}) => {
             <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
               <button onClick={() => router.push("/")}>
                 <Icon
-                  icon="ph:book-open-thin"
+                  icon="iconamoon:edit-thin"
                   width={21}
                   height={21}
-                  color="#3c3c3c"
+                  color="#aaa"
                 />
               </button>
               <div className="flex space-x-2">
@@ -104,6 +112,14 @@ const Published: React.FC<PublishedProps> = ({}) => {
                   All
                 </button>
               </div>
+              <button onClick={() => router.push("/")}>
+                <Icon
+                  icon="ph:share-network-thin"
+                  width={21}
+                  height={21}
+                  color="#aaa"
+                />
+              </button>
             </div>
             <EditorContent
               editor={editor}
