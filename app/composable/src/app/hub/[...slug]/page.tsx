@@ -2,13 +2,6 @@
 
 import Layout from "@/components/Layout"; // Importing Layout component
 
-const ToasterProvider = () => {
-  const { theme } = useTheme() as {
-    theme: "light" | "dark" | "system";
-  };
-  return <Toaster theme={theme} />;
-};
-
 export default function Page({ params }: { params: { slug: string } }) {
   console.log(`params: ${params}`);
   let slug = params.slug;

@@ -12,8 +12,6 @@ import { Icon } from "@iconify/react";
 // import openBookIcon from "@iconify-icons/emojione-v1/open-book";
 import { useRouter } from "next/navigation";
 
-import "react-toggle/style.css";
-
 import {
   useEffect,
   useRef,
@@ -59,7 +57,7 @@ const Published: React.FC<PublishedProps> = ({}) => {
 
       setHydrated(true);
     }
-  }, [editor, hydrated]);
+  }, [editor, hydrated, blockState]);
 
   const [activeToggle, setActiveToggle] = useState("All");
 
