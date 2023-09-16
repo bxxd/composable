@@ -9,6 +9,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
+import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
 import { EditorBubbleMenu } from "./bubble-menu";
@@ -21,6 +22,7 @@ import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
 import _ from "lodash";
+import publishIcon from "@iconify/icons-ph/book-thin";
 
 import {
   createNodeJSON,
@@ -419,6 +421,8 @@ const TipTap = forwardRef((props, ref) => {
     popSubContent(editorRef.current, true);
   };
 
+  const router = useRouter();
+
   return (
     <section
       className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
@@ -426,7 +430,10 @@ const TipTap = forwardRef((props, ref) => {
     >
       <div className="header flex justify-end pb-1">
         <div className="flex mr-auto pt-1">
-          <div className="ml-2 text-stone-400  text-sm font-normal">
+          <button type="button" onMouseDown={() => router.push("/publish")}>
+            <Icon icon={publishIcon} width={21} height={21} color="#aaa" />
+          </button>
+          <div className="ml-1 text-stone-400  text-sm font-normal">
             Project
           </div>
           <div className="ml-2 text-stone-400  text-sm italic">

@@ -1,0 +1,251 @@
+.tiptap {
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 2em;
+    font-weight: bold;
+  }
+  h2 {
+    font-size: 1.75em;
+    font-weight: bold;
+  }
+  h3 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  h4 {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
+  h5 {
+    font-size: 1em;
+    font-weight: bold;
+  }
+  h6 {
+    font-size: 0.875em;
+    font-weight: bold;
+  }
+
+  p {
+    margin-bottom: 1.5em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.1;
+  }
+
+  code {
+    background-color: rgba(#616161, 0.1);
+    color: #616161;
+  }
+
+  pre {
+    background: #0d0d0d;
+    color: #fff;
+    font-family: "JetBrainsMono", monospace;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+
+    code {
+      color: inherit;
+      padding: 0;
+      background: none;
+      font-size: 0.8rem;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  hr {
+    margin: 1rem 0;
+  }
+
+  blockquote {
+    padding-left: 1rem;
+    border-left: 2px solid rgba(#0d0d0d, 0.1);
+  }
+}
+
+.toggleButton {
+  @apply text-xs py-0.5 px-1.5 rounded border  border-gray-100;
+}
+
+.dark .toggleButton {
+  @apply bg-gray-800 text-gray-200 border-gray-700;
+}
+
+.toggleButtonActive {
+  @apply bg-blue-500 text-white border-blue-500;
+}
+
+.dark .toggleButtonActive {
+  @apply bg-blue-400 text-gray-800 border-blue-400;
+}
+
+.ProseMirror.ProseMirror-focused {
+  outline: none !important;
+}
+
+.user-block {
+  border: 1px dashed #af4747;
+  border-top: none;
+  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+}
+
+.data-block {
+  border: 1px dashed #c92bd4;
+  border-top: none;
+  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+}
+
+.assistant-block {
+  border: 1px dashed #47af72;
+  border-top: none;
+  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+}
+
+.system-block {
+  border: 1px dashed #3e52ac;
+  border-top: none;
+  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+}
+
+.ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--novel-stone-400);
+  pointer-events: none;
+  height: 0;
+}
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--novel-stone-400);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Custom image styles */
+
+.ProseMirror img {
+  transition: filter 0.1s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(90%);
+  }
+
+  &.ProseMirror-selectednode {
+    outline: 3px solid #5abbf7;
+    filter: brightness(90%);
+  }
+}
+
+.img-placeholder {
+  position: relative;
+
+  &:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid var(--novel-stone-200);
+    border-top-color: var(--novel-stone-800);
+    animation: spinning 0.6s linear infinite;
+  }
+}
+
+@keyframes spinning {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom TODO list checkboxes – shoutout to this awesome tutorial: https://moderncss.dev/pure-css-custom-checkbox-style/ */
+
+ul[data-type="taskList"] li > label {
+  margin-right: 0.2rem;
+  user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+  ul[data-type="taskList"] li > label {
+    margin-right: 0.5rem;
+  }
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--novel-white);
+  margin: 0;
+  cursor: pointer;
+  width: 1.2em;
+  height: 1.2em;
+  position: relative;
+  top: 5px;
+  border: 2px solid var(--novel-stone-900);
+  margin-right: 0.3rem;
+  display: grid;
+  place-content: center;
+
+  &:hover {
+    background-color: var(--novel-stone-50);
+  }
+
+  &:active {
+    background-color: var(--novel-stone-200);
+  }
+
+  &::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  }
+
+  &:checked::before {
+    transform: scale(1);
+  }
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  color: var(--novel-stone-400);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* Overwrite tippy-box original max-width */
+
+.tippy-box {
+  max-width: 400px !important;
+}
+
+.tableWrapper {
+  padding: 1rem 0;
+  overflow-x: auto;
+}
+
+.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
