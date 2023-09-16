@@ -1,36 +1,20 @@
 "use client";
 
-import Header from "@/components/header/Header";
-import { ThemeProvider, useTheme } from "next-themes";
-import { Toaster } from "sonner";
-import { GlobalProvider } from "@/lib/context";
+import Layout from "@/components/Layout"; // Importing Layout component
 
-const ToasterProvider = () => {
-  const { theme } = useTheme() as {
-    theme: "light" | "dark" | "system";
+interface PageProps {
+  params: {
+    slug: string;
   };
-  return <Toaster theme={theme} />;
-};
+}
 
-export default function Page({ params }: { params: { slug: string } }) {
+export default function Page({ params }: PageProps) {
   console.log(`params: ${params}`);
   let slug = params.slug;
 
   return (
-    <>
-      <GlobalProvider>
-        <ThemeProvider
-          attribute="class"
-          value={{
-            light: "light-theme",
-            dark: "dark-theme",
-          }}
-        >
-          <Header />
-          <main className="App  flex flex-col gap-4">{slug}</main>
-          <ToasterProvider />
-        </ThemeProvider>
-      </GlobalProvider>
-    </>
+    <Layout>
+      <div className="App flex flex-col gap-4">{slug}</div>
+    </Layout>
   );
 }
