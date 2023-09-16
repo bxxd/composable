@@ -105,7 +105,7 @@ export class BlockStore {
 
   public loadFromLocalStorage(): boolean {
     const storedDataString = localStorage.getItem("blockStore");
-    console.log("loading from local storage", storedDataString);
+    console.log("loading BlockStore from local storage..");
     if (storedDataString) {
       this.deserialize(storedDataString);
       return true;
@@ -174,6 +174,7 @@ export function generateNextBlockIdFromContent(
       }
     }
   }
+  console.log(`maxBlockId: ${maxBlockId}`);
   return maxBlockId;
 }
 
@@ -202,6 +203,7 @@ export function generateBlockId(editor: Editor | null): string | null {
   const store = BlockStore.getInst();
   const blockState = store.get();
 
+  console.log("generateBlockId..");
   console.log("blockState", blockState);
 
   if (editor === null) {

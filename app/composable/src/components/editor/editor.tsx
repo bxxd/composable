@@ -65,6 +65,11 @@ let mockdata = [
       },
     ],
   },
+  {
+    type: "dBlock",
+    attrs: { role: "user", id: "0.1" },
+    content: [{ type: "paragraph", content: [] }],
+  },
 ];
 
 function extractTextFromJSON(
@@ -235,6 +240,7 @@ const TipTap = forwardRef((props, ref) => {
     api: "/api/generate",
     onFinish: (_prompt, _completion) => {
       console.log("AI finished", editor);
+      toast("AI finished.");
 
       if (editor) {
         editor.setOptions({ editable: true });
@@ -301,7 +307,7 @@ const TipTap = forwardRef((props, ref) => {
 
     diff = diff.replace(/\n/g, "<br>");
 
-    console.log("diff", diff);
+    // console.log("diff", diff);
 
     if (newNodePosition.current === null) {
       const newNodeJSON = createNodeJSON(diff, "assistant", editorRef.current);
@@ -407,8 +413,8 @@ const TipTap = forwardRef((props, ref) => {
   };
 
   const clearEditor = () => {
+    blockState.set({ level: 1, lastId: null, ctxStack: { "1": mockdata } });
     editor?.commands.setContent(mockdata);
-    blockState.set({ level: 1 });
     saveUpdates({ editor: editorRef.current });
   };
 
@@ -428,10 +434,10 @@ const TipTap = forwardRef((props, ref) => {
       ref={componentRef}
     >
       <div className="header flex justify-end pb-1">
+        <button type="button">
+          <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
+        </button>
         <div className="flex mr-auto pt-1">
-          <button type="button" onMouseDown={() => router.push("/publish")}>
-            <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
-          </button>
           <div className="ml-1 text-stone-400  text-sm font-normal">
             Project
           </div>
@@ -439,6 +445,19 @@ const TipTap = forwardRef((props, ref) => {
             - level {blockState.get().level ? blockState.get().level : 1}
           </div>
         </div>
+        <button
+          type="button"
+          onMouseDown={() => router.push("/publish")}
+          className="mr-1"
+          title="Publish to the world."
+        >
+          <Icon
+            icon="ph:share-network-thin"
+            width={21}
+            height={21}
+            color="#aaa"
+          />
+        </button>
         <div className="rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400 inline-block ">
           {saveStatus}
         </div>
@@ -456,7 +475,7 @@ const TipTap = forwardRef((props, ref) => {
             <button
               type="button"
               className="w-6 h-6 bg-green-400 hover:bg-green-500 active:bg-green-600 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-green-700 dark:hover:bg-green-800 dark:active:bg-green-900 dark:text-white"
-              onClick={handleSubLevelAcceptClick}
+              onMouseDown={handleSubLevelAcceptClick}
               title="Close sub context and accept changes."
             >
               <Icon icon="ant-design:check-circle-outlined" color="white" />
@@ -481,7 +500,7 @@ const TipTap = forwardRef((props, ref) => {
           <button
             type="button"
             className="w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
-            onClick={() => clearEditor()}
+            onMouseDown={() => clearEditor()}
             title="Reset all context"
           >
             <Icon icon="ant-design:close-circle-outlined" />

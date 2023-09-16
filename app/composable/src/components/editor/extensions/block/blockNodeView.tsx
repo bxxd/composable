@@ -46,7 +46,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   };
 
   useEffect(() => {
-    console.log("BlockNodeView mounted or updated.", node.toJSON());
+    // console.log("BlockNodeView mounted or updated.", node.toJSON());
     if (!node.attrs.id) {
       const newAttrs = { ...node.attrs, id: generateBlockId(editor) };
 
@@ -103,37 +103,39 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
       className={`flex gap-2 group w-full relative ${node.attrs.role}-block`}
     >
       <section
-        className="flex m-1 pt-[2px] gap-1"
+        className="flex flex-col m-1 pt-[2px] gap-1"
         aria-label="left-menu"
         contentEditable="false"
         suppressContentEditableWarning
       >
-        <button
-          type="button"
-          className="d-block-button group-hover:opacity-100"
-          onClick={removeCurrentNode}
-        >
-          <Icon icon={closeIcon} />
-        </button>
-        <button
-          type="button"
-          className="d-block-button group-hover:opacity-100"
-          onClick={createNodeAfter}
-        >
-          <Icon icon={plusIcon} />
-        </button>
-        <div
-          className="d-block-button group-hover:opacity-100"
-          contentEditable={false}
-          draggable
-          data-drag-handle
-        >
-          <Icon icon={dragIndicatorIcon} />
+        <div className="flex gap-1">
+          <button
+            type="button"
+            className="d-block-button group-hover:opacity-100"
+            onClick={removeCurrentNode}
+          >
+            <Icon icon={closeIcon} />
+          </button>
+          <button
+            type="button"
+            className="d-block-button group-hover:opacity-100"
+            onClick={createNodeAfter}
+          >
+            <Icon icon={plusIcon} />
+          </button>
+          <div
+            className="d-block-button group-hover:opacity-100"
+            contentEditable={false}
+            draggable
+            data-drag-handle
+          >
+            <Icon icon={dragIndicatorIcon} />
+          </div>
         </div>
+        <div className="text-sm opacity-20 italic">{node.attrs.id}</div>
       </section>
 
       <div className="flex flex-col flex-grow">
-        {/* id:`{node.attrs.id}` */}
         {node.attrs.children && node.attrs.children.length > 0 && (
           <div className="flex mt-2" style={{ marginBottom: "-7px" }}>
             <span className="italic opacity-25 pr-1 max-h-6 line-clamp-1">

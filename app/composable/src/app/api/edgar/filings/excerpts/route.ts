@@ -14,7 +14,6 @@ export async function GET(req: Request) {
     console.log("get excerpts..", url);
 
     const filing_id = url.searchParams.get("filing_id");
-    // const search_term = url.searchParams.get("search_term");
 
     const query = `SELECT
     e.id AS id,
@@ -40,7 +39,6 @@ ORDER BY e.id ASC;`;
     console.log("result length", result.length);
     // Send the results as JSON
     return NextResponse.json(result);
-    // res.status(200).json(result.rows);
   } catch (err) {
     console.error(err);
     return NextResponse.json(

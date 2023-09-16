@@ -66,7 +66,7 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
             return false;
           },
           apply: (tr, value) => {
-            console.log("trailingNode apply");
+            // console.log("trailingNode apply");
 
             if (tr.doc.lastChild?.attrs.role != "user") return true;
 

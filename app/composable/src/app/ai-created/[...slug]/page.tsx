@@ -1,6 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout"; // Importing Layout component
+import Published from "@/components/publish/published";
 
 export default function Page({ params }: { params: { slug: string } }) {
   console.log(`params: ${params}`);
@@ -8,7 +9,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   return (
     <Layout>
-      <div className="App flex flex-col gap-4">{slug}</div>
+      <Published id={slug} />
     </Layout>
   );
 }
