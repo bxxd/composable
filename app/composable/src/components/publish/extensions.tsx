@@ -15,15 +15,21 @@ import Highlight from "@tiptap/extension-highlight";
 import Text from "@tiptap/extension-text";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import HardBreak from "@tiptap/extension-hard-break";
-
+import { Markdown } from "tiptap-markdown";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
 import DropCursor from "@tiptap/extension-dropcursor";
 
 export const publishedExtensions = [
   StarterKit,
-  Text,
-  Paragraph,
-  HardBreak,
+  // Text,
+  // Paragraph,
+  // HardBreak,
   Color,
   TextStyle,
   TiptapUnderline,
+  TiptapLink,
+  Markdown,
+  // OrderedList,
+  // ListItem,
 ];

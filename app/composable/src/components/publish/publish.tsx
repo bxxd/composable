@@ -6,7 +6,7 @@ import { BlockStore } from "@/lib/editor";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
 import { Icon } from "@iconify/react";
-
+import { useLatestContextValue } from "@/lib/context";
 import { useRouter } from "next/navigation";
 
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +22,8 @@ const Publish: React.FC<PublishProps> = ({}) => {
   const [activeToggle, setActiveToggle] = useState("Assistant");
 
   const contentArrayRef = useRef<JSONContent[]>([]);
+
+  const aiModelRef = useLatestContextValue("aiModel");
 
   const editor = useEditor({
     extensions: publishedExtensions,
@@ -55,9 +57,19 @@ const Publish: React.FC<PublishProps> = ({}) => {
 
       contentArrayRef.current = contentArray;
 
-      // console.log("hydrating..", contentArray);
+      console.log("hydrating..", contentArray);
       setTimeout(() => {
         editor.commands.setContent(contentArray);
+        console.log("done hydrating");
+
+        // const markdownOutput = editor.storage.markdown
+        //   .getMarkdown()
+        //   .replace(/\\/g, "")
+        //   .replace(/&lt;/g, "<")
+        //   .replace(/&gt;/g, ">");
+        // // editor.getText();
+        // // console.log("markdownOutput", markdownOutput);
+        // editor?.commands.setContent(markdownOutput);
       }, 0);
 
       setHydrated(true);
@@ -73,7 +85,10 @@ const Publish: React.FC<PublishProps> = ({}) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(contentArrayRef.current),
+        body: JSON.stringify({
+          data: contentArrayRef.current,
+          ai_model: aiModelRef.current,
+        }),
       });
 
       if (!response.ok) {
@@ -93,7 +108,7 @@ const Publish: React.FC<PublishProps> = ({}) => {
     <>
       <div className="flex p-0 w-full overflow-auto">
         {/* TipTap Component */}
-        <div className="flex flex-col w-2/3 min-w-[41ch]">
+        <div className="flex flex-col min-w-[36ch]">
           <div className="flex flex-col border-r border-b border-solid rounded-lg m-1 mb-5 pl-5 pr-2  border-gray-100 dark:border-gray-600 ">
             <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
               <button onClick={() => router.push("/")}>

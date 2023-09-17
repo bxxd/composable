@@ -7,10 +7,10 @@ type NavigationProps = {
 
 export default function Navigation({ routes }: NavigationProps) {
   return (
-    <nav className="flex space-x-4">
+    <nav className="flex space-x-1">
       {routes.map((route, index) => (
         <Link key={index} href={route.path} passHref>
-          <span className="px-1 py-1 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-300 cursor-pointer">
+          <span className="px-4 rounded-md text-sm opacity-50 transition duration-300 ease-in-out transform hover:scale-105 hover:opacity-100">
             {route.label}
           </span>
         </Link>

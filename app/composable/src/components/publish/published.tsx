@@ -17,11 +17,8 @@ import { toast } from "sonner";
 type PublishedProps = { id: string };
 
 const Published: React.FC<PublishedProps> = ({ id }) => {
-  const blockState = BlockStore.getInst();
-
   const [hydrated, setHydrated] = useState(false);
-
-  const contentArrayRef = useRef<JSONContent[]>([]);
+  const [data, setData] = useState<any>(null);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(window.location.href).then(
@@ -46,8 +43,9 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
     try {
       const res = await fetch(`/api/blob?id=${id}`);
       const data = await res.json();
-      console.log("data", data);
-      return data.data;
+      // console.log("data", data);
+      setData(data[0]);
+      return data[0];
     } catch (error) {
       toast(`Error fetching content data: ${error}`);
       return [];
@@ -57,10 +55,13 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
   useEffect(() => {
     if (editor) {
       const fetchData = async () => {
-        const contentArray = await fetchContentData(id);
+        const data = await fetchContentData(id);
+
+        const contentArray = data.data;
         setTimeout(() => {
           editor.commands.setContent(contentArray);
         }, 0);
+        console.log("done hydrating");
       };
       fetchData();
       setHydrated(true);
@@ -71,36 +72,34 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
 
   return (
     <>
-      <div className="flex p-0 w-full overflow-auto">
-        {/* TipTap Component */}
-        <div className="flex flex-col w-2/3 min-w-[41ch]">
-          <div className="flex flex-col border-r border-b border-solid rounded-lg m-1 mb-5 pl-5 pr-2  border-gray-100 dark:border-gray-600 ">
-            <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
-              <div className="">
-                {/* <button onClick={() => router.push("/")} className="mr-2">
-                  <Icon
-                    icon="iconamoon:edit-thin"
-                    width={21}
-                    height={21}
-                    color="#aaa"
-                  />
-                </button> */}
-                <button onMouseDown={copyToClipboard}>
-                  <Icon
-                    icon="ph:link-thin"
-                    width={21}
-                    height={21}
-                    color="#aaa"
-                  />
-                </button>
-              </div>
-            </div>
-            <EditorContent
-              editor={editor}
-              className="rounded-lg p-2 leading-relaxed outline-none "
-            />
+      {/* TipTap Component */}
+      <div
+        className="flex flex-col w-full"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
+          <div>
+            <button onMouseDown={copyToClipboard}>
+              <Icon icon="ph:link-thin" width={21} height={21} color="#aaa" />
+            </button>
+            <button onClick={() => router.push("/")} className="ml-2">
+              <Icon
+                icon="iconamoon:edit-thin"
+                width={21}
+                height={21}
+                color="#aaa"
+              />
+            </button>
+          </div>
+          <div className="text-sm opacity-25 italic">
+            {data?.id} Created by {data?.ai_model}
           </div>
         </div>
+        <EditorContent
+          editor={editor}
+          className="rounded-lg p-2 leading-relaxed outline-none "
+        />
       </div>
     </>
   );

@@ -75,6 +75,11 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.3.1.tgz#d0fce5d07b0620caa282b5131c297bb60f9d87e6"
   integrity sha512-EsBwpc7hBUJWAsNPBmJy4hxWx12v6bshQsldrVmjxJoc3isbxhOrF2IcCpaXxfvq03NwkI7sbsOLXbYuqF/8Ww==
 
+"@endo/env-options@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@endo/env-options/-/env-options-0.1.4.tgz#e516bc3864f00b154944e444fb8996a9a0c23a45"
+  integrity sha512-Ol8ct0aW8VK1ZaqntnUJfrYT59P6Xn36XPbHzkqQhsYkpudKDn5ILYEwGmSO/Ff+XJjv/pReNI0lhOyyrDa9mg==
+
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.4.0":
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.4.0.tgz#a23514e8fb9af1269d5f7788aa556798d61c6b59"
@@ -716,7 +721,7 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-gapcursor/-/extension-gapcursor-2.1.10.tgz#712853ce82642108e50a37014d585ff72af6758d"
   integrity sha512-WSBT9X7dzg0HyMoMP/Yyxl28QwIJO90YzobI9z5mav86BQv7C5wU0fQSpbpAbsN3s7lxKhPwNrXkwkpnXT4ZCA==
 
-"@tiptap/extension-hard-break@^2.1.10", "@tiptap/extension-hard-break@^2.1.2":
+"@tiptap/extension-hard-break@^2.1.10":
   version "2.1.10"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-hard-break/-/extension-hard-break-2.1.10.tgz#e885e83d936b45891bf4dc40c713d042f84eb8c4"
   integrity sha512-sYrzpPoV5jQri+duGb50nDTs+hOBQDxXTKlJuZNFfZMwgx6epwxb8xICcGAUJFShuuW8UAWCNcB4jG9tMqgvyw==
@@ -4367,6 +4372,13 @@ seroval@^0.5.0:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/seroval/-/seroval-0.5.1.tgz#e6d17365cdaaae7e50815c7e0bcd7102facdadf3"
   integrity sha512-ZfhQVB59hmIauJG5Ydynupy8KHyr5imGNtdDhbZG68Ufh1Ynkv9KOYOAABf71oVbQxJ8VkWnMHAjEHE7fWkH5g==
+
+ses@^0.18.8:
+  version "0.18.8"
+  resolved "https://registry.yarnpkg.com/ses/-/ses-0.18.8.tgz#88036511ac3b3c07e4d82dd8cfc6e5f3788205b6"
+  integrity sha512-kOH1AhJc6gWDXKURKeU1w7iFUdImAegAljVvBg5EUBgNqjH4bxcEsGVUadVEPtA2PVRMyQp1fiSMDwEZkQNj1g==
+  dependencies:
+    "@endo/env-options" "^0.1.4"
 
 set-function-name@^2.0.0, set-function-name@^2.0.1:
   version "2.0.1"

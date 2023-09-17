@@ -8,18 +8,17 @@ export async function POST(req: NextRequest) {
   try {
     const db = getDbInstance();
     const data = await req.json();
-    const id = nanoid();
 
     console.log("blob POST...");
 
     const ip_address = req.headers.get("x-forwarded-for") || req.ip;
 
-    await db.none(
-      "INSERT INTO json_blobs (id, data, ip_address) VALUES ($1, $2, $3)",
-      [id, JSON.stringify(data), ip_address]
+    const result = await db.one(
+      "INSERT INTO json_blobs (data, ip_address, ai_model) VALUES ($1, $2, $3) RETURNING id",
+      [JSON.stringify(data.data), ip_address, data.ai_model]
     );
 
-    return NextResponse.json({ id });
+    return NextResponse.json({ id: result.id });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
@@ -34,16 +33,36 @@ export async function GET(req: NextRequest) {
     const db = getDbInstance();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
+    const limitParam = url.searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam, 10) : 50;
 
-    if (!id) {
-      return NextResponse.json({ message: "ID is required" }, { status: 400 });
+    if (isNaN(limit) || limit <= 0) {
+      return NextResponse.json(
+        { message: "Invalid limit value" },
+        { status: 400 }
+      );
     }
 
-    const data = await db.one("SELECT data FROM json_blobs WHERE id = $1", [
-      id,
-    ]);
+    const integerId = id ? parseInt(id, 10) : null;
 
-    // console.log("blob GET... data:", data);
+    if (integerId && (isNaN(integerId) || integerId <= 0)) {
+      return NextResponse.json(
+        { message: "Invalid ID value" },
+        { status: 400 }
+      );
+    }
+
+    // If id is not null, fetch data limited by the "limit" parameter
+    const data = id
+      ? await db.any(
+          "SELECT id, data, created_at, ai_model FROM json_blobs WHERE id = $1 ORDER BY created_at DESC LIMIT $2 ",
+          [id, limit]
+        )
+      : await db.any(
+          "SELECT id, data, created_at, ai_model FROM json_blobs  ORDER BY created_at DESC LIMIT $1",
+          [limit]
+        );
+
     return NextResponse.json(data);
   } catch (err) {
     console.error(err);

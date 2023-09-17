@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for");
     const ratelimit = new Ratelimit({
       redis: kv,
-      limiter: Ratelimit.slidingWindow(50, "1 d"),
+      limiter: Ratelimit.slidingWindow(25, "1 d"),
     });
 
     const { success, limit, reset, remaining } = await ratelimit.limit(
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   let system_prompt = {
     role: "system",
-    content: "step by step using logos.",
+    content: "",
   };
 
   if (messages.length > 0 && messages[0].role != "system") {

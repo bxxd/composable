@@ -48,11 +48,17 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   useEffect(() => {
     // console.log("BlockNodeView mounted or updated.", node.toJSON());
     if (!node.attrs.id) {
+      console.log(
+        "BlockNodeView: generating id for node with no id",
+        node.attrs
+      );
       const newAttrs = { ...node.attrs, id: generateBlockId(editor) };
 
-      editor.view.dispatch(
-        editor.view.state.tr.setNodeMarkup(getPos(), undefined, newAttrs)
-      );
+      setTimeout(() => {
+        editor.view.dispatch(
+          editor.view.state.tr.setNodeMarkup(getPos(), undefined, newAttrs)
+        );
+      }, 0);
     }
   }, [node, getPos, editor]);
 

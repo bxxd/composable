@@ -16,9 +16,9 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
   };
 
   const routes = [
-    { path: "/", label: "> Workspace" },
-    { path: "/docs", label: "> Doc Center" },
-    { path: "/hub", label: "> Hub" },
+    { path: "/", label: "Workspace" },
+    { path: "/docs", label: "Docs" },
+    { path: "/hub", label: "Hub" },
     // ... add more routes as necessary
   ];
 
@@ -26,22 +26,23 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
       <div className="px-4 md:flex md:items-center md:justify-between py-1">
         <div className="px-4 md:flex md:items-center md:justify-between py-1">
-          <span className="flex text-med tracking-normal transition-colors hover:text-gray-600 dark:hover:text-gray-400">
+          <div className="flex-shrink-0 inline-block">
             <Image
               src="/images/logo3.png"
               width={25}
               height={25}
               alt="logo"
-              className="flex mr-1"
+              className="mr-1"
             />
-            <div className="opacity-50 mr-5">
-              <a href="/">
-                Composable Parts
-                <span className="text-sm italic">&nbsp;beta</span>
-              </a>
-            </div>
-          </span>
-          <div className="">
+          </div>
+
+          <div className="opacity-50 mr-5  font-serif">
+            <a href="/">
+              Composable Parts
+              <span className="text-xs italic">&nbsp;beta</span>
+            </a>
+          </div>
+          <div className="font-serif">
             <Navigation routes={routes} />
           </div>
         </div>
