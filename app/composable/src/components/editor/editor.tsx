@@ -239,7 +239,7 @@ const TipTap = forwardRef((props, ref) => {
         spellcheck: "false",
         suppressContentEditableWarning: "true",
       },
-      handlePaste: handlePaste,
+      // handlePaste: handlePaste,
     },
     onUpdate: (e) => {
       setSaveStatus("Unsaved");
