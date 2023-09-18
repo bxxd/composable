@@ -8,13 +8,15 @@ import { publishedExtensions } from "./extensions";
 import { Icon } from "@iconify/react";
 import { useLatestContextValue } from "@/lib/context";
 import { useRouter } from "next/navigation";
-
+import { EditorBubbleMenu } from "@/components/editor/bubble-menu";
 import { useEffect, useRef, useState } from "react";
 import { JSONContent } from "@tiptap/react";
 
-type PublishProps = {};
+type PublishProps = {
+  isEditable?: boolean;
+};
 
-const Publish: React.FC<PublishProps> = ({}) => {
+const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
   const blockState = BlockStore.getInst();
 
   const [hydrated, setHydrated] = useState(false);
@@ -27,7 +29,7 @@ const Publish: React.FC<PublishProps> = ({}) => {
 
   const editor = useEditor({
     extensions: publishedExtensions,
-    editable: false,
+    editable: isEditable,
   });
 
   useEffect(() => {
@@ -61,15 +63,6 @@ const Publish: React.FC<PublishProps> = ({}) => {
       setTimeout(() => {
         editor.commands.setContent(contentArray);
         console.log("done hydrating");
-
-        // const markdownOutput = editor.storage.markdown
-        //   .getMarkdown()
-        //   .replace(/\\/g, "")
-        //   .replace(/&lt;/g, "<")
-        //   .replace(/&gt;/g, ">");
-        // // editor.getText();
-        // // console.log("markdownOutput", markdownOutput);
-        // editor?.commands.setContent(markdownOutput);
       }, 0);
 
       setHydrated(true);
@@ -86,7 +79,7 @@ const Publish: React.FC<PublishProps> = ({}) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          data: contentArrayRef.current,
+          data: editor?.getJSON(),
           ai_model: aiModelRef.current,
         }),
       });
@@ -154,6 +147,7 @@ const Publish: React.FC<PublishProps> = ({}) => {
                 />
               </button>
             </div>
+            {editor && <EditorBubbleMenu editor={editor} />}
             <EditorContent
               editor={editor}
               className="rounded-lg p-2 leading-relaxed outline-none "
