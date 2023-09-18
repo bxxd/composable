@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         model: aiModel,
         stream: true,
         messages: messages,
-        max_tokens: 1024,
+        max_tokens: 2048,
       },
       {
         headers: {
