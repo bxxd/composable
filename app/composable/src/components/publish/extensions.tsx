@@ -29,7 +29,7 @@ export const publishedExtensions = [
   TextStyle,
   TiptapUnderline,
   TiptapLink,
-  // Markdown,
+  Markdown,
   // OrderedList,
   // ListItem,
 ];

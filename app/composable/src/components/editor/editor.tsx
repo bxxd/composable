@@ -21,6 +21,7 @@ import { defaultExtensions } from "./extensions";
 import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
+// import { GPTTokens } from "gpt-tokens";
 import _ from "lodash";
 
 import {
@@ -260,7 +261,23 @@ const TipTap = forwardRef((props, ref) => {
       console.log("AI finished", editor);
 
       saveUpdates();
+
+      // let currentEditor = editor || editorRef.current;
+      // let data = currentEditor?.getJSON();
+      // if (data) {
+      //   data = extractTextFromJSON(data);
+
+      //   let usageInfo = new GPTTokens({
+      //     model: "gpt-4",
+      //     data: data.content,
+      //   });
+
+      //   toast(
+      //     `AI finished. Usage: ${usageInfo.usedUSD} tokens: ${usageInfo.usedTokens}`
+      //   );
+      // } else {
       toast("AI finished.");
+      // }
 
       if (editor) {
         editor.setOptions({ editable: true });

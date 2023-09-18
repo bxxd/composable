@@ -63,6 +63,15 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
       setTimeout(() => {
         editor.commands.setContent(contentArray);
         console.log("done hydrating");
+
+        const markdownOutput = editor.storage.markdown
+          .getMarkdown()
+          .replace(/\\/g, "")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">");
+        // editor.getText();
+        // console.log("markdownOutput", markdownOutput);
+        editor?.commands.setContent(markdownOutput);
       }, 0);
 
       setHydrated(true);

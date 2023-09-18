@@ -99,6 +99,8 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    // console.log("response", response);
+
     // Convert the response into a friendly text-stream
     const stream = OpenAIStream(response);
 
