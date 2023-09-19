@@ -39,7 +39,7 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
           <div className="opacity-50 mr-5  font-serif">
             <a href="/">
               Composable Parts
-              <span className="text-xs italic">&nbsp;beta</span>
+              <span className="text-xs italic">&nbsp;wip</span>
             </a>
           </div>
           <div className="font-serif">

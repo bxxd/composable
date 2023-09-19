@@ -214,7 +214,8 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           title="Edit sub context with just this node."
           onMouseDown={() => handleOpenEditor(node)}
         >
-          <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} />
+          {/* <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} /> */}
+          <Icon icon={baselineChevronRight} />
         </button>
         {/* using onMouseDown because onClick was failing first time on chrome */}
         <button
