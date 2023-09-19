@@ -104,10 +104,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   };
 
   return (
-    <NodeViewWrapper
-      as="div"
-      className={`flex gap-2 group w-full relative ${node.attrs.role}-block`}
-    >
+    <NodeViewWrapper as="div" className={`${node.attrs.role}-block`}>
       <section
         className="flex flex-col m-1 pt-[2px] gap-1"
         aria-label="left-menu"
@@ -138,7 +135,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             <Icon icon={dragIndicatorIcon} />
           </div>
         </div>
-        <div className="text-sm opacity-20 italic">{node.attrs.id}</div>
+        {/* <div className="text-sm opacity-20 italic">{node.attrs.id}</div> */}
       </section>
 
       <div className="flex flex-col flex-grow">
@@ -155,7 +152,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           }`}
           onMouseDown={isDataBlock ? toggleExpanded : undefined}
         >
-          <NodeViewContent className={`node-view-content w-full`} />
+          <NodeViewContent className="node-view-content w-full pl-2 pr-2" />
           {isDataBlock && (
             <span className="ml-2">
               <Icon
