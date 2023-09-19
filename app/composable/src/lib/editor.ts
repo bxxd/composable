@@ -55,10 +55,12 @@ export class BlockStore {
   private data: BlockData;
   private id: string;
   private static instances: Record<string, BlockStore> = {};
+  private static lastCreatedId: string | null = null;
 
   private constructor(id: string = "") {
     this.id = id;
     this.data = { lastId: null, level: 1, ctxStack: {} };
+    BlockStore.lastCreatedId = id;
   }
 
   private debouncedSave = debounce(() => {
@@ -72,8 +74,15 @@ export class BlockStore {
     return this.id ? `blockStore#${this.id}` : "blockStore";
   }
 
-  public static getInst(id: string = ""): BlockStore {
+  public static getInst(id: string | null = null): BlockStore {
     console.log("BlockStore.getInst", id);
+
+    if (id === null && BlockStore.lastCreatedId) {
+      id = BlockStore.lastCreatedId;
+    } else {
+      id = "";
+    }
+
     if (!BlockStore.instances[id]) {
       BlockStore.instances[id] = new BlockStore(id);
     }
@@ -362,6 +371,7 @@ export function pushSubContent(editor: Editor, content: JSONContent[]) {
   // const ctxStack = store.get().ctxStack;
   // store.set({ ctxStack: { ...ctxStack, [currentLevel]: currentContent } });
   store.setCtxItemAtLevel(currentLevel, currentContent);
+  store.set({ level: currentLevel });
 
   maxId = content.reduce((maxId: string, item: any) => {
     if (compareBlockIds(maxId, item.attrs.id) < 0) {

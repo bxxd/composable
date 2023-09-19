@@ -2,7 +2,7 @@ export const aiModels = [
   { name: "OpenAI: GPT-3.5 Turbo", value: "openai/gpt-3.5-turbo" },
   { name: "OpenAI: GPT-3.5 Turbo 16k", value: "openai/gpt-3.5-turbo-16k" },
   { name: "OpenAI: GPT-4", value: "openai/gpt-4" },
-  { name: "OpenAI: GPT-4 32k", value: "openai/gpt-4-32k" },
+  // { name: "OpenAI: GPT-4 32k", value: "openai/gpt-4-32k" },
   { name: "Anthropic: Claude v2", value: "anthropic/claude-2" },
   {
     name: "Anthropic: Claude Instant v1",

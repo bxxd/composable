@@ -38,6 +38,10 @@
     line-height: 1.1;
   }
 
+  p {
+    font-size: 1.1em;
+  }
+
   code {
     background-color: rgba(#616161, 0.1);
     color: #616161;
@@ -334,34 +338,9 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
     @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600  text-lg py-1 opacity-20 transition duration-200 ease-in-out h-fit rounded flex justify-center items-center cursor-pointer;
   }
 
-  // .d-block-button {
-  //   background-color: #edf2f7;
-  //   text-align: center;
-  //   font-size: 1.125rem; /* Corresponds to text-lg */
-  //   padding-top: 0.25rem; /* Corresponds to py-1 */
-  //   padding-bottom: 0.25rem; /* Corresponds to py-1 */
-  //   opacity: 0.1; /* Corresponds to opacity-10 */
-  //   transition: all 0.2s ease-in-out; /* Corresponds to transition duration-200 ease-in-out */
-  //   border-radius: 0.25rem; /* Corresponds to rounded */
-  //   display: flex; /* Corresponds to flex */
-  //   justify-content: center; /* Corresponds to justify-center */
-  //   align-items: center; /* Corresponds to items-center */
-  //   cursor: pointer; /* Corresponds to cursor-pointer */
-  //   // height: fit-content; /* Corresponds to h-fit */
-  // }
-  // cursor-grab
-
-  // .d-block-button:hover {
-  //   background-color: #e2e8f0;
-  // }
-
-  // :is(.dark .d-block-button) {
-  //   background-color: #718096;
-  // }
-
-  // :is(.dark .d-block-button:hover) {
-  //   background-color: #4a5568;
-  // }
+  .icon-size {
+    @apply w-5 h-5;
+  }
 }
 
 .tableWrapper {

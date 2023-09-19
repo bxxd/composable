@@ -105,39 +105,56 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
   return (
     <NodeViewWrapper as="div" className={`${node.attrs.role}-block`}>
-      <section
-        className="flex flex-col m-1 pt-[2px] gap-1"
-        aria-label="left-menu"
-        contentEditable="false"
-        suppressContentEditableWarning
-      >
-        <div className="flex gap-1">
-          <button
-            type="button"
-            className="d-block-button group-hover:opacity-100"
-            onClick={removeCurrentNode}
-          >
-            <Icon icon={closeIcon} />
-          </button>
-          <button
-            type="button"
-            className="d-block-button group-hover:opacity-100"
-            onClick={createNodeAfter}
-          >
-            <Icon icon={plusIcon} />
-          </button>
-          <div
-            className="d-block-button group-hover:opacity-100"
-            contentEditable={false}
-            draggable
-            data-drag-handle
-          >
-            <Icon icon={dragIndicatorIcon} />
+      <div>
+        <div className="flex justify-between ml-1 mt-1 mr-1">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="d-block-button group-hover:opacity-100"
+              onClick={removeCurrentNode}
+            >
+              <Icon icon={closeIcon} className="icon-size" />
+            </button>
+            <button
+              type="button"
+              className="d-block-button group-hover:opacity-100"
+              onClick={createNodeAfter}
+            >
+              <Icon icon={plusIcon} className="icon-size" />
+            </button>
+            <div
+              className="d-block-button group-hover:opacity-100"
+              contentEditable={false}
+              draggable
+              data-drag-handle
+            >
+              <Icon icon={dragIndicatorIcon} className="icon-size" />
+            </div>
+
+            <button
+              type="button"
+              className="d-block-button group-hover:opacity-100"
+              title="Save snippet for later re-use"
+              onMouseDown={() => {
+                console.log("Button was clicked.");
+                addSavedToList(node);
+              }}
+            >
+              <Icon icon={saveIcon} className="icon-size" />
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="d-block-button group-hover:opacity-100"
+              title="Edit sub context with just this node."
+              onMouseDown={() => handleOpenEditor(node)}
+            >
+              <Icon icon={baselineChevronRight} className="icon-size" />
+            </button>
           </div>
         </div>
-        {/* <div className="text-sm opacity-20 italic">{node.attrs.id}</div> */}
-      </section>
-
+      </div>
       <div className="flex flex-col flex-grow">
         {node.attrs.children && node.attrs.children.length > 0 && (
           <div className="flex mt-2" style={{ marginBottom: "-7px" }}>
@@ -203,29 +220,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             </div>
           </div>
         )}
-      </div>
-      <div className="flex">
-        <button
-          type="button"
-          className="d-block-button group-hover:opacity-100 m-1 mr-0"
-          title="Edit sub context with just this node."
-          onMouseDown={() => handleOpenEditor(node)}
-        >
-          {/* <Icon icon={node.attrs.children ? baselineChevronRight : plusIcon} /> */}
-          <Icon icon={baselineChevronRight} />
-        </button>
-        {/* using onMouseDown because onClick was failing first time on chrome */}
-        <button
-          type="button"
-          className="d-block-button group-hover:opacity-100 m-1 ml-1"
-          title="Save snippet for later re-use"
-          onMouseDown={() => {
-            console.log("Button was clicked.");
-            addSavedToList(node);
-          }}
-        >
-          <Icon icon={saveIcon} />
-        </button>
       </div>
     </NodeViewWrapper>
   );

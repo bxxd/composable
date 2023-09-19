@@ -538,6 +538,8 @@ const TipTap = forwardRef((props, ref) => {
     popSubContent(editorRef.current, true);
   };
 
+  console.log(blockState.get());
+
   return (
     <section
       className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
@@ -552,7 +554,7 @@ const TipTap = forwardRef((props, ref) => {
             Project {slug}
           </div>
           <div className="ml-2 text-stone-400  text-sm italic">
-            - level {blockState.get().level ? blockState.get().level : 1}
+            - level {blockState.get().level}
           </div>
         </div>
         <button
