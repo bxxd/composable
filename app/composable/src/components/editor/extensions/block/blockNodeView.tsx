@@ -130,7 +130,8 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             >
               <Icon icon={dragIndicatorIcon} className="icon-size" />
             </div>
-
+          </div>
+          <div className="flex gap-2">
             <button
               type="button"
               className="d-block-button group-hover:opacity-100"
@@ -142,8 +143,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             >
               <Icon icon={saveIcon} className="icon-size" />
             </button>
-          </div>
-          <div className="flex gap-2">
             <button
               type="button"
               className="d-block-button group-hover:opacity-100"
