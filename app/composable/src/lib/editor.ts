@@ -77,10 +77,13 @@ export class BlockStore {
   public static getInst(id: string | null = null): BlockStore {
     console.log("BlockStore.getInst", id);
 
-    if (id === null && BlockStore.lastCreatedId) {
-      id = BlockStore.lastCreatedId;
-    } else {
-      id = "";
+    if (id === null) {
+      if (BlockStore.lastCreatedId) {
+        id = BlockStore.lastCreatedId;
+        console.log("replacing null id with last created id", id);
+      } else {
+        id = "";
+      }
     }
 
     if (!BlockStore.instances[id]) {

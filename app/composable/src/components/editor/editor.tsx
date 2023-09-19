@@ -559,7 +559,7 @@ const TipTap = forwardRef((props, ref) => {
         </div>
         <button
           type="button"
-          onMouseDown={() => router.push("/publish")}
+          onMouseDown={() => router.push("/publish/" + slug)}
           className="mr-1"
           title="Publish to the world."
         >
@@ -607,7 +607,7 @@ const TipTap = forwardRef((props, ref) => {
             }
             title="Send context to AI"
           >
-            <Icon icon="ant-design:down" />
+            <Icon icon="ant-design:down" className="icon-size" />
           </button>
           <button
             type="button"
@@ -615,7 +615,10 @@ const TipTap = forwardRef((props, ref) => {
             onMouseDown={() => clearEditor()}
             title="Reset all context"
           >
-            <Icon icon="ant-design:close-circle-outlined" />
+            <Icon
+              icon="ant-design:close-circle-outlined"
+              className="icon-size"
+            />
           </button>
         </div>
       </div>

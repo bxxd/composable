@@ -127,7 +127,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
         <div className="flex flex-col min-w-[36ch]">
           <div className="flex flex-col border-r border-b border-solid rounded-lg m-1 mb-5 pl-5 pr-2  border-gray-100 dark:border-gray-600 ">
             <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
-              <button onClick={() => router.push("/")}>
+              <button onClick={() => router.push("/" + slug)}>
                 <Icon
                   icon="iconamoon:edit-thin"
                   width={21}
