@@ -9,19 +9,20 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
 import { EditorBubbleMenu } from "./bubble-menu";
 
 import { EditorView } from "prosemirror-view";
+import { Transaction } from "prosemirror-state";
+
 import { Editor } from "@tiptap/core";
 import { Slice } from "prosemirror-model";
 import { defaultExtensions } from "./extensions";
 import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
-// import { GPTTokens } from "gpt-tokens";
 import _ from "lodash";
 
 import {
@@ -127,32 +128,56 @@ function extractTextFromJSON(
   return result;
 }
 
+type EditorOrView = Editor | EditorView;
+
+const insertSegmentsWithHardBreaks = (
+  editorOrView: EditorOrView,
+  diff: string
+) => {
+  const segments = diff.split("\n");
+
+  let tr: Transaction;
+  let schema: any;
+  let dispatch;
+
+  if (editorOrView instanceof EditorView) {
+    ({ tr, schema } = editorOrView.state);
+    dispatch = editorOrView.dispatch;
+  } else {
+    // Assuming editorOrView is of Editor type
+    tr = editorOrView.state.tr;
+    schema = editorOrView.state.schema;
+    dispatch = editorOrView.view.dispatch;
+  }
+
+  segments.forEach((segment, index) => {
+    if (segment) {
+      tr.insertText(segment);
+    }
+
+    if (index < segments.length - 1) {
+      tr.insert(tr.selection.from, schema.nodes.hardBreak.create());
+    }
+  });
+
+  // Dispatch the transaction after all changes have been batched
+  dispatch(tr);
+};
+
 function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
-  // Prevent default paste behavior
+  console.log("handlePaste");
+
   event.preventDefault();
 
-  // Get plain text from clipboard
   const plainText = event.clipboardData?.getData("text/plain");
 
   if (!plainText) {
     return false;
   }
 
-  // Insert the plain text at the current cursor position
-  const transaction = view.state.tr.insertText(plainText);
-  view.dispatch(transaction);
+  insertSegmentsWithHardBreaks(view, plainText);
 
-  return true; // Indicate that the paste event was handled
-}
-
-function useLatestValue<T>(value: T) {
-  const latestValueRef = useRef(value);
-
-  useEffect(() => {
-    latestValueRef.current = value;
-  }, [value]);
-
-  return latestValueRef;
+  return true;
 }
 
 const TipTap = forwardRef((props, ref) => {
@@ -164,31 +189,56 @@ const TipTap = forwardRef((props, ref) => {
 
   const editorRef = useRef<Editor | null>(null);
 
-  const blockState = BlockStore.getInst();
-
   const componentRef = useRef<HTMLDivElement>(null);
+
+  const [data, setData] = useState<any>(null);
+
+  const params = useParams();
+  let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
+  if (slug === undefined) {
+    slug = "";
+  }
+
+  const blockState = BlockStore.getInst(slug);
+
+  const router = useRouter();
+
+  // console.log(`params ${JSON.stringify(params)}`);
+  // console.log("slug", slug);
+
+  const fetchContentData = async (id: string) => {
+    console.log("fetching content data for id: ", id);
+    try {
+      const res = await fetch(`/api/blob?id=${id}&original`);
+      const data = await res.json();
+      console.log("got data", data);
+      setData(data[0]);
+      return data[0];
+    } catch (error) {
+      toast(`Error fetching content data: ${error}`);
+      return [];
+    }
+  };
 
   const saveUpdates = useDebouncedCallback(async () => {
     setSaveStatus("Saving...");
-    // setContent(json);
 
     // Simulate a delay in saving.
-    setTimeout(() => {
-      if (isLoading) {
-        console.log("AI is busy, not saving.");
-        return;
-      }
-      const json = editorRef.current?.getJSON();
 
-      if (!json) {
-        console.warn("no json to save, editor:", editorRef.current);
-        return;
-      }
-      blockState.setCtxItemAtLevel(blockState.get().level, json);
-      console.log("Saved.");
-      setSaveStatus("Saved");
-    }, 500);
-  }, 750);
+    if (isLoading) {
+      console.log("AI is busy, not saving.");
+      return;
+    }
+    const json = editorRef.current?.getJSON();
+
+    if (!json) {
+      console.warn("no json to save, editor:", editorRef.current);
+      return;
+    }
+    blockState.setCtxItemAtLevel(blockState.get().level, json);
+    console.log("Saved.");
+    setSaveStatus("Saved");
+  }, 1000);
 
   useImperativeHandle(ref, () => ({
     getEditor: () => editor,
@@ -240,7 +290,7 @@ const TipTap = forwardRef((props, ref) => {
         spellcheck: "false",
         suppressContentEditableWarning: "true",
       },
-      // handlePaste: handlePaste,
+      handlePaste: handlePaste,
     },
     onUpdate: (e) => {
       setSaveStatus("Unsaved");
@@ -262,22 +312,7 @@ const TipTap = forwardRef((props, ref) => {
 
       saveUpdates();
 
-      // let currentEditor = editor || editorRef.current;
-      // let data = currentEditor?.getJSON();
-      // if (data) {
-      //   data = extractTextFromJSON(data);
-
-      //   let usageInfo = new GPTTokens({
-      //     model: "gpt-4",
-      //     data: data.content,
-      //   });
-
-      //   toast(
-      //     `AI finished. Usage: ${usageInfo.usedUSD} tokens: ${usageInfo.usedTokens}`
-      //   );
-      // } else {
       toast("AI finished.");
-      // }
 
       if (editor) {
         editor.setOptions({ editable: true });
@@ -348,36 +383,9 @@ const TipTap = forwardRef((props, ref) => {
 
     console.log("received diff from ", completion);
 
-    const insertSegmentsWithHardBreaks = (editor: Editor, diff: string) => {
-      const segments = diff.split("\n");
-      // console.log(`diff: '${diff}' segments: '${segments}'`);
-
-      segments.forEach((segment, index) => {
-        if (segment) {
-          // Insert the segment text
-          // console.log(`** inserting segment: '${segment}'`);
-          setTimeout(() => {
-            const transaction = editor.state.tr.insertText(segment);
-            editor.view.dispatch(transaction);
-          }, 0);
-        }
-
-        // Insert a hard break except after the last segment
-        if (index < segments.length - 1) {
-          // console.log(`** inserting hard break`);
-          setTimeout(() => {
-            editor.commands.setHardBreak();
-          }, 0);
-        }
-      });
-    };
-
     prev.current = completion;
 
-    // diff = diff.replace(/\n/g, "<br>");
-
     // console.log("diff", diff);
-
     if (newNodePosition.current === null) {
       const newNodeJSON = createNodeJSON("", "assistant", editorRef.current);
       // Get the position of the last node
@@ -444,10 +452,25 @@ const TipTap = forwardRef((props, ref) => {
           console.log(
             "No data found in localStorage, initializing with default values..."
           );
+          if (!slug) {
+            console.log("No slug, initializing with mockdata...");
+            editor.commands.setContent(mockdata);
+            blockState.set({ level: 1 });
+            saveUpdates();
+          } else {
+            console.log("Slug found, initializing...");
+            const fetchData = async () => {
+              const data = await fetchContentData(slug);
 
-          editor.commands.setContent(mockdata);
-          blockState.set({ level: 1 });
-          saveUpdates();
+              setTimeout(() => {
+                editor.commands.setContent(data.original);
+                blockState.set({ level: 1 });
+                saveUpdates();
+              }, 0);
+              console.log("done hydrating");
+            };
+            fetchData();
+          }
         } else {
           console.log(
             "Data found in localStorage, initializing with values..."
@@ -458,7 +481,7 @@ const TipTap = forwardRef((props, ref) => {
       setHydrated(true);
       editorRef.current = editor;
     }
-  }, [editor, setHydrated, blockState, saveUpdates]);
+  }, [editor, hydrated, setHydrated, saveUpdates, slug, blockState]);
 
   const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {
@@ -498,20 +521,18 @@ const TipTap = forwardRef((props, ref) => {
     popSubContent(editorRef.current, true);
   };
 
-  const router = useRouter();
-
   return (
     <section
       className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
       ref={componentRef}
     >
       <div className="header flex justify-end pb-1">
-        <button type="button">
+        <button type="button" className="cursor-default">
           <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
         </button>
         <div className="flex mr-auto pt-1">
           <div className="ml-1 text-stone-400  text-sm font-normal">
-            Project
+            Project {slug}
           </div>
           <div className="ml-2 text-stone-400  text-sm italic">
             - level {blockState.get().level ? blockState.get().level : 1}

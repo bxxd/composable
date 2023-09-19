@@ -20,63 +20,93 @@ import DropCursor from "@tiptap/extension-dropcursor";
 import { TrailingNode } from "./trailingNode";
 import { DBlock, HandleAIButtonClickParams } from "./block";
 
+import { Blockquote } from "@tiptap/extension-blockquote";
+import { Bold } from "@tiptap/extension-bold";
+import { BulletList } from "@tiptap/extension-bullet-list";
+import { Code } from "@tiptap/extension-code";
+import { CodeBlock } from "@tiptap/extension-code-block";
+import { Dropcursor } from "@tiptap/extension-dropcursor";
+
+import { Heading } from "@tiptap/extension-heading";
+import { History } from "@tiptap/extension-history";
+import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
+import { Italic } from "@tiptap/extension-italic";
+import { ListItem } from "@tiptap/extension-list-item";
+import { OrderedList } from "@tiptap/extension-ordered-list";
+
+import { Strike } from "@tiptap/extension-strike";
+
 export function defaultExtensions(
   handleAIButtonClick: (params: HandleAIButtonClickParams) => void
 ) {
   return [
-    StarterKit.configure({
-      bulletList: {
-        HTMLAttributes: {
-          class: "list-disc list-outside leading-3 -mt-2",
-        },
-      },
-      orderedList: {
-        HTMLAttributes: {
-          class: "list-decimal list-outside leading-3 -mt-2",
-        },
-      },
-      listItem: {
-        HTMLAttributes: {
-          class: "leading-normal -mb-2",
-        },
-      },
-      blockquote: {
-        HTMLAttributes: {
-          class: "border-l-4 border-stone-700",
-        },
-      },
-      codeBlock: {
-        HTMLAttributes: {
-          class:
-            "rounded-sm bg-stone-100 p-5 font-mono font-medium text-stone-800",
-        },
-      },
-      code: {
-        HTMLAttributes: {
-          class:
-            "rounded-md bg-stone-200 px-1.5 py-1 font-mono font-medium text-stone-900",
-          spellcheck: "false",
-        },
-      },
-      horizontalRule: false,
-      dropcursor: {
-        width: 2,
-        class: "notitap-dropcursor",
-        color: "skyblue",
-      },
-      gapcursor: false,
-    }),
+    //   StarterKit.configure({
+    //     bulletList: {
+    //       HTMLAttributes: {
+    //         class: "list-disc list-outside leading-3 -mt-2",
+    //       },
+    //     },
+    //     orderedList: {
+    //       HTMLAttributes: {
+    //         class: "list-decimal list-outside leading-3 -mt-2",
+    //       },
+    //     },
+    //     listItem: {
+    //       HTMLAttributes: {
+    //         class: "leading-normal -mb-2",
+    //       },
+    //     },
+    //     blockquote: {
+    //       HTMLAttributes: {
+    //         class: "border-l-4 border-stone-700",
+    //       },
+    //     },
+    //     codeBlock: {
+    //       HTMLAttributes: {
+    //         class:
+    //           "rounded-sm bg-stone-100 p-5 font-mono font-medium text-stone-800",
+    //       },
+    //     },
+    //     code: {
+    //       HTMLAttributes: {
+    //         class:
+    //           "rounded-md bg-stone-200 px-1.5 py-1 font-mono font-medium text-stone-900",
+    //         spellcheck: "false",
+    //       },
+    //     },
+    //     horizontalRule: false,
+    //     dropcursor: {
+    //       width: 2,
+    //       class: "notitap-dropcursor",
+    //       color: "skyblue",
+    //     },
+    //     gapcursor: false,
+    //   }),
+
+    Blockquote,
+    Bold,
+    BulletList,
+    Code,
+    CodeBlock,
+
+    Heading,
+    History,
+    HorizontalRule,
+    Italic,
+    ListItem,
+    OrderedList,
+    Strike,
 
     DBlock.configure({ handleAIButtonClick: handleAIButtonClick }),
     Document,
-    // Text,
-    // Paragraph,
-    // HardBreak,
-    // DropCursor.configure({
-    //   width: 2,
-    //   class: "notitap-dropcursor",
-    //   color: "skyblue",
-    // }),
+    Text,
+    Paragraph,
+    HardBreak,
+    DropCursor.configure({
+      width: 2,
+      class: "notitap-dropcursor",
+      color: "skyblue",
+    }),
 
     TrailingNode,
 

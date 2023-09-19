@@ -7,17 +7,23 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
 import { Icon } from "@iconify/react";
 import { useLatestContextValue } from "@/lib/context";
-import { useRouter } from "next/navigation";
 import { EditorBubbleMenu } from "@/components/editor/bubble-menu";
 import { useEffect, useRef, useState } from "react";
 import { JSONContent } from "@tiptap/react";
+import { useRouter, useParams } from "next/navigation";
 
 type PublishProps = {
   isEditable?: boolean;
 };
 
 const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
-  const blockState = BlockStore.getInst();
+  const params = useParams();
+  let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
+  if (slug === undefined) {
+    slug = "";
+  }
+
+  const blockState = BlockStore.getInst(slug);
 
   const [hydrated, setHydrated] = useState(false);
 
@@ -37,6 +43,11 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
       blockState.loadFromLocalStorage();
 
       let jsonData: JSONContent = blockState.getCtxItemAtCurrentLevel();
+
+      if (!jsonData) {
+        editor.commands.setContent([]);
+        return;
+      }
 
       console.log("jsonData", JSON.stringify(jsonData));
 
@@ -82,6 +93,8 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
 
   const publishToWorld = async () => {
     try {
+      let jsonData: JSONContent = blockState.getCtxItemAtCurrentLevel();
+
       const response = await fetch("/api/blob", {
         method: "POST",
         headers: {
@@ -89,6 +102,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
         },
         body: JSON.stringify({
           data: editor?.getJSON(),
+          original: JSON.stringify(jsonData),
           ai_model: aiModelRef.current,
         }),
       });

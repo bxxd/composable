@@ -12,7 +12,7 @@ export default function Page() {
     // Function to fetch the last 10 created items
     const fetchItems = async () => {
       try {
-        const res = await fetch("/api/blob?limit=16"); // Replace with your API endpoint
+        const res = await fetch("/api/blob?limit=44"); // Replace with your API endpoint
         const data = await res.json();
         setItems(data); // Set fetched data to state
       } catch (error) {

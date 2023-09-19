@@ -83,14 +83,19 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
             <button onMouseDown={copyToClipboard}>
               <Icon icon="ph:link-thin" width={21} height={21} color="#aaa" />
             </button>
-            {/* <button onClick={() => router.push("/")} className="ml-2">
-              <Icon
-                icon="iconamoon:edit-thin"
-                width={21}
-                height={21}
-                color="#aaa"
-              />
-            </button> */}
+            {data?.original && (
+              <button
+                onClick={() => router.push(`/work/${id}`)}
+                className="ml-2"
+              >
+                <Icon
+                  icon="iconamoon:edit-thin"
+                  width={21}
+                  height={21}
+                  color="#aaa"
+                />
+              </button>
+            )}
           </div>
           <div className="text-sm opacity-25 italic">
             {data?.id} Created by {data?.ai_model}

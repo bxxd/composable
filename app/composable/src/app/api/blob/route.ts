@@ -13,9 +13,11 @@ export async function POST(req: NextRequest) {
 
     const ip_address = req.headers.get("x-forwarded-for") || req.ip;
 
+    const original = data.original || null;
+
     const result = await db.one(
-      "INSERT INTO json_blobs (data, ip_address, ai_model) VALUES ($1, $2, $3) RETURNING id",
-      [JSON.stringify(data.data), ip_address, data.ai_model]
+      "INSERT INTO json_blobs (data, ip_address, ai_model, original) VALUES ($1, $2, $3, $4) RETURNING id",
+      [JSON.stringify(data.data), ip_address, data.ai_model, original]
     );
 
     return NextResponse.json({ id: result.id });
@@ -34,6 +36,18 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     const limitParam = url.searchParams.get("limit");
+    const original = url.searchParams.has("original");
+
+    console.log(
+      "blob GET...",
+      "id",
+      id,
+      "limit",
+      limitParam,
+      "original",
+      original
+    );
+
     const limit = limitParam ? parseInt(limitParam, 10) : 50;
 
     if (isNaN(limit) || limit <= 0) {
@@ -52,16 +66,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // If id is not null, fetch data limited by the "limit" parameter
-    const data = id
-      ? await db.any(
-          "SELECT id, data, created_at, ai_model FROM json_blobs WHERE id = $1 ORDER BY created_at DESC LIMIT $2 ",
-          [id, limit]
-        )
-      : await db.any(
-          "SELECT id, data, created_at, ai_model FROM json_blobs  ORDER BY created_at DESC LIMIT $1",
-          [limit]
-        );
+    let queryText: string;
+    let queryParams: (string | number)[];
+
+    if (id && original) {
+      queryText =
+        "SELECT original, created_at, ai_model FROM json_blobs WHERE id = $1 AND original IS NOT NULL ORDER BY created_at DESC LIMIT $2";
+      queryParams = [id, limit];
+    } else if (id) {
+      queryText =
+        "SELECT id, data, created_at, ai_model, CASE WHEN original IS NOT NULL THEN true ELSE false END AS original FROM json_blobs WHERE id = $1 ORDER BY created_at DESC LIMIT $2";
+      queryParams = [id, limit];
+    } else {
+      queryText =
+        "SELECT id, data, created_at, ai_model, CASE WHEN original IS NOT NULL THEN true ELSE false END AS original FROM json_blobs ORDER BY created_at DESC LIMIT $1";
+      queryParams = [limit];
+    }
+
+    const data = await db.any(queryText, queryParams);
 
     return NextResponse.json(data);
   } catch (err) {

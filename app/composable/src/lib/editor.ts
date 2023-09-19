@@ -53,23 +53,31 @@ export interface BlockData {
 export class BlockStore {
   private static inst: BlockStore;
   private data: BlockData;
+  private id: string;
+  private static instances: Record<string, BlockStore> = {};
+
+  private constructor(id: string = "") {
+    this.id = id;
+    this.data = { lastId: null, level: 1, ctxStack: {} };
+  }
 
   private debouncedSave = debounce(() => {
     console.log("saving..");
     const serialized = this.serialize();
     // console.log("debouncedSave", serialized);
-    localStorage.setItem("blockStore", serialized);
+    localStorage.setItem(this.getStorageKey(), serialized);
   }, 500);
 
-  private constructor() {
-    this.data = { lastId: null, level: 1, ctxStack: {} };
+  private getStorageKey(): string {
+    return this.id ? `blockStore#${this.id}` : "blockStore";
   }
 
-  public static getInst(): BlockStore {
-    if (!BlockStore.inst) {
-      BlockStore.inst = new BlockStore();
+  public static getInst(id: string = ""): BlockStore {
+    console.log("BlockStore.getInst", id);
+    if (!BlockStore.instances[id]) {
+      BlockStore.instances[id] = new BlockStore(id);
     }
-    return BlockStore.inst;
+    return BlockStore.instances[id];
   }
 
   public get(): BlockData {
@@ -90,11 +98,6 @@ export class BlockStore {
       )
     );
 
-    // console.log("serializing", JSON.stringify(blockStore));
-    // console.log("level", blockStore.level); // Check the level value
-    // console.log("keys", Object.keys(blockStore.ctxStack)); // Check the keys in ctxStack
-    // console.log("filtered", JSON.stringify(filteredCtxStack)); // Check the filtered ctxStack
-
     const serializedBlockStore = {
       ...blockStore,
       ctxStack: filteredCtxStack,
@@ -104,7 +107,7 @@ export class BlockStore {
   }
 
   public loadFromLocalStorage(): boolean {
-    const storedDataString = localStorage.getItem("blockStore");
+    const storedDataString = localStorage.getItem(this.getStorageKey());
     console.log("loading BlockStore from local storage..");
     if (storedDataString) {
       this.deserialize(storedDataString);
@@ -146,8 +149,21 @@ export class BlockStore {
 
   public saveNow(): void {
     this.debouncedSave.cancel(); // Cancel any pending debounced calls
-    localStorage.setItem("blockStore", this.serialize());
+    localStorage.setItem(this.getStorageKey(), this.serialize());
   }
+}
+
+export function listAllStorageBlockStores(): string[] {
+  const blockStores: string[] = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("blockStore-")) {
+      blockStores.push(key.replace("blockStore-", ""));
+    }
+  }
+
+  return blockStores;
 }
 
 // export let lastId: string | null = null;
