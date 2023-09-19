@@ -130,8 +130,32 @@ function extractTextFromJSON(
 
 type EditorOrView = Editor | EditorView;
 
-const insertSegmentsWithHardBreaks = (
-  editorOrView: EditorOrView,
+const insertSegmentsWithHardBreaks = (editor: Editor, diff: string) => {
+  const segments = diff.split("\n");
+  // console.log(`diff: '${diff}' segments: '${segments}'`);
+
+  segments.forEach((segment, index) => {
+    if (segment) {
+      // Insert the segment text
+      // console.log(`** inserting segment: '${segment}'`);
+      setTimeout(() => {
+        const transaction = editor.state.tr.insertText(segment);
+        editor.view.dispatch(transaction);
+      }, 0);
+    }
+
+    // Insert a hard break except after the last segment
+    if (index < segments.length - 1) {
+      // console.log(`** inserting hard break`);
+      setTimeout(() => {
+        editor.commands.setHardBreak();
+      }, 0);
+    }
+  });
+};
+
+const insertSegmentsWithHardBreaksView = (
+  editorView: EditorView,
   diff: string
 ) => {
   const segments = diff.split("\n");
@@ -140,15 +164,8 @@ const insertSegmentsWithHardBreaks = (
   let schema: any;
   let dispatch;
 
-  if (editorOrView instanceof EditorView) {
-    ({ tr, schema } = editorOrView.state);
-    dispatch = editorOrView.dispatch;
-  } else {
-    // Assuming editorOrView is of Editor type
-    tr = editorOrView.state.tr;
-    schema = editorOrView.state.schema;
-    dispatch = editorOrView.view.dispatch;
-  }
+  ({ tr, schema } = editorView.state);
+  dispatch = editorView.dispatch;
 
   segments.forEach((segment, index) => {
     if (segment) {
@@ -175,7 +192,7 @@ function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
     return false;
   }
 
-  insertSegmentsWithHardBreaks(view, plainText);
+  insertSegmentsWithHardBreaksView(view, plainText);
 
   return true;
 }
