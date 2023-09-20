@@ -1,12 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getDbInstance } from "@/lib/db";
-import { nanoid } from "nanoid";
+import { getDbInstance, releaseDbInstance } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const db = await getDbInstance();
   try {
-    const db = getDbInstance();
     const data = await req.json();
 
     console.log("blob POST...");
@@ -27,12 +26,14 @@ export async function POST(req: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    await releaseDbInstance();
   }
 }
 
 export async function GET(req: NextRequest) {
+  const db = await getDbInstance();
   try {
-    const db = getDbInstance();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     const limitParam = url.searchParams.get("limit");
@@ -92,5 +93,7 @@ export async function GET(req: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    await releaseDbInstance();
   }
 }

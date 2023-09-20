@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDbInstance } from "@/lib/db";
+import { getDbInstance, releaseDbInstance } from "@/lib/db";
 
 import { Excerpt } from "@/lib/types";
 
@@ -8,6 +8,7 @@ interface QueryResult extends Excerpt {}
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const db = await getDbInstance();
   try {
     const url = new URL(req.url);
 
@@ -34,8 +35,7 @@ LEFT JOIN tags AS t ON e.id = t.excerpt_id
 GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
 ORDER BY e.id ASC;`;
 
-    let db_query = getDbInstance();
-    const result: QueryResult[] = await db_query.any(query, filing_id);
+    const result: QueryResult[] = await db.any(query, filing_id);
     console.log("result length", result.length);
     // Send the results as JSON
     return NextResponse.json(result);
@@ -47,5 +47,7 @@ ORDER BY e.id ASC;`;
       },
       { status: 500 }
     );
+  } finally {
+    await releaseDbInstance();
   }
 }

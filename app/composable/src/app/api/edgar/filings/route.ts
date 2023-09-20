@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getDbInstance } from "@/lib/db";
+import { getDbInstance, releaseDbInstance } from "@/lib/db";
 import { Filing, Company, Excerpt } from "@/lib/types";
 import { getEmbedding } from "@/app/api/lib/embedding";
 
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 interface QueryResult extends Filing, Company, Excerpt {}
 
 export async function GET(req: NextRequest) {
+  const db = await getDbInstance();
   try {
     const url = new URL(req.url);
     let limit: string | null = url.searchParams.get("limit");
@@ -158,7 +159,6 @@ export async function GET(req: NextRequest) {
     `;
     }
 
-    let db = getDbInstance();
     const result: QueryResult[] = await db.any(baseQuery, numericLimit);
 
     console.log(`result length: ${result.length}`);
@@ -227,5 +227,7 @@ export async function GET(req: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    await releaseDbInstance();
   }
 }
