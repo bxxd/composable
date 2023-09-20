@@ -130,6 +130,9 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             >
               <Icon icon={dragIndicatorIcon} className="icon-size" />
             </div>
+            <div className="italic opacity-25 text-sm mt-1 pl-2">
+              {node.attrs.id}
+            </div>
           </div>
           <div className="flex gap-2">
             <button
