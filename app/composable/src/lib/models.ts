@@ -36,4 +36,4 @@ export const aiModels = [
   { value: "pygmalionai/mythalion-13b", name: "Pygmalion: Mythalion 13B" },
 ];
 
-export const defaultAiModel = "pygmalionai/mythalion-13b";
+export const defaultAiModel = "meta-llama/llama-2-70b-chat";
