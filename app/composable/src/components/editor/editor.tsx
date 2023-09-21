@@ -53,7 +53,7 @@ let mockdata = [
         content: [
           {
             type: "text",
-            text: `This is a system message. You can delete it by pressing the "x" button.`,
+            text: `Welcome! This is a system message. To personalize your experience, you may delete or edit this message by clicking the "x" button. It serves as a guide for customizing how you would like the assistant to engage with you.`,
           },
         ],
       },
@@ -61,8 +61,33 @@ let mockdata = [
   },
   {
     type: "dBlock",
-    attrs: { role: "user", id: "0.1" },
-    content: [{ type: "paragraph", content: [] }],
+    attrs: { role: "user", id: "0.2" },
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: `This is your personal message block. Each block, including this one, is modular—meaning you can rearrange, save, or delve into its context. When you click the ">" symbol next to this block, a new contextual window will appear with the assistant, focusing solely on this block. In this nested context, you may interact with the assistant, explore related topics, and any generated insights can be seamlessly integrated back into this parent block, creating a hierarchical chain of interactions for your reference.`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    type: "dBlock",
+    attrs: { role: "assistant", id: "0.3" },
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: `This is example an assistant's response block. It is also customizable and can be edited for your convenience. The color coding is designed to help you quickly distinguish between different types of messages.`,
+          },
+        ],
+      },
+    ],
   },
 ];
 
