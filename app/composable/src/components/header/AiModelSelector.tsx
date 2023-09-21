@@ -18,7 +18,7 @@ export const AiModelSelector = React.memo((): React.ReactElement => {
       console.log("onChange triggered");
       setSelectedModel(e.target.value);
     },
-    []
+    [setSelectedModel]
   );
 
   return (
@@ -35,5 +35,7 @@ export const AiModelSelector = React.memo((): React.ReactElement => {
     </select>
   );
 });
+
+AiModelSelector.displayName = "AiModelSelector";
 
 export default AiModelSelector;
