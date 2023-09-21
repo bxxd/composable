@@ -23,6 +23,7 @@ import { defaultExtensions } from "./extensions";
 import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
+
 import _ from "lodash";
 
 import {
@@ -128,8 +129,6 @@ function extractTextFromJSON(
   return result;
 }
 
-type EditorOrView = Editor | EditorView;
-
 const insertSegmentsWithHardBreaks = (editor: Editor, diff: string) => {
   const segments = diff.split("\n");
   // console.log(`diff: '${diff}' segments: '${segments}'`);
@@ -197,7 +196,13 @@ function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
   return true;
 }
 
-const TipTap = forwardRef((props, ref) => {
+type TipTapProps = {
+  onToggleCatalog: () => void;
+};
+
+const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
+  const { onToggleCatalog } = props;
+
   const [saveStatus, setSaveStatus] = useState("Saved");
 
   const [hydrated, setHydrated] = useState(false);
@@ -207,8 +212,6 @@ const TipTap = forwardRef((props, ref) => {
   const editorRef = useRef<Editor | null>(null);
 
   const componentRef = useRef<HTMLDivElement>(null);
-
-  const [data, setData] = useState<any>(null);
 
   const params = useParams();
   let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
@@ -229,7 +232,7 @@ const TipTap = forwardRef((props, ref) => {
       const res = await fetch(`/api/blob?id=${id}&original`);
       const data = await res.json();
       console.log("got data", data);
-      setData(data[0]);
+
       return data[0];
     } catch (error) {
       toast(`Error fetching content data: ${error}`);
@@ -546,9 +549,14 @@ const TipTap = forwardRef((props, ref) => {
       ref={componentRef}
     >
       <div className="header flex justify-end pb-1">
-        <button type="button" className="cursor-default">
+        <button
+          type="button"
+          className="cursor-pointer"
+          onClick={onToggleCatalog}
+        >
           <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
         </button>
+
         <div className="flex mr-auto pt-1">
           <div className="ml-1 text-stone-400  text-sm font-normal">
             Project {slug}

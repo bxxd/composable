@@ -1,13 +1,15 @@
 import TipTap from "@/components/editor";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { DataItem } from "@/lib/types";
 import SearchColumn from "./searchColumn";
 import SavedItems from "./savedItems";
 import { JSONContent } from "@tiptap/react";
+import Catalog from "@/components/workspace/catalog";
 
 type WorkspaceProps = {};
 
 export default function Workspace({}: WorkspaceProps) {
+  const [showCatalog, setShowCatalog] = useState(true);
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;
@@ -31,11 +33,18 @@ export default function Workspace({}: WorkspaceProps) {
     }
   };
 
+  const handleToggleCatalog = () => {
+    // New function to toggle Catalog visibility
+    console.log("handleToggleCatalog..");
+    setShowCatalog(!showCatalog);
+  };
+
   return (
-    <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto">
+    <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto flex-grow h-full">
       {/* TipTap Component */}
       <div className="flex flex-col w-2/3 min-w-[36ch]">
-        <TipTap ref={tiptapRef} />
+        {showCatalog && <Catalog />}
+        <TipTap ref={tiptapRef} onToggleCatalog={handleToggleCatalog} />
       </div>
 
       {/* SearchColumn Component */}

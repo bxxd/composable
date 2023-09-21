@@ -31,7 +31,10 @@ const Layout: React.FC<LayoutProps> = ({
         }}
       >
         <Header childrenComponents={headerChildrenComponents} />
-        <main className="App flex flex-col gap-4">{children}</main>
+        <main className="App flex flex-col gap-4 flex-grow h-full">
+          {children}
+        </main>
+
         <ToasterProvider />
       </ThemeProvider>
     </GlobalProvider>
