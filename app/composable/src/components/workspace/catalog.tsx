@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Icon } from "@iconify/react";
 import { useRouter, useParams } from "next/navigation";
+import { BlockStore } from "@/lib/editor";
 
 type KeyButtonProps = {
   keyName: string;
@@ -8,6 +9,7 @@ type KeyButtonProps = {
   isActive: boolean;
   onClick: (key: string) => void;
 };
+
 const KeyButton: React.FC<KeyButtonProps> = ({
   keyName,
   onDelete,
@@ -19,32 +21,37 @@ const KeyButton: React.FC<KeyButtonProps> = ({
     : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer";
 
   return (
-    <button
-      className={`flex items-center rounded-md p-1 ${buttonClasses}`}
-      onClick={() => {
-        if (!isActive) onClick(keyName);
-      }}
-    >
-      <span className="text-sm text-gray-600 dark:text-gray-300 mx-2">
-        {" "}
-        {/* Changed text-sm to text-xs */}
-        Project {keyName}
-      </span>
-      {/* <Icon
+    <div className={`flex items-center rounded-md p-1 ${buttonClasses}`}>
+      <div
+        onClick={() => {
+          if (!isActive) onClick(keyName);
+        }}
+        className="flex"
+      >
+        <span className="text-sm text-gray-600 dark:text-gray-300 mx-2">
+          {" "}
+          {/* Changed text-sm to text-xs */}
+          Project {keyName}
+        </span>
+      </div>
+      {keyName != "" && (
+        <Icon
           icon="ic:baseline-close"
           className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
           onClick={() => onDelete(keyName)}
           width={16}
           height={16}
-        /> */}
-    </button>
+        />
+      )}
+    </div>
   );
 };
+
 type CatalogProps = {
   onToggleCatalog: () => void;
 };
 
-const Catalog = ({ onToggleCatalog }: CatalogProps) => {
+const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
   const [keys, setKeys] = useState<string[]>([]);
   const params = useParams();
   let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
@@ -53,6 +60,26 @@ const Catalog = ({ onToggleCatalog }: CatalogProps) => {
   }
 
   useEffect(() => {
+    refreshKeys();
+    const handleStorageChange = (e: Event) => {
+      if (e instanceof StorageEvent && e.key?.startsWith("blockStore")) {
+        refreshKeys(); // Re-fetch keys
+      } else if (e.type === "local-storage-updated") {
+        refreshKeys();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("local-storage-updated", handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("local-storage-updated", handleStorageChange);
+    };
+  }, []);
+
+  const refreshKeys = () => {
     const blockStoreKeys: string[] = [];
     let emptyKeyExists = false; // Track whether "" exists as a key
 
@@ -82,11 +109,45 @@ const Catalog = ({ onToggleCatalog }: CatalogProps) => {
     }
 
     setKeys(blockStoreKeys);
-  }, []);
+  };
+
+  // Listen to changes in localStorage
 
   const onDelete = (key: string) => {
-    localStorage.removeItem(key);
-    setKeys((prevKeys) => prevKeys.filter((k) => k !== key));
+    const deleteSuccess = BlockStore.getInst(key).delete(key);
+    if (deleteSuccess && slug === key) {
+      router.push(`/work`);
+    }
+  };
+
+  const newKeyInputRef = useRef<HTMLInputElement>(null);
+  const [isCreatingNewKey, setIsCreatingNewKey] = useState<boolean>(false);
+  const [newKeyName, setNewKeyName] = useState<string>("");
+
+  const handleNewKeyCreation = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (newKeyName.length > 0) {
+        setIsCreatingNewKey(false);
+        // Logic to save newKeyName into your storage here
+        router.push(`/work/${newKeyName}`);
+      } else {
+        setIsCreatingNewKey(false);
+      }
+    }
+
+    if (e.key === "Escape") {
+      setIsCreatingNewKey(false);
+    }
+
+    if (e.key === "Backspace" && newKeyName.length === 0) {
+      setIsCreatingNewKey(false);
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (newKeyName === "") {
+      setIsCreatingNewKey(false);
+    }
   };
 
   const router = useRouter();
@@ -99,9 +160,8 @@ const Catalog = ({ onToggleCatalog }: CatalogProps) => {
             icon="ph:x-thin"
             className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
             onClick={() => onToggleCatalog()}
-            width={18} // Adjust this for width
-            height={18} // Adjust this for height
-            style={{ fontWeight: 100 }} // Making it thin, you may have to check the specific icon's documentation for making it thin.
+            width={18}
+            height={18}
           />
         </div>
         {keys.map((key, index) => (
@@ -112,11 +172,38 @@ const Catalog = ({ onToggleCatalog }: CatalogProps) => {
               isActive={key === slug}
               onClick={(key) => {
                 router.push(`/work/${key}`);
-                /* your onClick logic here */
               }}
             />
           </div>
         ))}
+        {isCreatingNewKey ? (
+          <input
+            type="text"
+            ref={newKeyInputRef}
+            className="m-1 px-2 py-1 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-xs focus:outline-none focus:border-blue-200"
+            value={newKeyName}
+            onChange={(e) => setNewKeyName(e.target.value)}
+            onKeyDown={handleNewKeyCreation}
+            onBlur={handleInputBlur}
+            placeholder="New Project Name"
+            autoFocus
+          />
+        ) : (
+          <div
+            className="flex items-center h-[28px] ml-1 mr-1 mt-1 border rounded-md "
+            onClick={() => {
+              setIsCreatingNewKey(true);
+              setNewKeyName("");
+            }}
+          >
+            <Icon
+              icon="tdesign:plus"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+              width={24}
+              height={24}
+            />
+          </div>
+        )}
       </div>
     </>
   );

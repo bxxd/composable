@@ -26,7 +26,7 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
       <div className="px-4 md:flex md:items-center md:justify-between py-1">
         <div className="px-4 md:flex md:items-center md:justify-between py-1">
-          <div className="flex select-none">
+          <div className="flex select-none justify-center pt-0">
             <div className="flex-shrink-0 inline-block">
               <Image
                 src="/images/logo3.png"
@@ -46,24 +46,31 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
             <Navigation routes={routes} />
           </div>
         </div>
-        <div className="flex ml-auto mr-4">
-          {childrenComponents.map((component, index) => (
-            <div key={index} className="mr-2">
-              {component}
-            </div>
-          ))}
+
+        <div className=" ml-auto inline-flex flex-shrink-0">
+          <div className="flex ml-1 mr-1 ">
+            {childrenComponents.map((component, index) => (
+              <div key={index} className="mr-2">
+                {component}
+              </div>
+            ))}
+          </div>
         </div>
-        <button
-          onClick={toggleTheme}
-          className="p-1 focus:outline-none focus:bg-gray-200 dark:focus:bg-gray-700 rounded transition-all duration-300"
-        >
-          <Icon
-            icon={theme === "light" ? darkMode : lightMode}
-            width="18"
-            height="18"
-            className="transition-colors"
-          />
-        </button>
+        <div className="flex justify-center items-center">
+          <div className="justify-center inline-flex flex-shrink-0">
+            <button
+              onClick={toggleTheme}
+              className="p-1 focus:outline-none focus:bg-gray-200 dark:focus:bg-gray-700 rounded transition-all duration-300"
+            >
+              <Icon
+                icon={theme === "light" ? darkMode : lightMode}
+                width="18"
+                height="18"
+                className="transition-colors"
+              />
+            </button>
+          </div>
+        </div>
       </div>
     </header>
   );

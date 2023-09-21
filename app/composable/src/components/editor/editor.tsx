@@ -244,6 +244,11 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     slug = "";
   }
 
+  // let blockState: BlockStore;
+  // useEffect(() => {
+  //   blockState = BlockStore.getInst(slug);
+  // }, [slug]);
+
   const blockState = BlockStore.getInst(slug);
 
   const router = useRouter();
@@ -507,11 +512,17 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
             const fetchData = async () => {
               const data = await fetchContentData(slug);
 
-              setTimeout(() => {
-                editor.commands.setContent(data.original);
-                blockState.set({ level: 1 });
-                saveUpdates();
-              }, 0);
+              if (!data) {
+                console.log("no data found for slug");
+
+                editor.commands.setContent(mockdata);
+              } else {
+                setTimeout(() => {
+                  editor.commands.setContent(data.original);
+                  blockState.set({ level: 1 });
+                  saveUpdates();
+                }, 0);
+              }
               console.log("done hydrating");
             };
             fetchData();
@@ -520,6 +531,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           console.log(
             "Data found in localStorage, initializing with values..."
           );
+
           editor.commands.setContent(blockState.getCtxItemAtCurrentLevel());
         }
       }, 0);
@@ -565,8 +577,6 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   const handleSubLevelAcceptClick = () => {
     popSubContent(editorRef.current, true);
   };
-
-  console.log(blockState.get());
 
   return (
     <section

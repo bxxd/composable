@@ -67,6 +67,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    if (id && !integerId) {
+      console.log("id is not an integer");
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    }
+
     let queryText: string;
     let queryParams: (string | number)[];
 

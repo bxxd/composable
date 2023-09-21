@@ -65,9 +65,19 @@ export class BlockStore {
 
   private debouncedSave = debounce(() => {
     console.log("saving..");
+    const key = this.getStorageKey();
     const serialized = this.serialize();
-    // console.log("debouncedSave", serialized);
-    localStorage.setItem(this.getStorageKey(), serialized);
+
+    // Check if the key exists in localStorage
+    const existingValue = localStorage.getItem(key);
+
+    if (existingValue === null) {
+      localStorage.setItem(key, serialized);
+      window.dispatchEvent(new Event("local-storage-updated"));
+    } else {
+      // If the key already exists, update it without firing the event
+      localStorage.setItem(key, serialized);
+    }
   }, 500);
 
   private getStorageKey(): string {
@@ -164,9 +174,37 @@ export class BlockStore {
     localStorage.setItem(this.getStorageKey(), this.serialize());
   }
 
-  public delete(): void {
-    localStorage.removeItem(this.getStorageKey());
-    delete BlockStore.instances[this.id];
+  public delete(id: string): boolean {
+    console.log("BlockStore.delete", id);
+    try {
+      const storageKey = this.getStorageKey();
+
+      // Check if the item exists in localStorage
+      if (localStorage.getItem(storageKey) !== null) {
+        localStorage.removeItem(storageKey);
+        window.dispatchEvent(new Event("local-storage-updated"));
+      } else {
+        console.warn(`Item with key ${storageKey} not found in localStorage.`);
+      }
+
+      // Check if the instance exists in BlockStore.instances
+      if (BlockStore.instances.hasOwnProperty(id)) {
+        delete BlockStore.instances[id];
+      } else {
+        console.warn(
+          `Instance with id ${id} not found in BlockStore.instances.`
+        );
+      }
+
+      if (BlockStore.lastCreatedId === id) {
+        BlockStore.lastCreatedId = null;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("An error occurred during deletion:", error);
+      return false;
+    }
   }
 }
 
