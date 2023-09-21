@@ -54,19 +54,32 @@ const Catalog = ({ onToggleCatalog }: CatalogProps) => {
 
   useEffect(() => {
     const blockStoreKeys: string[] = [];
+    let emptyKeyExists = false; // Track whether "" exists as a key
+
     for (let i = 0; i < localStorage.length; i++) {
       let key = localStorage.key(i) as string;
       if (key.startsWith("blockStore")) {
         key = key.replace("blockStore", "").replace("#", "");
 
+        if (key === "") {
+          emptyKeyExists = true; // Set flag if "" is found
+        }
+
         blockStoreKeys.push(key);
       }
     }
+
+    // Sort keys alphabetically
     blockStoreKeys.sort((a, b) => {
       if (a === "") return -1;
       if (b === "") return 1;
       return a.localeCompare(b);
     });
+
+    // Add "" at the beginning if it doesn't exist
+    if (!emptyKeyExists) {
+      blockStoreKeys.unshift("");
+    }
 
     setKeys(blockStoreKeys);
   }, []);

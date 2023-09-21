@@ -9,7 +9,7 @@ import Catalog from "@/components/workspace/catalog";
 type WorkspaceProps = {};
 
 export default function Workspace({}: WorkspaceProps) {
-  const [showCatalog, setShowCatalog] = useState(true);
+  const [showCatalog, setShowCatalog] = useState(false);
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;
@@ -50,7 +50,7 @@ export default function Workspace({}: WorkspaceProps) {
       {/* SearchColumn Component */}
       <div className="flex-grow w-1/3 min-w-[22ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
-        <SearchColumn handleAddData={handleAddData} />
+        {/* <SearchColumn handleAddData={handleAddData} /> */}
       </div>
     </div>
   );

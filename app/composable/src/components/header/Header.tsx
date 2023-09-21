@@ -17,7 +17,7 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
 
   const routes = [
     { path: "/work", label: "Workspace" },
-    { path: "/docs", label: "Docs" },
+    // { path: "/docs", label: "Docs" },
     { path: "/hub", label: "Hub" },
     // ... add more routes as necessary
   ];

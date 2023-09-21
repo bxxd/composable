@@ -73,13 +73,13 @@ export async function POST(req: NextRequest) {
     baseURL: "https://openrouter.ai/api/v1",
   });
 
-  // if (aiModel.includes("openai")) {
-  //   console.log("using openai");
-  //   openai = new OpenAI({
-  //     apiKey: process.env.OPENAI_API_KEY || "",
-  //   });
-  //   aiModel = aiModel.replace("openai/", "");
-  // }
+  if (aiModel.includes("openai")) {
+    console.log("using openai");
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || "",
+    });
+    aiModel = aiModel.replace("openai/", "");
+  }
 
   // console.log("messages", messages);
   try {

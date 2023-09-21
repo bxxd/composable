@@ -163,18 +163,25 @@ export class BlockStore {
     this.debouncedSave.cancel(); // Cancel any pending debounced calls
     localStorage.setItem(this.getStorageKey(), this.serialize());
   }
+
+  public delete(): void {
+    localStorage.removeItem(this.getStorageKey());
+    delete BlockStore.instances[this.id];
+  }
 }
 
 export function listAllStorageBlockStores(): string[] {
   const blockStores: string[] = [];
-
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith("blockStore-")) {
-      blockStores.push(key.replace("blockStore-", ""));
+    if (key && key.startsWith("blockStore")) {
+      if (key === "blockStore") {
+        blockStores.push("");
+      } else {
+        blockStores.push(key.replace("blockStore#", ""));
+      }
     }
   }
-
   return blockStores;
 }
 

@@ -364,9 +364,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     const mousedownHandler = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      stop();
+      //   stop();
 
-      window.alert("AI writing canceled.");
+      toast("Editing disabled while AI is responding.");
     };
 
     const element = componentRef.current;
@@ -552,7 +552,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
         <button
           type="button"
           className="cursor-pointer"
-          onClick={onToggleCatalog}
+          onMouseDown={onToggleCatalog}
         >
           <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
         </button>
