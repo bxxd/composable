@@ -1,18 +1,31 @@
+import React, { useEffect, useCallback } from "react";
+
 import { aiModels } from "@/lib/models";
 import { useGlobalContext } from "@/lib/context";
-import React from "react";
 
 type AiModelSelectorProps = {};
 
-export const AiModelSelector: React.FC<AiModelSelectorProps> = () => {
+export const AiModelSelector = React.memo((): React.ReactElement => {
   const { aiModel: selectedModel, setAiModel: setSelectedModel } =
     useGlobalContext();
+
+  useEffect(() => {
+    console.log("Current selected model:", selectedModel);
+  }, [selectedModel]);
+
+  const handleOnChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      console.log("onChange triggered");
+      setSelectedModel(e.target.value);
+    },
+    []
+  );
 
   return (
     <select
       className="flex mr-1"
       value={selectedModel}
-      onChange={(e) => setSelectedModel(e.target.value)}
+      onChange={handleOnChange}
     >
       {aiModels.map((model, index) => (
         <option key={index} value={model.value}>
@@ -21,6 +34,6 @@ export const AiModelSelector: React.FC<AiModelSelectorProps> = () => {
       ))}
     </select>
   );
-};
+});
 
 export default AiModelSelector;

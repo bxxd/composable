@@ -26,21 +26,21 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
       <div className="px-4 md:flex md:items-center md:justify-between py-1">
         <div className="px-4 md:flex md:items-center md:justify-between py-1">
-          <div className="flex-shrink-0 inline-block">
-            <Image
-              src="/images/logo3.png"
-              width={25}
-              height={25}
-              alt="logo"
-              className="mr-1"
-            />
-          </div>
+          <div className="flex select-none">
+            <div className="flex-shrink-0 inline-block">
+              <Image
+                src="/images/logo3.png"
+                width={25}
+                height={25}
+                alt="logo"
+                className="mr-1"
+              />
+            </div>
 
-          <div className="opacity-50 mr-5  font-serif">
-            <a href="/">
+            <div className="opacity-50 mr-5  font-serif">
               Composable Parts
               <span className="text-xs italic">&nbsp;wip</span>
-            </a>
+            </div>
           </div>
           <div className="font-serif">
             <Navigation routes={routes} />

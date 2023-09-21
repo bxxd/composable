@@ -578,6 +578,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           type="button"
           className="cursor-pointer"
           onMouseDown={onToggleCatalog}
+          title="Show or Hide the Catalog."
         >
           <Icon icon="ph:books-thin" width={21} height={21} color="#aaa" />
         </button>

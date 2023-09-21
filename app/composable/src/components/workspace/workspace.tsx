@@ -1,5 +1,6 @@
 import TipTap from "@/components/editor";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { DataItem } from "@/lib/types";
 import SearchColumn from "./searchColumn";
 import SavedItems from "./savedItems";
@@ -9,7 +10,22 @@ import Catalog from "@/components/workspace/catalog";
 type WorkspaceProps = {};
 
 export default function Workspace({}: WorkspaceProps) {
+  const params = useParams();
+  let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
+  if (slug === undefined) {
+    slug = "";
+  }
+
   const [showCatalog, setShowCatalog] = useState(false);
+
+  useEffect(() => {
+    if (slug && slug !== "") {
+      setShowCatalog(true);
+    } else {
+      setShowCatalog(false);
+    }
+  }, [slug]);
+
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;
