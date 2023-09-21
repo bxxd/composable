@@ -43,7 +43,7 @@ export default function Workspace({}: WorkspaceProps) {
     <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto flex-grow h-full">
       {/* TipTap Component */}
       <div className="flex flex-col w-2/3 min-w-[36ch]">
-        {showCatalog && <Catalog />}
+        {showCatalog && <Catalog onToggleCatalog={handleToggleCatalog} />}
         <TipTap ref={tiptapRef} onToggleCatalog={handleToggleCatalog} />
       </div>
 

@@ -40,8 +40,11 @@ const KeyButton: React.FC<KeyButtonProps> = ({
     </button>
   );
 };
+type CatalogProps = {
+  onToggleCatalog: () => void;
+};
 
-const Catalog: React.FC = () => {
+const Catalog = ({ onToggleCatalog }: CatalogProps) => {
   const [keys, setKeys] = useState<string[]>([]);
   const params = useParams();
   let slug = Array.isArray(params.slug) ? params.slug.join("") : params.slug;
@@ -77,7 +80,17 @@ const Catalog: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap pt-1">
+        <div className="flex items-center h-[32px] ml-2 mr-1 pt-1">
+          <Icon
+            icon="ph:x-thin"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+            onClick={() => onToggleCatalog()}
+            width={18} // Adjust this for width
+            height={18} // Adjust this for height
+            style={{ fontWeight: 100 }} // Making it thin, you may have to check the specific icon's documentation for making it thin.
+          />
+        </div>
         {keys.map((key, index) => (
           <div className="m-1" key={index}>
             <KeyButton
