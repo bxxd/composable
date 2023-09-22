@@ -56,9 +56,10 @@ export default function Workspace({}: WorkspaceProps) {
   };
 
   return (
-    <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto flex-grow h-full">
+    // <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto flex-grow h-full">
+    <div className="flex p-0 w-full overflow-auto flex-grow h-full">
       {/* TipTap Component */}
-      <div className="flex flex-col w-2/3 min-w-[36ch]">
+      <div className="flex flex-col w-full min-w-[36ch]">
         {showCatalog && <Catalog onToggleCatalog={handleToggleCatalog} />}
         <TipTap ref={tiptapRef} onToggleCatalog={handleToggleCatalog} />
       </div>
@@ -66,7 +67,7 @@ export default function Workspace({}: WorkspaceProps) {
       {/* SearchColumn Component */}
       <div className="flex-grow w-1/3 min-w-[22ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
-        {/* <SearchColumn handleAddData={handleAddData} /> */}
+        <SearchColumn handleAddData={handleAddData} />
       </div>
     </div>
   );

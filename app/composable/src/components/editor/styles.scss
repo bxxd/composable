@@ -40,6 +40,7 @@
 
   p {
     font-size: 1.1em;
+    margin-top: 4px;
   }
 
   code {
@@ -81,28 +82,53 @@
   outline: none !important;
 }
 
-.user-block {
-  border: 1px dashed #af4747;
+// .user-block {
+//   border: 1px dashed #af4747;
+//   border-top: none;
+//   border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+// }
+
+// .data-block {
+//   border: 1px dashed #c92bd4;
+//   border-top: none;
+//   border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+// }
+
+// .assistant-block {
+//   border: 1px dashed #47af72;
+//   border-top: none;
+//   border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+// }
+
+// .system-block {
+//   border: 1px dashed #3e52ac;
+//   border-top: none;
+//   border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+// }
+
+.common-block {
   border-top: none;
+  border-left: 2px solid; /* solid left */
+  // border-right: 2px solid; /* solid right */
+  padding-bottom: 4px;
   border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+  @apply shadow;
+}
+
+.user-block {
+  border-color: #af4747;
 }
 
 .data-block {
-  border: 1px dashed #c92bd4;
-  border-top: none;
-  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+  border-color: #c92bd4;
 }
 
 .assistant-block {
-  border: 1px dashed #47af72;
-  border-top: none;
-  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+  border-color: #47af72;
 }
 
 .system-block {
-  border: 1px dashed #3e52ac;
-  border-top: none;
-  border-radius: 0 0 4px 4px; /* Rounded corners only at the bottom */
+  border-color: #3e52ac;
 }
 
 .ProseMirror .is-editor-empty:first-child::before {
@@ -339,7 +365,7 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   }
 
   .icon-size {
-    @apply w-5 h-5;
+    @apply w-4 h-4;
   }
 }
 

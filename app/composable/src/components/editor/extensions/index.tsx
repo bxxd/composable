@@ -72,7 +72,7 @@ export function defaultExtensions(
       multicolor: true,
     }),
 
-    TiptapLink,
+    // TiptapLink,
     // Markdown.configure({
     //   html: false,
     //   transformCopiedText: true,

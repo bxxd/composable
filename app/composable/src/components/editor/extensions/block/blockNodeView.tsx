@@ -13,6 +13,7 @@ import { useGlobalContext } from "@/lib/context";
 import { isTextNodeEmpty } from "@/lib/editor";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { getTextFromDBlock, generateBlockId } from "@/lib/editor";
+import { JSONContent } from "@tiptap/react";
 
 import {
   createNodeJSON,
@@ -26,17 +27,41 @@ interface ExtendedNodeViewProps extends NodeViewProps {
   extraClass?: string;
 }
 
+const areEqual = (
+  prevProps: ExtendedNodeViewProps,
+  nextProps: ExtendedNodeViewProps
+) => {
+  const prevAttrs = prevProps.node.attrs;
+  const nextAttrs = nextProps.node.attrs;
+
+  // Shallow compare attrs except for 'children'
+  const areAttrsEqual =
+    prevAttrs.role === nextAttrs.role &&
+    prevAttrs.data === nextAttrs.data &&
+    prevAttrs.id === nextAttrs.id;
+
+  // Deep compare 'children' attribute if necessary
+  const areChildrenEqual = prevAttrs.children === nextAttrs.children; // Replace with deep comparison if needed
+
+  // Deep compare 'content' using JSON.stringify
+  const prevContentStr = JSON.stringify(prevProps.node.content);
+  const nextContentStr = JSON.stringify(nextProps.node.content);
+  const isContentEqual = prevContentStr === nextContentStr;
+
+  return areAttrsEqual && areChildrenEqual && isContentEqual;
+};
+
 export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   node,
   getPos,
   editor,
 }) => {
-  // console.log("BlockNodeView", node.attrs);
+  // console.log("BlockNodeView re-rendering");
 
   const { savedList, setSavedList } = useGlobalContext();
 
   const addSavedToList = (node: ProseMirrorNode) => {
-    console.log("addSavedToList", node.attrs.id);
+    // console.log("addSavedToList", node.attrs.id);
     if (isTextNodeEmpty(node)) {
       console.warn("Cannot save empty node.");
       return;
@@ -46,12 +71,13 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   };
 
   useEffect(() => {
-    // console.log("BlockNodeView mounted or updated.", node.toJSON());
+    // // console.log("BlockNodeView mounted or updated.", node.toJSON());
+    // console.log("BlockNodeView mounted or updated called.");
     if (!node.attrs.id) {
-      console.log(
-        "BlockNodeView: generating id for node with no id",
-        node.attrs
-      );
+      // console.log(
+      //   "BlockNodeView: generating id for node with no id",
+      //   node.attrs
+      // );
       const newAttrs = { ...node.attrs, id: generateBlockId(editor) };
 
       setTimeout(() => {
@@ -70,19 +96,37 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 
   const handleOpenEditor = (node: any) => {
     const store = BlockStore.getInst();
-    let currentContent = editor.getJSON();
+    let currentDoc = editor.getJSON();
 
     let ctxStack = store.get().ctxStack;
-    ctxStack[getBlockIdLevel(node.attrs.id)] = currentContent;
+    ctxStack[getBlockIdLevel(node.attrs.id)] = currentDoc;
 
     let content = node.attrs.children;
 
     if (content === null || content === undefined) {
-      content = node.toJSON();
-      content = _.cloneDeep(content);
-      content.attrs.id = node.attrs.id + ".0";
-      content = [content];
+      let thisNode = node.toJSON();
+      thisNode = _.cloneDeep(thisNode);
+      thisNode.attrs.id = node.attrs.id + ".1";
+
+      content = [thisNode];
+
+      let currentContent: JSONContent[] | undefined = currentDoc.content;
+      if (
+        currentContent &&
+        currentContent.length > 0 &&
+        thisNode.attrs.role != "system"
+      ) {
+        let possibleSystemNode = currentContent[0];
+        if (possibleSystemNode?.attrs?.role === "system") {
+          possibleSystemNode = _.cloneDeep(possibleSystemNode);
+          if (possibleSystemNode && possibleSystemNode.attrs) {
+            possibleSystemNode.attrs.id = node.attrs.id + ".0";
+            content.unshift(possibleSystemNode);
+          }
+        }
+      }
     }
+
     pushSubContent(editor, content);
   };
 
@@ -104,7 +148,10 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   };
 
   return (
-    <NodeViewWrapper as="div" className={`${node.attrs.role}-block`}>
+    <NodeViewWrapper
+      as="div"
+      className={`common-block ${node.attrs.role}-block `}
+    >
       <div>
         <div className="flex justify-between ml-1 mt-1 mr-1">
           <div className="flex gap-2">
@@ -130,7 +177,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             >
               <Icon icon={dragIndicatorIcon} className="icon-size" />
             </div>
-            <div className="italic opacity-25 text-sm mt-1 pl-2">
+            <div className="italic opacity-25 text-xs mt-1 pl-2">
               {node.attrs.id}
             </div>
           </div>
@@ -140,7 +187,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
               className="d-block-button group-hover:opacity-100"
               title="Save snippet for later re-use"
               onMouseDown={() => {
-                console.log("Button was clicked.");
+                // console.log("Button was clicked.");
                 addSavedToList(node);
               }}
             >
@@ -226,3 +273,5 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
     </NodeViewWrapper>
   );
 };
+
+export const MemoizedBlockNodeView = React.memo(BlockNodeView, areEqual);

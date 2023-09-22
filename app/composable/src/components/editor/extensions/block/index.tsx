@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { BlockNodeView } from "./blockNodeView";
+import { BlockNodeView, MemoizedBlockNodeView } from "./blockNodeView";
 import { Editor } from "@tiptap/core";
 
 export interface HandleAIButtonClickParams {
@@ -99,7 +99,7 @@ export const DBlock = Node.create<BlockOptions>({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(BlockNodeView);
+    return ReactNodeViewRenderer(MemoizedBlockNodeView);
   },
 
   addKeyboardShortcuts() {

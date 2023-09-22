@@ -43,6 +43,7 @@ export const TrailingNode = Extension.create<TrailingNodeOptions>({
       new Plugin({
         key: plugin,
         appendTransaction: (_, __, state) => {
+          // console.log("appendTransaction in trailingNode");
           const { doc, tr, schema } = state;
 
           const shouldInsertNodeAtEnd = plugin.getState(state);
