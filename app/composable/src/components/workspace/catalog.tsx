@@ -34,7 +34,7 @@ const KeyButton: React.FC<KeyButtonProps> = ({
           Project {keyName}
         </span>
       </div>
-      {true && (
+      {keyName != "" && (
         <Icon
           icon="ic:baseline-close"
           className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
@@ -124,15 +124,19 @@ const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
   const [isCreatingNewKey, setIsCreatingNewKey] = useState<boolean>(false);
   const [newKeyName, setNewKeyName] = useState<string>("");
 
+  const handleCreateCategory = () => {
+    if (newKeyName.length > 0) {
+      setIsCreatingNewKey(false);
+      // Logic to save newKeyName into your storage here
+      router.push(`/work/${newKeyName}`);
+    } else {
+      setIsCreatingNewKey(false);
+    }
+  };
+
   const handleNewKeyCreation = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (newKeyName.length > 0) {
-        setIsCreatingNewKey(false);
-        // Logic to save newKeyName into your storage here
-        router.push(`/work/${newKeyName}`);
-      } else {
-        setIsCreatingNewKey(false);
-      }
+      handleCreateCategory();
     }
 
     if (e.key === "Escape") {
@@ -177,17 +181,26 @@ const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
           </div>
         ))}
         {isCreatingNewKey ? (
-          <input
-            type="text"
-            ref={newKeyInputRef}
-            className="m-1 px-2 py-1 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-xs focus:outline-none focus:border-blue-200"
-            value={newKeyName}
-            onChange={(e) => setNewKeyName(e.target.value)}
-            onKeyDown={handleNewKeyCreation}
-            onBlur={handleInputBlur}
-            placeholder="New Project Name"
-            autoFocus
-          />
+          <div className="relative">
+            <input
+              type="text"
+              ref={newKeyInputRef}
+              className="m-1 px-2 py-1 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-xs focus:outline-none focus:border-blue-200 pr-6"
+              value={newKeyName}
+              onChange={(e) => setNewKeyName(e.target.value)}
+              onKeyDown={handleNewKeyCreation}
+              onBlur={handleInputBlur}
+              placeholder="New Project Name"
+              autoFocus
+            />
+            <Icon
+              icon="tdesign:plus"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+              width={20}
+              height={20}
+              onClick={handleCreateCategory}
+            />
+          </div>
         ) : (
           <div
             className="flex items-center h-[28px] ml-1 mr-1 mt-1 border rounded-md "
