@@ -85,7 +85,7 @@ export class BlockStore {
   }
 
   public static getInst(id: string | null = null): BlockStore {
-    console.log("BlockStore.getInst", id);
+    // console.log("BlockStore.getInst", id);
 
     if (id === null) {
       if (BlockStore.lastCreatedId) {
@@ -416,8 +416,7 @@ export function pushSubContent(editor: Editor, content: JSONContent[]) {
   const currentLevel = getBlockIdLevel(maxId);
 
   console.log("currentLevel", currentLevel);
-  // const ctxStack = store.get().ctxStack;
-  // store.set({ ctxStack: { ...ctxStack, [currentLevel]: currentContent } });
+
   store.setCtxItemAtLevel(currentLevel, currentContent);
   store.set({ level: currentLevel });
 

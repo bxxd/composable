@@ -206,7 +206,7 @@ const insertSegmentsWithHardBreaksView = (
 };
 
 function handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice) {
-  console.log("handlePaste");
+  // console.log("handlePaste");
 
   event.preventDefault();
 
@@ -244,6 +244,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     slug = "";
   }
 
+  // console.log("re-rendering TipTap");
+
   // let blockState: BlockStore;
   // useEffect(() => {
   //   blockState = BlockStore.getInst(slug);
@@ -257,11 +259,11 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   // console.log("slug", slug);
 
   const fetchContentData = async (id: string) => {
-    console.log("fetching content data for id: ", id);
+    // console.log("fetching content data for id: ", id);
     try {
       const res = await fetch(`/api/blob?id=${id}&original`);
       const data = await res.json();
-      console.log("got data", data);
+      // console.log("got data", data);
 
       return data[0];
     } catch (error) {
@@ -271,6 +273,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   };
 
   const saveUpdates = useDebouncedCallback(async () => {
+    console.log("saveUpdates..");
     setSaveStatus("Saving...");
 
     // Simulate a delay in saving.
@@ -312,8 +315,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     newNodePosition.current = null;
     let data = currentEditor?.getJSON();
 
-    console.log("editor", currentEditor);
-    console.log("json", JSON.stringify(data));
+    // console.log("editor", currentEditor);
+    // console.log("json", JSON.stringify(data));
 
     data = extractTextFromJSON(data);
 
@@ -323,7 +326,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     });
 
     toast.message("Sending to AI...");
-    console.log("payload ", payload);
+    // console.log("payload ", payload);
 
     complete(payload);
   };
@@ -351,6 +354,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   });
 
   useEffect(() => {
+    // console.log("useEffect setting editorRef");
     editorRef.current = editor;
   }, [editor]);
 
@@ -358,7 +362,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     id: "composable",
     api: "/api/generate",
     onFinish: (_prompt, _completion) => {
-      console.log("AI finished", editor);
+      // console.log("AI finished", editor);
 
       saveUpdates();
 
@@ -380,6 +384,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   useEffect(() => {
     // if user presses escape or cmd + z and it's loading,
     // stop the request, delete the completion, and insert back the "++"
+    // console.log("useEffect setting up event listeners");
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || (e.metaKey && e.key === "z")) {
         stop();
@@ -416,6 +421,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   }, [stop, isLoading, editor, complete, completion.length]);
 
   useEffect(() => {
+    // console.log("useEffect completion");
     if (!editor) {
       return;
     }
@@ -431,7 +437,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
       return;
     }
 
-    console.log("received diff from ", completion);
+    // console.log("received diff from ", completion);
 
     prev.current = completion;
 
@@ -464,7 +470,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
       return;
     }
 
-    console.log("appendContentNodeToEnd..");
+    // console.log("appendContentNodeToEnd..");
 
     let newContent = _.cloneDeep(content);
 
@@ -496,6 +502,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   };
 
   useEffect(() => {
+    // console.log("being called useEffect hydrated");
     if (editor) {
       setTimeout(() => {
         if (!blockState.loadFromLocalStorage()) {
@@ -545,7 +552,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
       console.log("no editor");
       return;
     }
-    console.log("appendDataContentToEnd..");
+    // console.log("appendDataContentToEnd..");
     const newNodeJSON = createNodeJSON(data, "data", editorRef.current);
 
     // Get the position of the last node
@@ -580,7 +587,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
   return (
     <section
-      className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
+      // className="flex flex-col border border-dashed rounded-lg m-1 p-1 pt-1 pb-0  border-sky-300"
+      className="flex flex-col rounded-lg m-1 pt-1 pr-1 pl-0 pb-1  mb-20"
       ref={componentRef}
     >
       <div className="header flex justify-end pb-1">
@@ -641,21 +649,11 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
       </div>
       {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent className="" editor={editor} />
-      <div className="relative group inline-block">
-        <div className="flex ml-auto">
+      <div className="relative group inline-block mt-2">
+        <div className="flex ">
           <button
             type="button"
-            className="w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-            onMouseDown={() =>
-              handleAIButtonClick({ editor: editorRef.current })
-            }
-            title="Send context to AI"
-          >
-            <Icon icon="ant-design:down" className="icon-size" />
-          </button>
-          <button
-            type="button"
-            className="w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
+            className=" w-6 h-6 bg-red-200 hover:bg-red-300 active:bg-red-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-red-700 dark:hover:bg-red-600 dark:active:bg-red-500 dark:text-gray-300"
             onMouseDown={() => clearEditor()}
             title="Reset all context"
           >
@@ -663,6 +661,16 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
               icon="ant-design:close-circle-outlined"
               className="icon-size"
             />
+          </button>
+          <button
+            type="button"
+            className="mr-auto w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+            onMouseDown={() =>
+              handleAIButtonClick({ editor: editorRef.current })
+            }
+            title="Send context to AI"
+          >
+            <Icon icon="ant-design:down" className="icon-size" />
           </button>
         </div>
       </div>

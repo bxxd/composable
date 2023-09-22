@@ -8,6 +8,24 @@ import { Ratelimit } from "@upstash/ratelimit";
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
+const timeout = (ms: number, promise: Promise<any>) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error("Request timed out"));
+    }, ms);
+
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((reason) => {
+        clearTimeout(timer);
+        reject(reason);
+      });
+  });
+};
+
 export async function POST(req: NextRequest) {
   console.log("generate AI response..");
 
@@ -84,7 +102,7 @@ export async function POST(req: NextRequest) {
   // console.log("messages", messages);
   try {
     // Ask OpenAI for a streaming chat completion given the prompt
-    const response = await openai.chat.completions.create(
+    const apiCall = openai.chat.completions.create(
       {
         model: aiModel,
         stream: true,
@@ -99,6 +117,11 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    const response: any = await Promise.race([
+      apiCall,
+      timeout(10000, apiCall),
+    ]);
+
     // console.log("response", response);
 
     // Convert the response into a friendly text-stream
@@ -107,11 +130,17 @@ export async function POST(req: NextRequest) {
     // Respond with the stream
     return new StreamingTextResponse(stream);
   } catch (error) {
-    console.log("error", error);
-    try {
-      return NextResponse.json((error as any).error.message, { status: 500 });
-    } catch (error) {
-      return NextResponse.json(error, { status: 500 });
+    if (typeof error === "object" && error !== null && "message" in error) {
+      if (error.message === "Request timed out") {
+        // Handle the timeout specifically
+        return NextResponse.json("Request timed out", { status: 504 }); // 504 Gateway Timeout
+      } else {
+        // Handle other errors
+        return NextResponse.json((error as any).error.message, { status: 500 });
+      }
+    } else {
+      // Handle unknown error types or other issues
+      return NextResponse.json("An unknown error occurred", { status: 500 });
     }
   }
 }
