@@ -451,8 +451,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
             "No data found in localStorage, initializing with default values..."
           );
           if (!slug) {
-            console.log("No slug, initializing with mockData...");
-            editor.commands.setContent(mockData);
+            console.log("No slug, initializing with introData...");
+            editor.commands.setContent(introData);
             blockState.set({ level: 1 });
             saveUpdates();
           } else {
@@ -463,7 +463,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
               if (!data) {
                 console.log("no data found for slug");
 
-                editor.commands.setContent(mockData);
+                editor.commands.setContent(introData);
               } else {
                 setTimeout(() => {
                   console.log("setting data to", JSON.stringify(data.original));
@@ -514,7 +514,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   };
 
   const clearEditor = () => {
-    blockState.set({ level: 1, lastId: null, ctxStack: { "1": mockData } });
+    blockState.set({ level: 1, lastId: null, ctxStack: { "1": clearData } });
     setTimeout(() => {
       editor?.commands.setContent(clearData);
     }, 0);
