@@ -1,6 +1,6 @@
 "use client";
 
-import "./styles.scss";
+import "@/styles/editor.scss";
 
 import {
   useEffect,
@@ -43,66 +43,7 @@ import { useCompletion } from "ai/react";
 
 import { toast } from "sonner";
 
-let mockdata = [
-  {
-    type: "dBlock",
-    attrs: { role: "system", id: "0.0" },
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: `Welcome! This is a system message. To personalize your experience, you may delete or edit this message by clicking the "x" button. It serves as a guide for customizing how you would like the assistant to engage with you.`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    type: "dBlock",
-    attrs: { role: "user", id: "0.2" },
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: `This is your personal message block. Each block, including this one, is modular—meaning you can rearrange, save, or delve into its context. When you click the ">" symbol next to this block, a new contextual window will appear with the assistant, focusing solely on this block. In this nested context, you may interact with the assistant, explore related topics, and any generated insights can be seamlessly integrated back into this parent block, creating a hierarchical chain of interactions for your reference.`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    type: "dBlock",
-    attrs: { role: "assistant", id: "0.3" },
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: `This is example an assistant's response block. It is also customizable and can be edited for your convenience. The color coding is designed to help you quickly distinguish between different types of messages.`,
-          },
-        ],
-      },
-    ],
-  },
-];
-
-let initData = [
-  {
-    type: "dBlock",
-    attrs: { role: "system", id: "0.0" },
-    content: [
-      {
-        type: "paragraph",
-        content: [],
-      },
-    ],
-  },
-];
+import { initData, introData, mockData, clearData } from "./samples";
 
 function extractTextFromJSON(
   data: JSONContent | null
@@ -510,8 +451,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
             "No data found in localStorage, initializing with default values..."
           );
           if (!slug) {
-            console.log("No slug, initializing with mockdata...");
-            editor.commands.setContent(mockdata);
+            console.log("No slug, initializing with mockData...");
+            editor.commands.setContent(mockData);
             blockState.set({ level: 1 });
             saveUpdates();
           } else {
@@ -522,9 +463,10 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
               if (!data) {
                 console.log("no data found for slug");
 
-                editor.commands.setContent(mockdata);
+                editor.commands.setContent(mockData);
               } else {
                 setTimeout(() => {
+                  console.log("setting data to", JSON.stringify(data.original));
                   editor.commands.setContent(data.original);
                   blockState.set({ level: 1 });
                   saveUpdates();
@@ -538,8 +480,10 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           console.log(
             "Data found in localStorage, initializing with values..."
           );
+          let data = blockState.getCtxItemAtCurrentLevel();
+          console.log("setting data to", JSON.stringify(data));
 
-          editor.commands.setContent(blockState.getCtxItemAtCurrentLevel());
+          editor.commands.setContent(data);
         }
       }, 0);
       setHydrated(true);
@@ -570,9 +514,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   };
 
   const clearEditor = () => {
-    blockState.set({ level: 1, lastId: null, ctxStack: { "1": mockdata } });
+    blockState.set({ level: 1, lastId: null, ctxStack: { "1": mockData } });
     setTimeout(() => {
-      editor?.commands.setContent(mockdata);
+      editor?.commands.setContent(clearData);
     }, 0);
     saveUpdates();
   };
