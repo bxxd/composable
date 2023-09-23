@@ -17,11 +17,11 @@ const KeyButton: React.FC<KeyButtonProps> = ({
   onClick,
 }) => {
   const buttonClasses = isActive
-    ? "bg-blue-200 dark:bg-blue-700 dark:hover:bg-blue-600 cursor-default"
-    : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer";
+    ? "bg-blue-200 dark:bg-blue-700 dark:hover:bg-blue-600 cursor-default shadow-inner"
+    : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer shadow-sm";
 
   return (
-    <div className={`flex items-center rounded-md p-1 ${buttonClasses}`}>
+    <div className={`flex items-center rounded-md p-1 ${buttonClasses} `}>
       <div
         onClick={() => {
           if (!isActive) onClick(keyName);
@@ -31,10 +31,10 @@ const KeyButton: React.FC<KeyButtonProps> = ({
         <span className="text-sm text-gray-600 dark:text-gray-300 mx-2">
           {" "}
           {/* Changed text-sm to text-xs */}
-          Project {keyName}
+          {keyName.length > 0 ? <>{keyName}</> : <>Home</>}
         </span>
       </div>
-      {keyName != "" && (
+      {true && (
         <Icon
           icon="ic:baseline-close"
           className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
@@ -185,7 +185,7 @@ const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
             <input
               type="text"
               ref={newKeyInputRef}
-              className="m-1 px-2 py-1 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-xs focus:outline-none focus:border-blue-200 pr-6"
+              className="m-1 mt-[5px] px-2  h-[27px] py-1 bg-white dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 text-sm focus:outline-none focus:border-blue-200 pr-6"
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               onKeyDown={handleNewKeyCreation}
@@ -203,7 +203,7 @@ const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
           </div>
         ) : (
           <div
-            className="flex items-center h-[28px] ml-1 mr-1 mt-1 border rounded-md "
+            className="flex items-center h-[27px] ml-1 mr-1 mt-[5px] shadow-sm rounded-md "
             onClick={() => {
               setIsCreatingNewKey(true);
               setNewKeyName("");
@@ -212,8 +212,8 @@ const Catalog: React.FC<CatalogProps> = ({ onToggleCatalog }) => {
             <Icon
               icon="tdesign:plus"
               className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
-              width={24}
-              height={24}
+              width={23}
+              height={23}
             />
           </div>
         )}

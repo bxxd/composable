@@ -542,7 +542,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
         <div className="flex mr-auto pt-1">
           <div className="ml-1 text-stone-400  text-sm font-normal">
-            Project {slug}
+            {slug === null || slug.length == 0 ? <>Home</> : <>{slug}</>}
           </div>
           <div className="ml-2 text-stone-400  text-sm italic">
             - level {blockState.get().level}
