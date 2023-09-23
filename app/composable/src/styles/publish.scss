@@ -78,3 +78,19 @@
     border-left: 2px solid rgba(#0d0d0d, 0.1);
   }
 }
+
+.toggleButton {
+  @apply text-xs py-0.5 px-1.5 rounded border  border-gray-100;
+}
+
+.dark .toggleButton {
+  @apply bg-gray-800 text-gray-200 border-gray-700;
+}
+
+.toggleButtonActive {
+  @apply bg-blue-500 text-white border-blue-500;
+}
+
+.dark .toggleButtonActive {
+  @apply bg-blue-400 text-gray-800 border-blue-400;
+}
