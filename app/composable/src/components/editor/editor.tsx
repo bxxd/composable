@@ -479,7 +479,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           );
           let data = blockState.getCtxItemAtCurrentLevel();
           console.log("setting data to", JSON.stringify(data));
-          fixIds(data);
+          // fixIds(data);
           editor.commands.setContent(data);
         }
       }, 0);

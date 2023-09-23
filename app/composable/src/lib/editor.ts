@@ -131,6 +131,7 @@ export class BlockStore {
 
   public loadFromLocalStorage(): boolean {
     const storedDataString = localStorage.getItem(this.getStorageKey());
+
     console.log("loading BlockStore from local storage..");
     if (storedDataString) {
       this.deserialize(storedDataString);
