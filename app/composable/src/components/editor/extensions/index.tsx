@@ -73,7 +73,7 @@ export function defaultExtensions(
     }),
 
     TiptapLink,
-    Dropcursor,
+
     // Markdown.configure({
     //   html: false,
     //   transformCopiedText: true,

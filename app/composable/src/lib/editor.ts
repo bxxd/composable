@@ -148,11 +148,13 @@ export class BlockStore {
       ctxItem = ctxItem.content;
     }
 
+    console.log("setCtxItemAtLevel", level, ctxItem);
+
     const currentCtxStack = this.data.ctxStack;
     currentCtxStack[level] = ctxItem; // Set the context item at the specified level
     this.data.ctxStack = currentCtxStack; // Update the internal context stack
 
-    this.debouncedSave(); // Save changes (assuming you have a debouncedSave method)
+    this.debouncedSave();
   }
 
   public getCtxItemAtLevel(level: number): any {
@@ -160,6 +162,8 @@ export class BlockStore {
   }
 
   public getCtxItemAtCurrentLevel(): any {
+    console.log("getting ctx item at current level", this.data.level);
+    console.log("ctxStack", this.data.ctxStack);
     return this.data.ctxStack[this.data.level];
   }
 
@@ -449,7 +453,10 @@ export function pushSubContent(editor: Editor, content: JSONContent[]) {
     return maxId;
   }, "");
 
-  store.set({ lastId: maxId, level: getBlockIdLevel(maxId) });
+  let newLevel = getBlockIdLevel(maxId);
+  console.log("newLevel", newLevel);
+  store.setCtxItemAtLevel(newLevel, content);
+  store.set({ lastId: maxId, level: newLevel });
 
   if (!isTextContentEmpty(content[content.length - 1])) {
     console.log("creating new node..........");

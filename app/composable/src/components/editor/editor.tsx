@@ -448,9 +448,8 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           );
           if (!slug) {
             console.log("No slug, initializing with introData...");
+            blockState.setCtxItemAtLevel(1, introData);
             editor.commands.setContent(introData);
-            blockState.set({ level: 1 });
-            saveUpdates();
           } else {
             console.log("Slug found, initializing...");
             const fetchData = async () => {
@@ -458,15 +457,14 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
               if (!data) {
                 console.log("no data found for slug");
-
+                blockState.setCtxItemAtLevel(1, introData);
                 editor.commands.setContent(introData);
               } else {
                 setTimeout(() => {
                   console.log("setting data to", JSON.stringify(data.original));
                   fixIds(data.original);
+                  blockState.setCtxItemAtLevel(1, data.original);
                   editor.commands.setContent(data.original);
-                  blockState.set({ level: 1 });
-                  saveUpdates();
                 }, 0);
               }
               console.log("done hydrating");
@@ -486,7 +484,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
       setHydrated(true);
       editorRef.current = editor;
     }
-  }, [editor, hydrated, setHydrated, saveUpdates, slug, blockState]);
+  }, [editor, setHydrated, saveUpdates, slug, blockState]);
 
   const appendDataContentToEnd = (data: DataItem) => {
     if (!editor) {
