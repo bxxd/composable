@@ -3,6 +3,7 @@ import { DataItem, RoleType } from "./types";
 import { JSONContent } from "@tiptap/react";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { debounce } from "lodash";
+import { DocumentBlock } from "@/lib/types";
 // import useLocalStorage from "@/lib/hooks/use-local-storage";
 import _ from "lodash";
 
@@ -345,6 +346,26 @@ export function compareBlockIds(id1: string, id2: string): number {
   }
 
   return 0;
+}
+
+export function fixIds(content: DocumentBlock[], parentId: string = "0"): void {
+  if (!content || !Array.isArray(content)) {
+    return;
+  }
+
+  let currentLevelId = 0; // Initialize the ID for children
+  for (const node of content) {
+    if (node.type === "dBlock") {
+      // Assign new ID based on parentId and currentLevelId
+      node.attrs.id = `${parentId}.${currentLevelId}`;
+      currentLevelId++; // Increment the current level ID for the next iteration
+
+      // Fix IDs of children recursively if they exist
+      if (node.attrs.children) {
+        fixIds(node.attrs.children, node.attrs.id);
+      }
+    }
+  }
 }
 
 // Increment the last segment of a block ID

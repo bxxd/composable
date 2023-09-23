@@ -33,6 +33,7 @@ import {
   isTextNodeEmpty,
   generateBlockId,
   rewriteBlockIdsWithParentId,
+  fixIds,
 } from "@/lib/editor";
 import baselineChevronLeft from "@iconify/icons-ic/baseline-chevron-left"; // Left arrow icon
 import { JSONContent } from "@tiptap/react";
@@ -186,11 +187,6 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   }
 
   // console.log("re-rendering TipTap");
-
-  // let blockState: BlockStore;
-  // useEffect(() => {
-  //   blockState = BlockStore.getInst(slug);
-  // }, [slug]);
 
   const blockState = BlockStore.getInst(slug);
 
@@ -467,6 +463,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
               } else {
                 setTimeout(() => {
                   console.log("setting data to", JSON.stringify(data.original));
+                  fixIds(data.original);
                   editor.commands.setContent(data.original);
                   blockState.set({ level: 1 });
                   saveUpdates();
@@ -482,7 +479,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           );
           let data = blockState.getCtxItemAtCurrentLevel();
           console.log("setting data to", JSON.stringify(data));
-
+          fixIds(data);
           editor.commands.setContent(data);
         }
       }, 0);

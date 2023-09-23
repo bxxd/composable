@@ -46,3 +46,39 @@ export interface Company {
 }
 
 export type RoleType = "assistant" | "data" | "user";
+
+/* below is description of the data structure in the Editor */
+interface TextContent {
+  text: string;
+  type: string;
+}
+
+interface HardBreak {
+  type: string;
+}
+
+interface ParagraphContent {
+  type: string;
+  content: (TextContent | HardBreak)[];
+}
+
+interface DocumentBlockAttrs {
+  role: "system" | "user" | "assistant";
+  data: null | {
+    tags?: string[];
+    title?: string | null;
+    tokens?: any;
+    excerpt?: string | null;
+    insight?: any;
+    category?: any;
+    subcategory?: any;
+  };
+  id: string;
+  children?: DocumentBlock[];
+}
+
+export interface DocumentBlock {
+  type: "dBlock";
+  attrs: DocumentBlockAttrs;
+  content?: ParagraphContent[];
+}
