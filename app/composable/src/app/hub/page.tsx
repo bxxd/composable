@@ -4,6 +4,7 @@ import Layout from "@/components/Layout"; // Importing Layout component
 import { useEffect, useState } from "react";
 import Published from "@/components/publish/published";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Page() {
   const [items, setItems] = useState<any[]>([]); // State to hold fetched items
@@ -29,15 +30,13 @@ export default function Page() {
       <div className="App flex flex-col gap-4 mr-4 ml-2 mb-2 mt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item, index) => (
-            <div
-              key={index}
-              className="card rounded-lg shadow-lg cursor-pointer border bg-white dark:bg-black"
-              onClick={() => router.push(`/ai-created/${item.id}`)}
-            >
-              <div className="pointer-events-none">
-                <Published id={item.id} />
+            <Link key={index} href={`/ai-created/${item.id}`}>
+              <div className="card rounded-lg shadow-lg cursor-pointer border">
+                <div className="pointer-events-none">
+                  <Published id={item.id} />
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -58,7 +57,7 @@ export default function Page() {
           height: 50%;
           left: 0;
           right: 0;
-          background: linear-gradient(transparent, #cccccc);
+          background: linear-gradient(transparent, #eeeeee);
         }
       `}</style>
     </Layout>
