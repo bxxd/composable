@@ -1,4 +1,4 @@
-import "@/styles/editor.scss";
+import "@/styles/publish.scss";
 
 import React from "react";
 import { BlockStore } from "@/lib/editor";

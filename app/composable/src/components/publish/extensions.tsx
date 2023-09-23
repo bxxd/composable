@@ -30,6 +30,7 @@ export const publishedExtensions = [
   TiptapUnderline,
   TiptapLink,
   Markdown,
+  HardBreak,
   // OrderedList,
   // ListItem,
 ];
