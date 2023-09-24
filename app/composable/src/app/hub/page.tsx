@@ -167,7 +167,7 @@ const Page: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((item, index) => (
               <Link key={index} href={`/ai-created/${item.id}`}>
-                <div className="card rounded-lg  cursor-pointer ">
+                <div className="card rounded-lg border cursor-pointer ">
                   <div className="pointer-events-none">
                     <MemoizedCard id={item.id} />
                   </div>
