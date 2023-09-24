@@ -172,10 +172,10 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
                 icon={isLiked ? "ph:heart-duotone" : "ph:heart"}
                 width={21}
                 height={21}
-                color="#aaa"
-                // color={isLiked ? "red" : "#aaa"}
+                color={isLiked ? "rgba(255, 0, 0, 0.5)" : "#aaa"} // 50% transparent red
               />
             </button>
+
             <span className="ml-1 opacity-40 text-xs mt-[3px]">{likes}</span>
           </div>
 
