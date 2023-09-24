@@ -4,6 +4,7 @@ import Header from "@/components/header/Header";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { GlobalProvider } from "@/lib/context";
+import Footer from "@/components/footer/Footer";
 
 const ToasterProvider = () => {
   const { theme } = useTheme() as {
@@ -32,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({
       >
         <Header childrenComponents={headerChildrenComponents} />
         <main className="App flex flex-col flex-grow h-full">{children}</main>
-
+        <Footer />
         <ToasterProvider />
       </ThemeProvider>
     </GlobalProvider>
