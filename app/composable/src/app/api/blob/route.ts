@@ -4,6 +4,31 @@ import { getEmbedding } from "@/app/api/lib/embedding";
 
 export const dynamic = "force-dynamic";
 
+function extractAllText(data: any): string {
+  if (typeof data === "object" && data !== null) {
+    if (Array.isArray(data)) {
+      // data is an array
+      const texts: string[] = data.map((item) => extractAllText(item));
+      return texts.join(" ");
+    } else {
+      // data is a dictionary
+      const texts: string[] = [];
+      for (const [key, value] of Object.entries(data)) {
+        if (key === "text") {
+          texts.push(value as string);
+        }
+        if (typeof value === "object" && value !== null) {
+          texts.push(extractAllText(value));
+        }
+      }
+      return texts.join(" ");
+    }
+  } else {
+    // data is neither a dictionary nor a list
+    return "";
+  }
+}
+
 export async function POST(req: NextRequest) {
   const db = await getDbInstance();
   try {
@@ -15,9 +40,21 @@ export async function POST(req: NextRequest) {
 
     const original = data.original || null;
 
+    if (!data.data) {
+      return NextResponse.json({ message: "Missing data" }, { status: 400 });
+    }
+
+    let embedding = await getEmbedding(extractAllText(data.data));
+
     const result = await db.one(
-      "INSERT INTO json_blobs (data, ip_address, ai_model, original) VALUES ($1, $2, $3, $4) RETURNING id",
-      [JSON.stringify(data.data), ip_address, data.ai_model, original]
+      "INSERT INTO json_blobs (data, ip_address, ai_model, original, embedding) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      [
+        JSON.stringify(data.data),
+        ip_address,
+        data.ai_model,
+        original,
+        embedding,
+      ]
     );
 
     return NextResponse.json({ id: result.id });
