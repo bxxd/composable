@@ -38,6 +38,10 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
     editable: isEditable,
   });
 
+  function capitalizeFirstLetter(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   useEffect(() => {
     if (editor) {
       blockState.loadFromLocalStorage();
@@ -61,7 +65,21 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
 
       let contentArray = filteredJsonData.reduce(
         (acc: JSONContent[], item: JSONContent) => {
-          return item.content ? acc.concat(item.content) : acc;
+          if (item.content) {
+            // Add role and hardBreak if activeToggle is 'all'
+            if (activeToggle.toLowerCase() === "all" && item.attrs?.role) {
+              const prependData = [
+                {
+                  text: `${capitalizeFirstLetter(item.attrs.role)}:`,
+                  type: "text",
+                  marks: [{ type: "bold" }],
+                },
+              ];
+              return acc.concat(prependData, item.content);
+            }
+            return acc.concat(item.content);
+          }
+          return acc;
         },
         []
       );
@@ -127,7 +145,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
         <div className="flex flex-col w-full">
           <div className="flex flex-col border-r border-b border-solid rounded-lg m-1 mb-5 pl-5 pr-2  border-gray-100 dark:border-gray-600 ">
             <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
-              <button onClick={() => router.push("/work/" + slug)}>
+              <button onMouseDown={() => router.push("/work/" + slug)}>
                 <Icon
                   icon="iconamoon:edit-thin"
                   width={21}
@@ -161,7 +179,10 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
                   All
                 </button>
               </div>
-              <button onClick={publishToWorld} title="Publish to the world.">
+              <button
+                onMouseDown={publishToWorld}
+                title="Publish to the world."
+              >
                 <Icon
                   icon="ph:share-network-thin"
                   width={21}

@@ -70,6 +70,77 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
 
   const router = useRouter();
 
+  const [likes, setLikes] = useState<number>(0); // Replace 0 with the initial number of likes from the server if available
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Set initial likes from the server
+    setLikes(data?.likes || 0);
+
+    // Check if the post is liked by this user
+    const likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+    setIsLiked(likedPosts.includes(data?.id));
+  }, [data?.id, data?.likes]);
+
+  useEffect(() => {
+    // Check if the post is liked by this user
+    const likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+    setIsLiked(likedPosts.includes(data?.id));
+  }, [data?.id]);
+
+  const handleLike = async () => {
+    let likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+
+    // Optimistically update UI
+    setIsLiked(!isLiked);
+    setLikes(isLiked ? likes - 1 : likes + 1);
+
+    if (isLiked) {
+      // Remove the id from the array
+      likedPosts = likedPosts.filter((id: string) => id !== data?.id);
+    } else {
+      // Add the id to the array
+      likedPosts.push(data?.id);
+    }
+
+    try {
+      const res = await fetch("/api/blob/updateLikes", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          blobId: data?.id,
+          likeStatus: !isLiked, // true for like, false for unlike
+        }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        // Update local storage since operation was successful
+        localStorage.setItem("likedPosts", JSON.stringify(likedPosts));
+      } else {
+        // Rollback optimistic update
+        setIsLiked(isLiked);
+        setLikes(likes);
+
+        console.log(
+          "An error occurred while updating likes: ",
+          JSON.stringify(result)
+        );
+        toast.error("Failed to update likes on the server");
+      }
+    } catch (error) {
+      // Rollback optimistic update
+      setIsLiked(isLiked);
+      setLikes(likes);
+
+      console.error("An error occurred while updating likes: ", error);
+      toast.error("Failed to update likes on the server");
+    }
+  };
+
   return (
     <>
       {/* TipTap Component */}
@@ -79,7 +150,7 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
-          <div>
+          <div className="flex mr-2">
             <button onMouseDown={copyToClipboard}>
               <Icon icon="ph:link-thin" width={21} height={21} color="#aaa" />
             </button>
@@ -96,7 +167,17 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
                 />
               </button>
             )}
+            <button onClick={handleLike} className="ml-2 opacity-50">
+              <Icon
+                icon={isLiked ? "ph:heart-duotone" : "ph:heart"}
+                width={21}
+                height={21}
+                color={isLiked ? "red" : "#aaa"}
+              />
+            </button>
+            <span className="ml-1 opacity-40 text-xs mt-[3px]">{likes}</span>
           </div>
+
           <div className="text-sm opacity-25 italic">
             {data?.id} Created by {data?.ai_model}
           </div>

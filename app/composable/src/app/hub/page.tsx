@@ -10,6 +10,8 @@ import closeIcon from "@iconify/icons-ic/baseline-close";
 import { Icon } from "@iconify/react";
 import searchIcon from "@iconify/icons-ic/search";
 import React from "react";
+import { Menu, MenuItem } from "@material-ui/core";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
 interface MemoizedCardProps {
   id: string;
@@ -33,22 +35,53 @@ const MemoizedCard: React.FC<MemoizedCardProps> = React.memo(
 export default function Page() {
   const [items, setItems] = useState<any[]>([]); // State to hold fetched items
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false); // New state
+
+  const [sortType, setSortType] = useState<string>("created"); // New state variable
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For dropdown menu
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const selectSortType = (type: string) => {
+    setSortType(type);
+    fetchItems(searchQuery, type); // Fetch items with new sort type
+    handleClose();
+  };
 
   const fetchItems = useCallback(
-    async (searchTerm: string | null = null) => {
+    async (
+      searchTerm: string | null = null,
+      sortType: string | null = null
+    ) => {
       try {
-        let url = "/api/blob?limit=44";
+        let url = "/api/blob?limit=64";
         if (searchTerm) {
-          url += `&search=${searchTerm}`;
+          url += `&search_term=${searchTerm}`;
         }
+        if (sortType) {
+          url += `&sort=${sortType}`; // Adding sorting parameter
+        }
+        console.log("fetching items from url: ", url);
         const res = await fetch(url); // Replace with your API endpoint
+        console.log("res", res);
         const data = await res.json();
         setItems(data); // Set fetched data to state
+        if (searchTerm) {
+          setIsSearchActive(true);
+        } else {
+          setIsSearchActive(false);
+        }
       } catch (error) {
         console.error("Error fetching items:", error);
       }
     },
-    [setItems] // Dependencies
+    [setItems, setIsSearchActive]
   );
 
   useEffect(() => {
@@ -63,12 +96,13 @@ export default function Page() {
   };
 
   const handleSearch = () => {
+    console.log("handleSearch searchQuery", searchQuery);
     if (searchQuery.length >= 3) {
-      // fetchItems(searchQuery);
+      fetchItems(searchQuery);
+    } else if (searchQuery.length === 0 && isSearchActive === true) {
+      fetchItems();
     } else {
-      if (searchQuery.length > 0) {
-        toast.error("Search query must be at least 3 characters long.");
-      }
+      toast.error("Search query must be at least 3 characters long.");
     }
   };
 
@@ -81,7 +115,7 @@ export default function Page() {
   const router = useRouter(); // Initialize the router
   return (
     <Layout>
-      <div className="max-w-[300px] pl-3 pt-1">
+      <div className="flex pl-3 pt-2">
         <div className="relative">
           {" "}
           <input
@@ -90,12 +124,15 @@ export default function Page() {
             value={searchQuery}
             onKeyDown={handleKeyDown}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-6 py-2 border rounded focus:outline-none focus:ring-1 focus:border-red-200"
+            className="w-full pl-10 pr-6 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:border-red-200"
           />
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <button
+            className="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer"
+            onMouseDown={handleSearch}
+          >
             {/* Place your search icon here */}
             <Icon icon={searchIcon} width={16} height={16} />
-          </div>
+          </button>
           {searchQuery && (
             <div
               onClick={() => clearSearch()}
@@ -106,13 +143,29 @@ export default function Page() {
             </div>
           )}
         </div>
+        <div className="flex pl-2 opacity-40 text-sm">
+          <button onClick={handleClick} className="mr-2">
+            Sort By <ArrowDropDownIcon />
+          </button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={() => selectSortType("likes")}>Likes</MenuItem>
+            <MenuItem onClick={() => selectSortType("created")}>
+              Newest
+            </MenuItem>
+          </Menu>
+        </div>
       </div>
       <div>
         <div className="flex flex-col mr-4 ml-2 mb-2 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((item, index) => (
               <Link key={index} href={`/ai-created/${item.id}`}>
-                <div className="card rounded-lg shadow-lg cursor-pointer border">
+                <div className="card rounded-lg  cursor-pointer ">
                   <div className="pointer-events-none">
                     <MemoizedCard id={item.id} />
                   </div>

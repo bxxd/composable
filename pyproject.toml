@@ -23,6 +23,7 @@ asyncpg = "^0.28.0"
 pytz = "^2023.3"
 pgvector = "^0.2.0"
 fastapi = "^0.103.1"
+psycopg2 = {extras = ["extras"], version = "^2.9.7"}
 
 
 [build-system]
