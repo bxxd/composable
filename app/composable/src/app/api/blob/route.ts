@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getDbInstance, releaseDbInstance } from "@/lib/db";
+import { getEmbedding } from "@/app/api/lib/embedding";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,8 @@ export async function GET(req: NextRequest) {
     const id = url.searchParams.get("id");
     const limitParam = url.searchParams.get("limit");
     const original = url.searchParams.has("original");
+    let search_term = url.searchParams.get("search_term");
+    const sort = url.searchParams.get("sort"); // New sort parameter
 
     console.log(
       "blob GET...",
@@ -46,7 +49,11 @@ export async function GET(req: NextRequest) {
       "limit",
       limitParam,
       "original",
-      original
+      original,
+      "search_term",
+      search_term,
+      "sort",
+      sort
     );
 
     const limit = limitParam ? parseInt(limitParam, 10) : 50;
@@ -75,18 +82,37 @@ export async function GET(req: NextRequest) {
     let queryText: string;
     let queryParams: (string | number)[];
 
-    if (id && original) {
-      queryText =
-        "SELECT original, created_at, ai_model FROM json_blobs WHERE id = $1 AND original IS NOT NULL ORDER BY created_at DESC LIMIT $2";
-      queryParams = [id, limit];
-    } else if (id) {
-      queryText =
-        "SELECT id, data, created_at, ai_model, CASE WHEN original IS NOT NULL THEN true ELSE false END AS original FROM json_blobs WHERE id = $1 ORDER BY created_at DESC LIMIT $2";
-      queryParams = [id, limit];
+    if (id) {
+      queryText = `SELECT id, data, created_at, ai_model, ${
+        original
+          ? `original`
+          : `CASE WHEN original IS NOT NULL THEN true ELSE false END AS original`
+      }, likes FROM json_blobs WHERE id = $1 `;
+      queryParams = [id];
     } else {
-      queryText =
-        "SELECT id, data, created_at, ai_model, CASE WHEN original IS NOT NULL THEN true ELSE false END AS original FROM json_blobs ORDER BY created_at DESC LIMIT $1";
-      queryParams = [limit];
+      let embedding: any;
+
+      if (search_term) {
+        embedding = await getEmbedding(search_term);
+      }
+
+      queryText = `SELECT id
+        ${
+          embedding
+            ? `,embedding <=> '${JSON.stringify(
+                embedding
+              )}' AS embedding_distance`
+            : ``
+        } FROM json_blobs ${
+        embedding
+          ? `ORDER BY embedding_distance ASC`
+          : `ORDER BY ${
+              sort === "likes"
+                ? "likes DESC, created_at DESC"
+                : "created_at DESC"
+            } `
+      } LIMIT ${limit}`;
+      queryParams = [];
     }
 
     const data = await db.any(queryText, queryParams);

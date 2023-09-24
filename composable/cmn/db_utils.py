@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 log = logging.getLogger(__name__)
 
 
-def get_dns_edgar(_):
+def get_dns_edgar(_=None):
     x = f"postgresql+asyncpg://{cmn.PSQL_DB_USER}:{cmn.PSQL_DB_PASSWORD}@{cmn.PSQL_DB_HOST}:{cmn.PSQL_DB_PORT}/{cmn.PSQL_DB_EDGAR}"
     # log.info(f"get_dns_edgar: {x}")
     return x

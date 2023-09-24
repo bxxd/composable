@@ -628,7 +628,7 @@ export const isTextNodeEmpty = (node: ProseMirrorNode | null) => {
   return !node.textContent || !node.textContent.trim();
 };
 
-function isTextContentEmpty(jsonObject: JSONContent): boolean {
+export function isTextContentEmpty(jsonObject: JSONContent): boolean {
   if (!jsonObject) {
     console.log("isTextContentEmpty: jsonObject is null");
     return true;

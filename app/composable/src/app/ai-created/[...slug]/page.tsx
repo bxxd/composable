@@ -10,7 +10,7 @@ export default function Page({ params }: { params: { slug: string } }) {
   return (
     <>
       <Layout>
-        <div className="flex flex-col items-start border-r border-b border-solid rounded-lg m-1 mb-5 pl-5 pr-2 border-gray-100 dark:border-gray-600">
+        <div className="flex flex-col items-start border-r border-b border-solid rounded-lg m-1 mb-5 pl-2 pr-2 border-gray-100 dark:border-gray-600">
           <Published id={slug} />
         </div>
       </Layout>
