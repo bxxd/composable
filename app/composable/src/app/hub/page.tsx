@@ -32,7 +32,9 @@ const MemoizedCard: React.FC<MemoizedCardProps> = React.memo(
   }
 );
 
-export default function Page() {
+MemoizedCard.displayName = "MemoizedCard";
+
+const Page: React.FC = () => {
   const [items, setItems] = useState<any[]>([]); // State to hold fetched items
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false); // New state
@@ -88,7 +90,7 @@ export default function Page() {
     // Function to fetch the last 10 created items
 
     fetchItems(); // Call the fetch function
-  }, []);
+  }, [fetchItems]);
 
   const clearSearch = () => {
     setSearchQuery("");
@@ -197,4 +199,8 @@ export default function Page() {
       `}</style>
     </Layout>
   );
-}
+};
+
+Page.displayName = "Page";
+
+export default Page;

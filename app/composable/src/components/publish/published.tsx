@@ -167,12 +167,13 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
                 />
               </button>
             )}
-            <button onClick={handleLike} className="ml-2 opacity-50">
+            <button onClick={handleLike} className="ml-2">
               <Icon
                 icon={isLiked ? "ph:heart-duotone" : "ph:heart"}
                 width={21}
                 height={21}
-                color={isLiked ? "red" : "#aaa"}
+                color="#aaa"
+                // color={isLiked ? "red" : "#aaa"}
               />
             </button>
             <span className="ml-1 opacity-40 text-xs mt-[3px]">{likes}</span>
@@ -190,5 +191,7 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
     </>
   );
 };
+
+Published.displayName = "Published";
 
 export default Published;

@@ -1,7 +1,7 @@
 import "@/styles/publish.scss";
 
 import React from "react";
-import { BlockStore } from "@/lib/editor";
+import { BlockStore, isTextContentEmpty } from "@/lib/editor";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
@@ -65,7 +65,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
 
       let contentArray = filteredJsonData.reduce(
         (acc: JSONContent[], item: JSONContent) => {
-          if (item.content) {
+          if (item.content && !isTextContentEmpty(item)) {
             // Add role and hardBreak if activeToggle is 'all'
             if (activeToggle.toLowerCase() === "all" && item.attrs?.role) {
               const prependData = [
