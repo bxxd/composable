@@ -76,10 +76,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let system_prompt = {
-    role: "system",
-    content: "",
-  };
+  // let system_prompt = {
+  //   role: "system",
+  //   content: "",
+  // };
 
   // if (messages.length > 0 && messages[0].role != "system") {
   //   messages = [system_prompt, ...messages];

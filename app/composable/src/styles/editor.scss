@@ -106,6 +106,14 @@
   border-color: #3e52ac;
 }
 
+.thought-block {
+  border-color: #cfcd62;
+}
+
+.static-block {
+  border-color: #78b3eb;
+}
+
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

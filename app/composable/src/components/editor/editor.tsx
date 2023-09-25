@@ -83,7 +83,26 @@ function extractTextFromJSON(
                     content: item.attrs?.data.excerpt,
                   });
                 } else {
-                  result.push({ role: role, content: textItem.text });
+                  if (role === "thought") {
+                    result.push({
+                      role: "assistant",
+                      content: `THOUGHT:
+${textItem.text}
+now go.`,
+                    });
+                  } else {
+                    if (
+                      role !== "user" &&
+                      role !== "assistant" &&
+                      role !== "system"
+                    ) {
+                      role = "assistant";
+                    }
+                    result.push({
+                      role: role,
+                      content: textItem.text,
+                    });
+                  }
                 }
               }
             }
@@ -550,12 +569,20 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
         </div>
         <button
           type="button"
+          onMouseDown={() => router.push("/play/" + slug)}
+          className="mr-1"
+          title="Play as if it was a script."
+        >
+          <Icon icon="ph:play-light" width={21} height={21} color="#aaa" />
+        </button>
+        <button
+          type="button"
           onMouseDown={() => router.push("/publish/" + slug)}
           className="mr-1"
           title="Publish to the world."
         >
           <Icon
-            icon="ph:share-network-thin"
+            icon="ph:book-bookmark-thin"
             width={21}
             height={21}
             color="#aaa"
