@@ -14,6 +14,10 @@ import { isTextNodeEmpty } from "@/lib/editor";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { getTextFromDBlock, generateBlockId } from "@/lib/editor";
 import { JSONContent } from "@tiptap/react";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
 
 import {
   createNodeJSON,
@@ -58,7 +62,32 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
 }) => {
   // console.log("BlockNodeView re-rendering");
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const { savedList, setSavedList } = useGlobalContext();
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const selectRole = (role: string) => {
+    // Prepare new attributes
+    const newAttrs = { ...node.attrs, role };
+
+    // Defer the transaction
+    setTimeout(() => {
+      editor.view.dispatch(
+        editor.view.state.tr.setNodeMarkup(getPos(), undefined, newAttrs)
+      );
+    }, 0);
+
+    // Close the menu
+    handleClose();
+  };
 
   const addSavedToList = (node: ProseMirrorNode) => {
     // console.log("addSavedToList", node.attrs.id);
@@ -181,10 +210,33 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
               {node.attrs.id}
             </div>
           </div>
+
           <div className="flex gap-2">
+            {node.attrs.role !== data && (
+              <button
+                onClick={handleClick}
+                className="d-block-button group-hover:opacity-100 p-0"
+              >
+                <MoreVertIcon className=" icon-size" />
+              </button>
+            )}
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={() => selectRole("user")}>Role User</MenuItem>
+              <MenuItem onClick={() => selectRole("assistant")}>
+                Role Assistant
+              </MenuItem>
+              <MenuItem onClick={() => selectRole("system")}>
+                Role System
+              </MenuItem>
+            </Menu>
             <button
               type="button"
-              className="d-block-button group-hover:opacity-100"
+              className="d-block-button group-hover:opacity-100 "
               title="Save snippet for later re-use"
               onMouseDown={() => {
                 // console.log("Button was clicked.");

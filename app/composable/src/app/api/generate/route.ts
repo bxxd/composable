@@ -81,9 +81,9 @@ export async function POST(req: NextRequest) {
     content: "",
   };
 
-  if (messages.length > 0 && messages[0].role != "system") {
-    messages = [system_prompt, ...messages];
-  }
+  // if (messages.length > 0 && messages[0].role != "system") {
+  //   messages = [system_prompt, ...messages];
+  // }
 
   let openai = new OpenAI({
     // apiKey: process.env.OPENAI_API_KEY || "",
