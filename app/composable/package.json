@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@iconify-icons/fa-solid": "^1.2.4",
     "@iconify/icons-ic": "^1.2.13",
     "@iconify/icons-material-symbols": "^1.2.53",
@@ -17,6 +19,7 @@
     "@iconify/react": "^4.1.1",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
+    "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.5",
     "@nanostores/react": "ai/react",
     "@radix-ui/react-popover": "^1.0.6",
