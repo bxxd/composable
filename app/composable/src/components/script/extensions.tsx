@@ -32,4 +32,9 @@ export const publishedExtensions = [
   Markdown,
   // OrderedList,
   // ListItem,
+
+  Placeholder.configure({
+    placeholder: "Respond to this prompt",
+    includeChildren: true,
+  }),
 ];

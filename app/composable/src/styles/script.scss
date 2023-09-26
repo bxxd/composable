@@ -41,7 +41,7 @@
   p {
     font-size: 1.1em;
     margin-top: 4px;
-    margin-bottom: 1.5em;
+    // margin-bottom: 1.5em;
   }
 
   code {
@@ -97,4 +97,35 @@
 
 .ProseMirror.ProseMirror-focused {
   outline: none !important;
+}
+
+.ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--novel-stone-400);
+  pointer-events: none;
+  height: 0;
+}
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--novel-stone-400);
+  pointer-events: none;
+  height: 0;
+}
+
+.fade-enter,
+.fade-exit-active,
+.fade-exit-done {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-enter-active,
+.fade-exit-active {
+  transition: opacity 1s; /* Adjust this to match your CSSTransition timeout */
 }
