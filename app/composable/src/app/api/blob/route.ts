@@ -1,33 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getDbInstance, releaseDbInstance } from "@/lib/db";
 import { getEmbedding } from "@/app/api/lib/embedding";
+import { extractAllText } from "@/lib/editor";
 
 export const dynamic = "force-dynamic";
-
-function extractAllText(data: any): string {
-  if (typeof data === "object" && data !== null) {
-    if (Array.isArray(data)) {
-      // data is an array
-      const texts: string[] = data.map((item) => extractAllText(item));
-      return texts.join(" ");
-    } else {
-      // data is a dictionary
-      const texts: string[] = [];
-      for (const [key, value] of Object.entries(data)) {
-        if (key === "text") {
-          texts.push(value as string);
-        }
-        if (typeof value === "object" && value !== null) {
-          texts.push(extractAllText(value));
-        }
-      }
-      return texts.join(" ");
-    }
-  } else {
-    // data is neither a dictionary nor a list
-    return "";
-  }
-}
 
 export async function POST(req: NextRequest) {
   const db = await getDbInstance();

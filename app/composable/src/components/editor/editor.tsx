@@ -40,7 +40,7 @@ import { JSONContent } from "@tiptap/react";
 
 import { Icon } from "@iconify/react";
 
-import { useCompletion } from "ai/react";
+import { useCompletion, useChat, Message } from "ai/react";
 
 import { toast } from "sonner";
 
@@ -83,7 +83,26 @@ function extractTextFromJSON(
                     content: item.attrs?.data.excerpt,
                   });
                 } else {
-                  result.push({ role: role, content: textItem.text });
+                  if (role === "thought") {
+                    result.push({
+                      role: "assistant",
+                      content: `THOUGHT:
+${textItem.text}
+now go.`,
+                    });
+                  } else {
+                    if (
+                      role !== "user" &&
+                      role !== "assistant" &&
+                      role !== "system"
+                    ) {
+                      role = "assistant";
+                    }
+                    result.push({
+                      role: role,
+                      content: textItem.text,
+                    });
+                  }
                 }
               }
             }
@@ -257,15 +276,10 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
     data = extractTextFromJSON(data);
 
-    let payload = JSON.stringify({
-      aiModel: aiModelRef.current,
-      messages: data,
-    });
-
     toast.message("Sending to AI...");
     // console.log("payload ", payload);
 
-    complete(payload);
+    complete(JSON.stringify(data));
   };
 
   const editor = useEditor({
@@ -296,11 +310,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   }, [editor]);
 
   const { complete, completion, isLoading, stop } = useCompletion({
-    id: "composable",
     api: "/api/generate",
     onFinish: (_prompt, _completion) => {
       // console.log("AI finished", editor);
-
       saveUpdates();
 
       toast("AI finished.");
@@ -312,6 +324,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     onError: (error) => {
       console.log("error", error);
       toast(error.message);
+    },
+    body: {
+      aiModel: aiModelRef.current,
     },
   });
 
@@ -548,6 +563,14 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
             - level {blockState.get().level}
           </div>
         </div>
+        <button
+          type="button"
+          onMouseDown={() => router.push("/play/" + slug)}
+          className="mr-1"
+          title="Play as if it was a script."
+        >
+          <Icon icon="ph:play-light" width={21} height={21} color="#aaa" />
+        </button>
         <button
           type="button"
           onMouseDown={() => router.push("/publish/" + slug)}

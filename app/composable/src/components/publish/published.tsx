@@ -185,7 +185,7 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
         </div>
         <EditorContent
           editor={editor}
-          className="rounded-lg p-2 leading-relaxed outline-none "
+          className="prose rounded-lg p-2 leading-relaxed outline-none "
         />
       </div>
     </>

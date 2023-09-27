@@ -228,11 +228,11 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
             >
               <MenuItem onClick={() => selectRole("user")}>Role User</MenuItem>
               <MenuItem onClick={() => selectRole("assistant")}>
-                Role Assistant
+                Assistant
               </MenuItem>
-              <MenuItem onClick={() => selectRole("system")}>
-                Role System
-              </MenuItem>
+              <MenuItem onClick={() => selectRole("system")}>System</MenuItem>
+              <MenuItem onClick={() => selectRole("thought")}>Thought</MenuItem>
+              <MenuItem onClick={() => selectRole("static")}>Static</MenuItem>
             </Menu>
             <button
               type="button"
