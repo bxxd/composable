@@ -40,7 +40,7 @@ import { JSONContent } from "@tiptap/react";
 
 import { Icon } from "@iconify/react";
 
-import { useCompletion } from "ai/react";
+import { useCompletion, useChat, Message } from "ai/react";
 
 import { toast } from "sonner";
 
@@ -276,15 +276,10 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
     data = extractTextFromJSON(data);
 
-    let payload = JSON.stringify({
-      aiModel: aiModelRef.current,
-      messages: data,
-    });
-
     toast.message("Sending to AI...");
     // console.log("payload ", payload);
 
-    complete(payload);
+    complete(JSON.stringify(data));
   };
 
   const editor = useEditor({
@@ -315,11 +310,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
   }, [editor]);
 
   const { complete, completion, isLoading, stop } = useCompletion({
-    id: "composable",
     api: "/api/generate",
     onFinish: (_prompt, _completion) => {
       // console.log("AI finished", editor);
-
       saveUpdates();
 
       toast("AI finished.");
@@ -331,6 +324,9 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     onError: (error) => {
       console.log("error", error);
       toast(error.message);
+    },
+    body: {
+      aiModel: aiModelRef.current,
     },
   });
 
@@ -582,7 +578,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
           title="Publish to the world."
         >
           <Icon
-            icon="ph:book-bookmark-thin"
+            icon="ph:share-network-thin"
             width={21}
             height={21}
             color="#aaa"

@@ -29,22 +29,11 @@ const timeout = (ms: number, promise: Promise<any>) => {
 export async function POST(req: NextRequest) {
   console.log("generate AI response..");
 
-  let messages: any;
-  let aiModel: any;
-  let prompt: any;
-  let payload: any;
+  const payload = await req.json();
+  console.log("payload", payload);
+  let { prompt, aiModel } = payload;
 
-  try {
-    payload = await req.json();
-    prompt = JSON.parse(payload["prompt"]);
-    console.log("payload", payload);
-    // console.log("payload", payload);
-    messages = prompt.messages;
-    aiModel = prompt.aiModel;
-  } catch (error) {
-    console.log("error", error, "payload:", payload);
-    return NextResponse.json("Unable to parse the payload.", { status: 500 });
-  }
+  let messages = JSON.parse(prompt);
 
   if (
     (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN,
@@ -75,15 +64,6 @@ export async function POST(req: NextRequest) {
       );
     }
   }
-
-  // let system_prompt = {
-  //   role: "system",
-  //   content: "",
-  // };
-
-  // if (messages.length > 0 && messages[0].role != "system") {
-  //   messages = [system_prompt, ...messages];
-  // }
 
   let openai = new OpenAI({
     // apiKey: process.env.OPENAI_API_KEY || "",
@@ -125,7 +105,11 @@ export async function POST(req: NextRequest) {
     // console.log("response", response);
 
     // Convert the response into a friendly text-stream
-    const stream = OpenAIStream(response);
+    const stream = OpenAIStream(response, {
+      async onCompletion(completion: any) {
+        console.log("hi there!", completion);
+      },
+    });
 
     // Respond with the stream
     return new StreamingTextResponse(stream);
