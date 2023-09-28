@@ -5,6 +5,7 @@ import json
 import time
 import aiohttp
 import composable.cmn
+from types import SimpleNamespace
 
 log = logging.getLogger(__name__)
 
@@ -31,17 +32,26 @@ async def get_filings(cik_str):
             log.error(f"Failed to parse JSON response: {e}")
             # log.info(f"Response: {resp_text}")
             return []
+
         filings = data["filings"]["recent"]
         filing_urls = []
+        log.info(f"DATA: {filings.keys()}")
         primaryDocDescriptions = filings["primaryDocDescription"]
         accessionNumbers = filings["accessionNumber"]
         primaryDocuments = filings["primaryDocument"]
+        filingDates = filings["filingDate"]
+        reportDates = filings["reportDate"]
+
         for index, description in enumerate(primaryDocDescriptions):
             if description.upper() in ["10-Q", "10-K"]:
+                item = SimpleNamespace()
                 accession_number = accessionNumbers[index].replace("-", "")
                 primaryDocument = primaryDocuments[index]
-                url = f"https://www.sec.gov/Archives/edgar/data/{cik_str}/{accession_number}/{primaryDocument}"
-                filing_urls.append((description, url))
+                item.filingDate = filingDates[index]
+                item.reportDate = reportDates[index]
+                item.filingType = description
+                item.url = f"https://www.sec.gov/Archives/edgar/data/{cik_str}/{accession_number}/{primaryDocument}"
+                filing_urls.append(item)
         return filing_urls
 
 
@@ -68,8 +78,8 @@ async def main(args):
     if ticker_info:
         cik_str = ticker_info["cik_str"]
         filings = await get_filings(cik_str)
-        for filing_type, url in filings:
-            print(f"Filing Type: {filing_type}\nURL: {url}")
+        for item in filings:
+            print(f"Filing Type: {item}")
     else:
         print(f"No data found for ticker: {args.ticker.upper()}")
 

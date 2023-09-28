@@ -1,10 +1,9 @@
 from fastapi import APIRouter
-from composable.api.routes.filing import router as filing_router
-
+from composable.api.routes.edgar import router as edgar_router
 
 router = APIRouter()
 
-router.include_router(filing_router, prefix="/filing", tags=["filing"])
+router.include_router(filing_router, prefix="/edgar", tags=["edgar"])
 
 
 @router.get("/")
