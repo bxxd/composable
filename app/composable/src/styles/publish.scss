@@ -1,83 +1,83 @@
-.tiptap {
-  ul,
-  ol {
-    padding: 0 1rem;
-  }
+// .tiptap {
+//   ul,
+//   ol {
+//     padding: 0 1rem;
+//   }
 
-  h1 {
-    font-size: 2em;
-    font-weight: bold;
-  }
-  h2 {
-    font-size: 1.75em;
-    font-weight: bold;
-  }
-  h3 {
-    font-size: 1.5em;
-    font-weight: bold;
-  }
-  h4 {
-    font-size: 1.25em;
-    font-weight: bold;
-  }
-  h5 {
-    font-size: 1em;
-    font-weight: bold;
-  }
-  h6 {
-    font-size: 0.875em;
-    font-weight: bold;
-  }
+//   h1 {
+//     font-size: 2em;
+//     font-weight: bold;
+//   }
+//   h2 {
+//     font-size: 1.75em;
+//     font-weight: bold;
+//   }
+//   h3 {
+//     font-size: 1.5em;
+//     font-weight: bold;
+//   }
+//   h4 {
+//     font-size: 1.25em;
+//     font-weight: bold;
+//   }
+//   h5 {
+//     font-size: 1em;
+//     font-weight: bold;
+//   }
+//   h6 {
+//     font-size: 0.875em;
+//     font-weight: bold;
+//   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    line-height: 1.1;
-  }
+//   h1,
+//   h2,
+//   h3,
+//   h4,
+//   h5,
+//   h6 {
+//     line-height: 1.1;
+//   }
 
-  p {
-    font-size: 1.1em;
-    margin-top: 4px;
-    margin-bottom: 1.5em;
-  }
+//   p {
+//     font-size: 1.1em;
+//     margin-top: 4px;
+//     // margin-bottom: 1.5em;
+//   }
 
-  code {
-    background-color: rgba(#616161, 0.1);
-    color: #616161;
-  }
+//   code {
+//     background-color: rgba(#616161, 0.1);
+//     color: #616161;
+//   }
 
-  pre {
-    background: #0d0d0d;
-    color: #fff;
-    font-family: "JetBrainsMono", monospace;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
+//   pre {
+//     background: #0d0d0d;
+//     color: #fff;
+//     font-family: "JetBrainsMono", monospace;
+//     padding: 0.75rem 1rem;
+//     border-radius: 0.5rem;
 
-    code {
-      color: inherit;
-      padding: 0;
-      background: none;
-      font-size: 0.8rem;
-    }
-  }
+//     code {
+//       color: inherit;
+//       padding: 0;
+//       background: none;
+//       font-size: 0.8rem;
+//     }
+//   }
 
-  img {
-    max-width: 100%;
-    height: auto;
-  }
+//   img {
+//     max-width: 100%;
+//     height: auto;
+//   }
 
-  hr {
-    margin: 1rem 0;
-  }
+//   hr {
+//     margin: 1rem 0;
+//   }
 
-  blockquote {
-    padding-left: 1rem;
-    border-left: 2px solid rgba(#0d0d0d, 0.1);
-  }
-}
+//   blockquote {
+//     padding-left: 1rem;
+//     border-left: 2px solid rgba(#0d0d0d, 0.1);
+//   }
+// }
 
 .toggleButton {
   @apply text-xs py-0.5 px-1.5 rounded border  border-gray-100;

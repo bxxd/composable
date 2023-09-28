@@ -48,6 +48,7 @@ export interface BlockData {
   lastId: string | null;
   level: number;
   ctxStack: Record<number, any>;
+  aiModel: string | null;
 }
 
 // Singleton for BlockData
@@ -60,7 +61,8 @@ export class BlockStore {
 
   private constructor(id: string = "") {
     this.id = id;
-    this.data = { lastId: null, level: 1, ctxStack: {} };
+    this.data = { lastId: null, level: 1, ctxStack: {}, aiModel: null };
+
     BlockStore.lastCreatedId = id;
   }
 

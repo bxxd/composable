@@ -28,6 +28,13 @@ const config: Config = {
           900: "var(--novel-stone-900)",
         },
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "65ch", // add required value here
+          },
+        },
+      },
     },
   },
   plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],

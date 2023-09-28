@@ -59,13 +59,13 @@ export default function Workspace({}: WorkspaceProps) {
     // <div className="flex p-0 w-full border-gray-300 border border-dashed rounded-lg overflow-auto flex-grow h-full">
     <div className="flex p-0 w-full overflow-auto flex-grow h-full">
       {/* TipTap Component */}
-      <div className="flex flex-col w-full min-w-[36ch]">
+      <div className="flex flex-col w-full min-w-[36ch] max-w-none">
         {showCatalog && <Catalog onToggleCatalog={handleToggleCatalog} />}
         <TipTap ref={tiptapRef} onToggleCatalog={handleToggleCatalog} />
       </div>
 
       {/* SearchColumn Component */}
-      <div className="flex-grow w-1/3 min-w-[22ch]">
+      <div className="flex-grow  min-w-[65ch] max-w-[65ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
         <SearchColumn handleAddData={handleAddData} />
       </div>

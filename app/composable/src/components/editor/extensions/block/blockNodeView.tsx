@@ -270,7 +270,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           }`}
           onMouseDown={isDataBlock ? toggleExpanded : undefined}
         >
-          <NodeViewContent className="node-view-content w-full pl-2 pr-2" />
+          <NodeViewContent className="node-view-content w-full pl-2 pr-2 max-w-none prose" />
           {isDataBlock && (
             <span className="ml-2">
               <Icon

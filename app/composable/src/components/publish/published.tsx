@@ -150,7 +150,7 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
-          <div className="flex mr-2">
+          <div className="flex mr-2 width-full">
             <button onMouseDown={copyToClipboard}>
               <Icon icon="ph:link-thin" width={21} height={21} color="#aaa" />
             </button>
@@ -178,9 +178,18 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
 
             <span className="ml-1 opacity-40 text-xs mt-[3px]">{likes}</span>
           </div>
-
+          <button
+            type="button"
+            onMouseDown={() => router.push("/play/" + id)}
+            className="mr-1 ml-auto"
+            title="Play as if it was a script."
+          >
+            <Icon icon="ph:play-light" width={21} height={21} color="#aaa" />
+          </button>
           <div className="text-sm opacity-25 italic">
-            {data?.id} Created by {data?.ai_model}
+            <div>
+              {data?.id} Created by {data?.ai_model}
+            </div>
           </div>
         </div>
         <EditorContent

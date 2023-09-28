@@ -4,7 +4,7 @@ import "@/styles/script.scss";
 
 import React, { useEffect, useState } from "react";
 import { BlockStore } from "@/lib/editor";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { JSONContent, useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
 import { Editor } from "@tiptap/core";
@@ -14,7 +14,7 @@ import { Icon } from "@iconify/react";
 import FadeIn from "react-fade-in";
 import { useCompletion } from "ai/react";
 import { toast } from "sonner";
-import { useLatestContextValue } from "@/lib/context";
+import { useLatestContextValue, useGlobalContext } from "@/lib/context";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -90,15 +90,16 @@ const Play: React.FC<PlayProps> = () => {
   const [script, setScript] = useState<ScriptItem[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentItem, setCurrentItem] = useState<ScriptItem | null>(null);
+  const [loadedFromLocalStorage, setLoadedFromLocalStorage] = useState(false);
 
   const [displayedItems, setDisplayedItems] = useState<ScriptItem[]>([]);
   const [displayUserInput, setDisplayUserInput] = useState(false);
   // const [userInput, setUserInput] = useState<string | null | undefined>(null);
   const aiModelRef = useLatestContextValue("aiModel");
 
-  const [aiModel, setAiModel] = useState<string>(aiModelRef.current);
+  const { setAiModel } = useGlobalContext();
 
-  const [aiWasLast, setAiWasLast] = useState(false);
+  // const [aiWasLast, setAiWasLast] = useState(false);
 
   const fetchContentData = async (id: string) => {
     // console.log("fetching content data for id: ", id);
@@ -142,7 +143,7 @@ const Play: React.FC<PlayProps> = () => {
       if (currentItem) {
         currentItem.text = _completion;
         setCurrentItem(currentItem);
-        setAiWasLast(true);
+        // setAiWasLast(true);
         next();
       }
 
@@ -161,7 +162,7 @@ const Play: React.FC<PlayProps> = () => {
       toast(error.message);
     },
     body: {
-      aiModel: aiModel,
+      aiModel: aiModelRef.current,
     },
   });
 
@@ -312,6 +313,7 @@ const Play: React.FC<PlayProps> = () => {
 
   useEffect(() => {
     if (blockState.loadFromLocalStorage()) {
+      setLoadedFromLocalStorage(true);
       let jsonData: JSONContent[] = blockState.getCtxItemAtCurrentLevel();
 
       let script = reduceToScript(jsonData);
@@ -343,7 +345,7 @@ const Play: React.FC<PlayProps> = () => {
       toast.error("Error.");
       setHydrated(true);
     }
-  }, [setHydrated, setScript, blockState, slug]);
+  }, [setHydrated, setScript, blockState, slug, setAiModel]);
 
   // useEffect(() => {
   //   if (!hydrated) {
@@ -359,6 +361,8 @@ const Play: React.FC<PlayProps> = () => {
   //   playNext();
   // }, [hydrated]);
 
+  const router = useRouter();
+
   if (!hydrated) {
   }
 
@@ -370,6 +374,18 @@ const Play: React.FC<PlayProps> = () => {
 
   return (
     <>
+      {!loadedFromLocalStorage && (
+        <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
+          <button onMouseDown={() => router.push("/work/" + slug)}>
+            <Icon
+              icon="iconamoon:edit-thin"
+              width={21}
+              height={21}
+              color="#aaa"
+            />
+          </button>
+        </div>
+      )}
       <div className="space-y-4 bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">
         {displayedItems.map((item, index) => (
           <React.Fragment key={item.id + index}>
