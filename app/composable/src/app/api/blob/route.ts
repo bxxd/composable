@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
         return ", true AS is_mine";
       } else {
         if (ip_address) {
-          return `, ip_address = '${ip_address} AS is_mine`;
+          return `, ip_address = '${ip_address}' AS is_mine`;
         } else {
           return `, ip_address IS NULL AS is_mine`;
         }
