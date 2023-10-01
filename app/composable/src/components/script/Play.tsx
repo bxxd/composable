@@ -216,7 +216,7 @@ const Play: React.FC<PlayProps> = () => {
       return;
     }
 
-    console.log("item", item);
+    console.log("item", JSON.stringify(item));
 
     if (item.role === "user") {
     } else {
@@ -274,6 +274,18 @@ const Play: React.FC<PlayProps> = () => {
           editor?.commands.clearContent();
           setDisplayUserInput(true);
         });
+        break;
+      case "data":
+        console.log("data");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "user",
+            content: "DATA: " + item.excerpt,
+          },
+        ]);
+        next();
+        break;
 
       default:
         console.log("default", item.role);
@@ -370,7 +382,7 @@ const Play: React.FC<PlayProps> = () => {
     `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}}`
   );
 
-  console.log("completion", completion);
+  // console.log("completion", completion);
 
   return (
     <>
