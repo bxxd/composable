@@ -71,8 +71,9 @@ const Page: React.FC = () => {
         }
         console.log("fetching items from url: ", url);
         const res = await fetch(url); // Replace with your API endpoint
-        console.log("res", res);
+        // console.log("res", res);
         const data = await res.json();
+        console.log("data", JSON.stringify(data));
         setItems(data); // Set fetched data to state
         if (searchTerm) {
           setIsSearchActive(true);
@@ -111,6 +112,25 @@ const Page: React.FC = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    console.log("handleDelete id", id);
+    try {
+      const response = await fetch(`/api/blob?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Refresh data or filter out the deleted item
+        setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      } else {
+        const errorData = await response.json();
+        console.error("Error deleting item:", errorData.message);
+      }
+    } catch (error) {
+      console.error("Error calling delete endpoint:", error);
     }
   };
 
@@ -166,13 +186,30 @@ const Page: React.FC = () => {
         <div className="flex flex-col mr-4 ml-2 mb-2 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((item, index) => (
-              <Link key={index} href={`/ai-created/${item.id}`}>
-                <div className="card rounded-lg border cursor-pointer ">
-                  <div className="pointer-events-none">
-                    <MemoizedCard id={item.id} />
+              <div className="relative" key={item.id}>
+                {" "}
+                {/* <-- Set position: relative to this container */}
+                {item.is_mine && (
+                  <button
+                    className="opacity-50 absolute bottom-0 right-0 p-2 cursor-pointer z-10"
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    <Icon
+                      icon="icon-park-twotone:delete"
+                      color="#c25d55"
+                      width="20"
+                      height="20"
+                    />
+                  </button>
+                )}
+                <Link href={`/ai-created/${item.id}`}>
+                  <div className="card rounded-lg border cursor-pointer">
+                    <div className="pointer-events-none">
+                      <MemoizedCard id={item.id} />
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         </div>

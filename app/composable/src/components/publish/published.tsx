@@ -57,6 +57,12 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
       const fetchData = async () => {
         const data = await fetchContentData(id);
 
+        if (!data) {
+          toast.error("Failed to fetch content data");
+          setHydrated(true);
+          return;
+        }
+
         const contentArray = data.data;
         setTimeout(() => {
           editor.commands.setContent(contentArray);
@@ -141,6 +147,14 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
     }
   };
 
+  // if (!hydrated) {
+  //   return <div>Loading...</div>;
+  // }
+
+  if (!data) {
+    return <div className="opacity-50">Loading...</div>;
+  }
+
   return (
     <>
       {/* TipTap Component */}
@@ -194,7 +208,7 @@ const Published: React.FC<PublishedProps> = ({ id }) => {
         </div>
         <EditorContent
           editor={editor}
-          className="prose rounded-lg p-2 leading-relaxed outline-none "
+          className="prose dark:prose-invert rounded-lg p-2 leading-relaxed outline-none "
         />
       </div>
     </>

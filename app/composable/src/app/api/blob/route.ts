@@ -5,6 +5,12 @@ import { extractAllText } from "@/lib/editor";
 
 export const dynamic = "force-dynamic";
 
+function getIpAddress(req: NextRequest) {
+  return (
+    req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || req.ip
+  );
+}
+
 export async function POST(req: NextRequest) {
   const db = await getDbInstance();
   try {
@@ -12,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     console.log("blob POST...");
 
-    const ip_address = req.headers.get("x-forwarded-for") || req.ip;
+    const ip_address = getIpAddress(req);
 
     const original = data.original || null;
 
@@ -46,6 +52,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // console.log("GET req", req);
   const db = await getDbInstance();
   try {
     const url = new URL(req.url);
@@ -95,11 +102,25 @@ export async function GET(req: NextRequest) {
     let queryText: string;
     let queryParams: (string | number)[];
 
+    const ip_address = getIpAddress(req);
+
+    const getMine = () => {
+      if (process.env.SUPER_USER === "true") {
+        return ", true AS is_mine";
+      } else {
+        if (ip_address) {
+          return `, ip_address = '${ip_address} AS is_mine`;
+        } else {
+          return `, ip_address IS NULL AS is_mine`;
+        }
+      }
+    };
+
     if (id) {
-      queryText = `SELECT id, data, created_at, ai_model, ${
+      queryText = `SELECT id, data, created_at, ai_model ${getMine()} ${
         original
-          ? `original`
-          : `CASE WHEN original IS NOT NULL THEN true ELSE false END AS original`
+          ? `,original`
+          : `,CASE WHEN original IS NOT NULL THEN true ELSE false END AS original`
       }, likes FROM json_blobs WHERE id = $1 `;
       queryParams = [id];
     } else {
@@ -109,7 +130,7 @@ export async function GET(req: NextRequest) {
         embedding = await getEmbedding(search_term);
       }
 
-      queryText = `SELECT id
+      queryText = `SELECT id ${getMine()}
         ${
           embedding
             ? `,embedding <=> '${JSON.stringify(
@@ -128,9 +149,69 @@ export async function GET(req: NextRequest) {
       queryParams = [];
     }
 
+    // console.log("queryText", queryText);
+
     const data = await db.any(queryText, queryParams);
 
     return NextResponse.json(data);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  } finally {
+    await releaseDbInstance();
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const db = await getDbInstance();
+
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    const integerId = id ? parseInt(id, 10) : null;
+
+    if (!integerId || isNaN(integerId) || integerId <= 0) {
+      return NextResponse.json(
+        { message: "Invalid or missing ID value" },
+        { status: 400 }
+      );
+    }
+
+    const ip_address = getIpAddress(req);
+
+    // Check if the record exists and if the IP address matches or both are undefined/null
+    const record = await db.oneOrNone(
+      `SELECT ip_address FROM json_blobs WHERE id = $1`,
+      [integerId]
+    );
+
+    if (!record) {
+      return NextResponse.json(
+        { message: "Record not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if the IP addresses either match, or if both are undefined/null
+    if (process.env.SUPER_USER !== "true") {
+      if (
+        record.ip_address !== ip_address &&
+        !(typeof ip_address === "undefined" && record.ip_address === null)
+      ) {
+        return NextResponse.json(
+          { message: "You are not authorized to delete this record" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // If IP matches, delete the record
+    await db.none(`DELETE FROM json_blobs WHERE id = $1`, [integerId]);
+
+    return NextResponse.json({ message: "Record deleted successfully" });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
