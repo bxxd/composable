@@ -194,7 +194,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
             {editor && <EditorBubbleMenu editor={editor} />}
             <EditorContent
               editor={editor}
-              className="prose rounded-lg p-2 leading-relaxed outline-none "
+              className="prose dark:prose-invert rounded-lg p-2 leading-relaxed outline-none "
             />
           </div>
         </div>

@@ -169,6 +169,11 @@ const Play: React.FC<PlayProps> = () => {
   const blockState = BlockStore.getInst(slug);
 
   const editor = useEditor({
+    editorProps: {
+      attributes: {
+        class: `prose-p:my-2`,
+      },
+    },
     extensions: publishedExtensions,
     editable: true,
   });
@@ -216,7 +221,7 @@ const Play: React.FC<PlayProps> = () => {
       return;
     }
 
-    console.log("item", item);
+    console.log("item", JSON.stringify(item));
 
     if (item.role === "user") {
     } else {
@@ -274,6 +279,18 @@ const Play: React.FC<PlayProps> = () => {
           editor?.commands.clearContent();
           setDisplayUserInput(true);
         });
+        break;
+      case "data":
+        console.log("data");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "user",
+            content: "DATA: " + item.excerpt,
+          },
+        ]);
+        next();
+        break;
 
       default:
         console.log("default", item.role);
@@ -370,12 +387,12 @@ const Play: React.FC<PlayProps> = () => {
     `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}}`
   );
 
-  console.log("completion", completion);
+  // console.log("completion", completion);
 
   return (
     <>
       {!loadedFromLocalStorage && (
-        <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm">
+        <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm ">
           <button onMouseDown={() => router.push("/work/" + slug)}>
             <Icon
               icon="iconamoon:edit-thin"
@@ -386,13 +403,13 @@ const Play: React.FC<PlayProps> = () => {
           </button>
         </div>
       )}
-      <div className="space-y-4 bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">
+      <div className="space-y-4 p-4 rounded-lg  bg-gray-50 dark:bg-gray-900">
         {displayedItems.map((item, index) => (
           <React.Fragment key={item.id + index}>
             <>
               {item.role == "assistant" ? (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
                     <div className="">
                       <Icon icon="mdi:robot" className="icon-size mr-2" />
                       <ReactMarkdown
@@ -405,22 +422,22 @@ const Play: React.FC<PlayProps> = () => {
                   </div>
                 </FadeIn>
               ) : item.role === "user" ? (
-                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100">
+                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
                   <Icon
                     icon="mdi-light:chevron-right"
                     className="icon-size mr-2"
                   />
                   <div
-                    className="prose"
+                    className="prose dark:prose-invert"
                     dangerouslySetInnerHTML={{ __html: item.html || "" }}
                   ></div>
                 </div>
               ) : (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
                     <Icon icon="mdi:robot" className="icon-size mr-2" />
                     <div
-                      className="prose"
+                      className="prose dark:prose-invert"
                       dangerouslySetInnerHTML={{ __html: item.html || "" }}
                     ></div>
                   </div>
@@ -432,17 +449,17 @@ const Play: React.FC<PlayProps> = () => {
 
         {displayUserInput && (
           <FadeIn>
-            <div>
-              <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100">
+            <div className="max-w-2xl">
+              <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 ">
                 <EditorContent
                   editor={editor}
-                  className="prose rounded-lg p-2 leading-relaxed outline-none "
+                  className="prose dark:prose-invert w-full rounded-lg p-2 leading-relaxed outline-none "
                 />
               </div>
 
               <button
                 type="button"
-                className="ml-auto w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+                className="ml-auto mt-1 w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
                 onMouseDown={() => {
                   handleAIButtonClick({ editor });
                 }}

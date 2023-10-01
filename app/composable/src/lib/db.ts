@@ -12,7 +12,9 @@ export const getDbInstance = async (): Promise<pgp.IDatabase<any, any>> => {
 
   mutex = (async () => {
     if (!dbInstance) {
-      console.log("creating db instance...");
+      console.log(
+        `creating db instance... host: ${process.env.PGHOST} db: ${process.env.PGDATABASE}`
+      );
       dbInstance = pgp()(
         process.env.DATABASE_URL || {
           host: process.env.PGHOST || "localhost",
