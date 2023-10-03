@@ -1,4 +1,5 @@
 import os
+from types import SimpleNamespace
 
 
 def remove_newlines_from_dict(data):
@@ -9,3 +10,7 @@ def remove_newlines_from_dict(data):
 
 def file_exists(file_path):
     return os.path.isfile(file_path)
+
+
+def namespace_to_dict(namespace_obj: SimpleNamespace) -> dict:
+    return vars(namespace_obj)

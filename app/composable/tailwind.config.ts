@@ -31,7 +31,7 @@ const config: Config = {
       typography: {
         DEFAULT: {
           css: {
-            maxWidth: "65ch", // add required value here
+            maxWidth: "87ch", // add required value here
           },
         },
       },

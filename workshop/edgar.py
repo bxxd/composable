@@ -6,6 +6,7 @@ import time
 import aiohttp
 import composable.cmn
 from types import SimpleNamespace
+from composable.services import filings
 
 log = logging.getLogger(__name__)
 
@@ -55,9 +56,32 @@ async def get_filings(cik_str):
         return filing_urls
 
 
-async def main(args):
-    log.info(f"Hello there! {args}")
+async def process(args):
+    log.info("process..")
+    data = {
+        "cik": {"cik_str": "0001318605", "title": "Tesla, Inc.", "ticker": "TSLA"},
+        "filing": {
+            "filingDate": "2023-07-24",
+            "reportDate": "2023-06-30",
+            "filingType": "10-Q",
+            "url": "https://www.sec.gov/Archives/edgar/data/0001318605/000095017023033872/tsla-20230630.htm",
+        },
+    }
 
+    await filings.save_company_from_cik_data(data["cik"])
+
+    filing_data = {}
+    filing_data["cik"] = int(data["cik"]["cik_str"])
+    filing_data["ticker"] = data["cik"]["ticker"]
+    filing_data["filing_type"] = data["filing"]["filingType"]
+    filing_data["filed_at"] = data["filing"]["filingDate"]
+    filing_data["reporting_for"] = data["filing"]["reportDate"]
+    filing_data["url"] = data["filing"]["url"]
+
+    await filings.save_filing(filing_data)
+
+
+async def test1(args):
     start_time = time.time()
 
     # Load and parse the JSON data
@@ -85,6 +109,11 @@ async def main(args):
 
     end_time = time.time()
     print(f"Execution time: {end_time - start_time:.2f} seconds")
+
+
+async def main(args):
+    log.info(f"Hello there! {args}")
+    await process(args)
 
 
 def parse_args():

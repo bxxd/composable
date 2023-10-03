@@ -59,9 +59,23 @@ def get_elements(element):
 
             for element in style_elements:
                 if "font-weight" in element:
-                    weight = int(element.split("font-weight:")[1])
+                    font_weight_value = element.split("font-weight:")[1].strip().lower()
+
+                    if font_weight_value == "normal":
+                        weight = 400
+                    elif font_weight_value == "bold":
+                        weight = 700
+                    else:
+                        try:
+                            weight = int(font_weight_value)
+                        except ValueError:
+                            # Handle or log invalid font-weight values
+                            pass
+
                 if "font-style" in element:
-                    italics = element.split("font-style:")[1] == "italic"
+                    italics = (
+                        element.split("font-style:")[1].strip().lower() == "italic"
+                    )
 
             if weight is not None and weight > 400:
                 s.type = "h2"

@@ -30,6 +30,26 @@ filing_period_enum = ["q1", "q2", "q3", "q4", "annual"]
 filing_type_enum = ["10-k", "10-q", "8-k", "20-f", "6-k", "other"]
 
 
+def determine_filing_period(filing_date: datetime, filing_type: str) -> str:
+    # Logic based on filing_type
+    if filing_type == "10-q":
+        if 1 <= filing_date.month <= 3:
+            return "q1"
+        elif 4 <= filing_date.month <= 6:
+            return "q2"
+        elif 7 <= filing_date.month <= 9:
+            return "q3"
+    elif filing_type == "10-k":
+        return "annual"  # or "q4" if you consider 10-K to represent Q4
+    else:
+        # Handle other filing types or raise an exception if needed
+        return None
+
+    raise ValueError(
+        f"Unable to determine filing period for date: {filing_date}, filing_type: {filing_type}"
+    )
+
+
 class Company(Base):
     __tablename__ = "companies"
     id = Column(Integer, primary_key=True)
@@ -76,6 +96,15 @@ class Tag(Base):
     excerpt_id = Column(Integer, ForeignKey("excerpts.id"))
     tag = Column(String(255))
     embedding = Column(Vector(1536))
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class Document(Base):
+    __tablename__ = "documents"
+    id = Column(Integer, primary_key=True)
+    filing_id = Column(Integer, ForeignKey("filings.id"))
+    status = Column(String(50))
+    url = Column(String(512))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
@@ -134,14 +163,20 @@ def before_insert_or_update_tag(mapper, connection, target):
 @event.listens_for(Filing, "before_insert")
 @event.listens_for(Filing, "before_update")
 def before_insert_or_update_filings(mapper, connection, target):
-    if target.filing_period not in filing_period_enum:
-        raise ValueError(
-            f"filing_period must be one of {filing_period_enum}, got {target.filing_period}"
-        )
+    target.filing_type = target.filing_type.lower() if target.filing_type else None
     if target.filing_type not in filing_type_enum:
         raise ValueError(
             f"filing_type must be one of {filing_type_enum}, got {target.filing_type}"
         )
+    if target.filing_period is None:
+        target.filing_period = determine_filing_period(
+            target.reporting_for, target.filing_type
+        )
+    if target.filing_period not in filing_period_enum:
+        raise ValueError(
+            f"filing_period must be one of {filing_period_enum}, got {target.filing_period}"
+        )
+
     target.filing_period = (
         target.filing_period.lower() if target.filing_period else None
     )
@@ -175,7 +210,9 @@ class Session(AbstractSessionEdgar):
     async def get_filings_by_keys(
         self, company_id, filed_at=None, reporting_for=None, filing_type=None
     ) -> Filing | None:
-        log.info(f"get_filings_by_keys: {company_id} {type} {filed_at} {reporting_for}")
+        log.info(
+            f"get_filings_by_keys: {company_id} {filing_type} {filed_at} {reporting_for}"
+        )
         if not company_id:
             log.warning("need company_id to get filing")
             return None
@@ -234,9 +271,3 @@ class Session(AbstractSessionEdgar):
         for tag in tags:
             tag = tag.strip().lower()
             await self.save(Tag(excerpt_id=excerpt_id, tag=tag))
-
-        # delete_stmt = self.delete(Tag).where(Tag.excerpt_id == excerpt_id)
-
-        # await self.execute(delete_stmt)
-
-        ### first get the tag if it already exists

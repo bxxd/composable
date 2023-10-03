@@ -22,6 +22,14 @@ async def fetch(session, url, headers=SEC_HEADERS):
         return await response.text()
 
 
+async def fetch_document(url):
+    headers = {
+        "User-Agent": SEC_HEADERS["User-Agent"],
+    }
+    async with aiohttp.ClientSession() as session:
+        return await fetch(session, url, headers=headers)
+
+
 async def get_filings(cik_str, year=None, quarter=None, filing_type=None, annual=False):
     async with aiohttp.ClientSession() as session:
         url = f"https://data.sec.gov/submissions/CIK{cik_str}.json"

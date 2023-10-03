@@ -9,19 +9,42 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_tagging_chain
 from langchain.schema.messages import HumanMessage
 from langchain.callbacks import get_openai_callback
+from composable.services.edgar import fetch_document
+from datetime import datetime
 
 import logging
 
 log = logging.getLogger(__name__)
+
+MODEL = "gpt-3.5-turbo-16k"
 
 
 async def save_company_from_yaml(args):
     log.info(f"save_company: {args}")
     with open(args.company, "r") as file:
         data = yaml.safe_load(file)
+        await save_company(data)
+
+
+async def save_company_from_cik_data(cik_data: dict):
+    log.info(f"save_company: {cik_data}")
+    cik = cik_data.get("cik_str")
+    if not cik:
+        log.error(f"save_company: cik not found")
+        return
+    cik = int(cik)
+
+    data = {
+        "cik": cik,
+        "ticker": cik_data.get("ticker"),
+        "name": cik_data.get("title"),
+    }
+
+    await save_company(data)
 
 
 async def save_company(data: dict):
+    log.info(f"save_company: {data}")
     data = utils.remove_newlines_from_dict(data)
 
     cik = data.get("cik")
@@ -44,17 +67,39 @@ async def save_filing_from_yaml(args):
 
     with open(args.filing, "r") as file:
         data = yaml.safe_load(file)
+        save_filing(data)
 
+
+async def save_filing(data: dict):
+    log.info(f"save_filing: {data}")
     cik = data.get("cik")
     ticker = data.get("ticker")
+    # Convert 'filed_at' to datetime.date if it's a string
     filed_at = data.get("filed_at")
+    if isinstance(filed_at, str):
+        filed_at = datetime.strptime(filed_at, "%Y-%m-%d").date()
+    # Convert 'reporting_for' to datetime.date if it's a string
     reporting_for = data.get("reporting_for")
+    if isinstance(reporting_for, str):
+        reporting_for = datetime.strptime(reporting_for, "%Y-%m-%d").date()
     filing_type = data.get("filing_type")
     file = data.get("file")
+    url = data.get("url")
 
     if not file or not utils.file_exists(file):
-        log.error(f"save_filing: file not found: {file}")
-        return
+        if url:
+            file = "/tmp/" + url.split("/")[-1]
+            if utils.file_exists(file):
+                log.info(f"save_filing: file already exists: {file}")
+            else:
+                content = await fetch_document(url)
+                if content:
+                    log.info(f"save_filing: saving file: {file}")
+                    with open(file, "w") as f:
+                        f.write(content)
+        else:
+            log.error(f"save_filing: file not found: {file} and no url provided")
+            return
 
     filing = None
     async with db.Session.context() as session:
@@ -71,13 +116,23 @@ async def save_filing_from_yaml(args):
 
         if not filings:
             log.debug(f"Creating filing for cik: {cik} ticker: {ticker}")
-            filing = db.Filing.from_dict(data)
+            filing = db.Filing.from_dict(
+                {
+                    "filed_at": filed_at,
+                    "filing_type": filing_type,
+                    "reporting_for": reporting_for,
+                    "url": url,
+                    "file": file,
+                    "company_id": company.id,
+                    "model": MODEL,
+                }
+            )
             filing.company_id = company.id
         else:
             (filing,) = filings[0]
             log.debug(f"already have filing: {filing}")
 
-        filing.model = args.model
+        filing.model = MODEL
 
         filing = await session.merge(filing)
         await session.commit()
@@ -88,7 +143,7 @@ async def save_filing_from_yaml(args):
 
     log.info(f"have filing: {filing}")
 
-    await save_filing_excerpts(args, filing, file)
+    await save_filing_excerpts(filing, file, MODEL)
 
 
 _TAGGING_TEMPLATE = """You are creating a rolling extract for the company. This will be used in a value proposition for investment.
@@ -148,12 +203,12 @@ tagging_schema = {
 }
 
 
-async def save_filing_excerpts(args, filing: db.Filing, file: str):
+async def save_filing_excerpts(
+    filing: db.Filing, file: str, model: str = "gpt-3.5-turbo-16k"
+):
     sections = qk_html.get_sections(file)
 
-    # , model="gpt-4"
-
-    llm = ChatOpenAI(temperature=0.2, verbose=False, model=args.model)
+    llm = ChatOpenAI(temperature=0.2, verbose=False, model=model)
 
     chain = create_tagging_chain(tagging_schema, llm)
 
