@@ -72,9 +72,9 @@ export const clearData = [
           {
             type: "text",
             text:
-              "You are an AI agent whose name is Connor, John Connor. Current date is " +
+              "Welcome to this never ending conversation. Current date is " +
               currentDate +
-              ". The users success is your priority and competence is key.",
+              ".",
           },
         ],
       },
