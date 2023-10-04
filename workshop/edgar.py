@@ -68,17 +68,20 @@ async def process(args):
         },
     }
 
-    await filings.save_company_from_cik_data(data["cik"])
+    company = await filings.save_company_from_cik_data(data["cik"])
 
     filing_data = {}
     filing_data["cik"] = int(data["cik"]["cik_str"])
     filing_data["ticker"] = data["cik"]["ticker"]
+
     filing_data["filing_type"] = data["filing"]["filingType"]
     filing_data["filed_at"] = data["filing"]["filingDate"]
     filing_data["reporting_for"] = data["filing"]["reportDate"]
     filing_data["url"] = data["filing"]["url"]
 
-    await filings.save_filing(filing_data)
+    filing = await filings.save_filing(filing_data)
+
+    await filings.save_excerpts(company, filing)
 
 
 async def test1(args):

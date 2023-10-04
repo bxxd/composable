@@ -8,6 +8,9 @@ from composable.services.edgar import (
 from composable.cmn.utils import namespace_to_dict
 from pydantic import BaseModel, HttpUrl
 import aiohttp
+from composable.services import filings
+from fastapi import BackgroundTasks
+
 
 import logging
 
@@ -75,21 +78,22 @@ async def get_ticker_filings(
 
 
 @router.post("/upload")
-async def upload_edgar(document: EdgarDocument):
-    # Fetch and parse the EDGAR document
-    content = await fetch_document(document.filing.url)
+async def upload_edgar(document: EdgarDocument, background_tasks: BackgroundTasks):
+    data = document.dict()
 
-    log.info(f"Content: {content[:700]}...")
+    company = await filings.save_company_from_cik_data(data["cik"])
+
+    filing_data = {}
+    filing_data["cik"] = int(data["cik"]["cik_str"])
+    filing_data["ticker"] = data["cik"]["ticker"]
+
+    filing_data["filing_type"] = data["filing"]["filingType"]
+    filing_data["filed_at"] = data["filing"]["filingDate"]
+    filing_data["reporting_for"] = data["filing"]["reportDate"]
+    filing_data["url"] = data["filing"]["url"]
+
+    filing = await filings.save_filing(filing_data)
+
+    background_tasks.add_task(filings.save_excerpts, company, filing)
 
     return {"parsed_content": "test"}
-
-
-x = {
-    "cik": {"cik_str": "0001318605", "title": "Tesla, Inc.", "ticker": "TSLA"},
-    "filing": {
-        "filingDate": "2023-07-24",
-        "reportDate": "2023-06-30",
-        "filingType": "10-Q",
-        "url": "https://www.sec.gov/Archives/edgar/data/0001318605/000095017023033872/tsla-20230630.htm",
-    },
-}

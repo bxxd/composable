@@ -23,7 +23,7 @@ async def save_company_from_yaml(args):
     log.info(f"save_company: {args}")
     with open(args.company, "r") as file:
         data = yaml.safe_load(file)
-        await save_company(data)
+        return await save_company(data)
 
 
 async def save_company_from_cik_data(cik_data: dict):
@@ -40,7 +40,7 @@ async def save_company_from_cik_data(cik_data: dict):
         "name": cik_data.get("title"),
     }
 
-    await save_company(data)
+    return await save_company(data)
 
 
 async def save_company(data: dict):
@@ -61,13 +61,15 @@ async def save_company(data: dict):
         await session.save(company)
         log.debug(f"company: {company}")
 
+        return company
+
 
 async def save_filing_from_yaml(args):
     log.info(f"save_filing: {args}")
 
     with open(args.filing, "r") as file:
         data = yaml.safe_load(file)
-        save_filing(data)
+        return save_filing(data)
 
 
 async def save_filing(data: dict):
@@ -83,23 +85,10 @@ async def save_filing(data: dict):
     if isinstance(reporting_for, str):
         reporting_for = datetime.strptime(reporting_for, "%Y-%m-%d").date()
     filing_type = data.get("filing_type")
-    file = data.get("file")
-    url = data.get("url")
+    if filing_type:
+        filing_type = filing_type.lower()
 
-    if not file or not utils.file_exists(file):
-        if url:
-            file = "/tmp/" + url.split("/")[-1]
-            if utils.file_exists(file):
-                log.info(f"save_filing: file already exists: {file}")
-            else:
-                content = await fetch_document(url)
-                if content:
-                    log.info(f"save_filing: saving file: {file}")
-                    with open(file, "w") as f:
-                        f.write(content)
-        else:
-            log.error(f"save_filing: file not found: {file} and no url provided")
-            return
+    url = data.get("url")
 
     filing = None
     async with db.Session.context() as session:
@@ -109,20 +98,17 @@ async def save_filing(data: dict):
             return
         filings = await session.get_filings_by_keys(
             company_id=company.id,
-            filed_at=filed_at,
-            reporting_for=reporting_for,
-            filing_type=filing_type,
+            url=url,
         )
 
         if not filings:
-            log.debug(f"Creating filing for cik: {cik} ticker: {ticker}")
+            log.info(f"Creating filing for cik: {cik} ticker: {ticker}")
             filing = db.Filing.from_dict(
                 {
                     "filed_at": filed_at,
                     "filing_type": filing_type,
                     "reporting_for": reporting_for,
                     "url": url,
-                    "file": file,
                     "company_id": company.id,
                     "model": MODEL,
                 }
@@ -130,20 +116,50 @@ async def save_filing(data: dict):
             filing.company_id = company.id
         else:
             (filing,) = filings[0]
-            log.debug(f"already have filing: {filing}")
+            log.info(f"already have filing: {filing}")
 
         filing.model = MODEL
 
         filing = await session.merge(filing)
         await session.commit()
 
+        return filing
+
+
+async def save_excerpts(company, filing, model=MODEL):
     if not filing:
         log.error(f"save_filing: filing not found")
         return
 
     log.info(f"have filing: {filing}")
 
-    await save_filing_excerpts(filing, file, MODEL)
+    async with db.Session.context() as session:
+        filing.status = "processing"
+        filing = await session.merge(filing)
+        await session.commit()
+
+    url = filing.url
+    file = None
+    if url:
+        file = "/tmp/" + url.split("/")[-1]
+        if utils.file_exists(file):
+            log.info(f"save_filing: file already exists: {file}")
+        else:
+            content = await fetch_document(url)
+            if content:
+                log.info(f"save_filing: saving file: {file}")
+                with open(file, "w") as f:
+                    f.write(content)
+    else:
+        log.error(f"save_filing: file not found: {file} and no url provided")
+        return
+
+    await save_filing_excerpts(company, filing, file, model)
+
+    async with db.Session.context() as session:
+        filing.status = "processed"
+        filing = await session.merge(filing)
+        await session.commit()
 
 
 _TAGGING_TEMPLATE = """You are creating a rolling extract for the company. This will be used in a value proposition for investment.
@@ -204,7 +220,7 @@ tagging_schema = {
 
 
 async def save_filing_excerpts(
-    filing: db.Filing, file: str, model: str = "gpt-3.5-turbo-16k"
+    company: db.Company, filing: db.Filing, file: str, model: str = "gpt-3.5-turbo-16k"
 ):
     sections = qk_html.get_sections(file)
 
@@ -243,6 +259,8 @@ async def save_filing_excerpts(
             excerpt.tokens = llm.get_num_tokens_from_messages(
                 [HumanMessage(content=s.text)]
             )
+            excerpt.company_name = company.name
+            excerpt.company_ticker = company.ticker
 
             excerpt = await session.merge(excerpt)
             await session.commit()

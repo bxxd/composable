@@ -173,7 +173,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
       {isExpanded && (
         <>
           <div className="flex flex-row justify-between">
-            <div className="relative w-full inline-block mb-2">
+            <div className="relative w-full inline-block mb-0">
               <input
                 type="text"
                 placeholder="Semantic Search..."
@@ -202,7 +202,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
             {Object.values(data).map((company) => (
               <div
                 key={company.company_ticker}
-                className="border p-1 rounded border-red-100"
+                className="border p-1 rounded border-red-100 mt-1"
               >
                 <div
                   onClick={() => toggleCollapseCompany(company.company_id)}

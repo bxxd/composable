@@ -70,6 +70,7 @@ class Filing(Base):
     filing_type = Column(String(10))
     model = Column(String(255))
     url = Column(String(255))
+    status = Column(String(50))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
@@ -87,6 +88,8 @@ class Excerpt(Base):
     embedding = Column(Vector(1536))
     category_embedding = Column(Vector(1536))
     tokens = Column(Integer)
+    company_name = Column(String(255))
+    company_ticker = Column(String(255))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
@@ -111,7 +114,14 @@ class Document(Base):
 @event.listens_for(Excerpt, "before_insert")
 @event.listens_for(Excerpt, "before_update")
 def before_insert_or_update_excerpt(mapper, connection, target):
-    attributes_to_track = ["excerpt", "title", "category", "subcategory"]
+    attributes_to_track = [
+        "excerpt",
+        "title",
+        "category",
+        "subcategory",
+        "company_name",
+        "company_ticker",
+    ]
     dirty = False
 
     for attr in attributes_to_track:
@@ -128,7 +138,7 @@ def before_insert_or_update_excerpt(mapper, connection, target):
         target.created_at = datetime.now()
 
     if dirty or target.embedding is None:
-        text = f"""{target.excerpt}"""
+        text = f"""{target.company_name + " " if target.company_name else ""}{"("+target.company_ticker.upper()+")" if target.company_ticker else ""}) {target.excerpt}"""
         target.embedding = get_embedding(text)
 
     if dirty or target.category_embedding is None:
@@ -182,6 +192,9 @@ def before_insert_or_update_filings(mapper, connection, target):
     )
     target.filing_type = target.filing_type.lower() if target.filing_type else None
 
+    if target.status is None:
+        target.status = "new"
+
 
 @event.listens_for(Company, "before_insert")
 @event.listens_for(Company, "before_update")
@@ -208,7 +221,7 @@ class Session(AbstractSessionEdgar):
             return item[0]
 
     async def get_filings_by_keys(
-        self, company_id, filed_at=None, reporting_for=None, filing_type=None
+        self, company_id, filed_at=None, reporting_for=None, filing_type=None, url=None
     ) -> Filing | None:
         log.info(
             f"get_filings_by_keys: {company_id} {filing_type} {filed_at} {reporting_for}"
@@ -220,9 +233,11 @@ class Session(AbstractSessionEdgar):
         if reporting_for is not None:
             condition &= Filing.reporting_for == reporting_for
         if filing_type is not None:
-            condition &= Filing.filing_type == filing_type
+            condition &= Filing.filing_type == filing_type.lower()
         if filed_at is not None:
             condition &= Filing.filed_at == filed_at
+        if url is not None:
+            condition &= Filing.url == url
 
         q = select(Filing).where(condition).limit(10)
         result = await self.execute(q)
