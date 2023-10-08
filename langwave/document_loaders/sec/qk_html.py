@@ -92,7 +92,7 @@ def get_elements(element):
     return texts
 
 
-def get_sections(file_path, break_on_h3=True):
+def get_sections(file_path, break_on_h3=True, break_on_h4=True):
     if not file_path:
         raise ValueError("file_path is required")
     if not "htm" in file_path:
@@ -126,6 +126,8 @@ def get_sections(file_path, break_on_h3=True):
     breaks = ["h2"]
     if break_on_h3:
         breaks.append("h3")
+    if break_on_h4:
+        breaks.append("h4")
 
     def add_section(text, cnt):
         nonlocal complete_sections, start

@@ -8,6 +8,7 @@ from sqlalchemy import (
     select,
     String,
     delete,
+    Float,
 )
 from sqlalchemy.orm import session
 from sqlalchemy.sql import func
@@ -71,6 +72,7 @@ class Filing(Base):
     model = Column(String(255))
     url = Column(String(255))
     status = Column(String(50))
+    cost = Column(Float)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
@@ -90,6 +92,7 @@ class Excerpt(Base):
     tokens = Column(Integer)
     company_name = Column(String(255))
     company_ticker = Column(String(255))
+    cost = Column(Float)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
@@ -165,9 +168,9 @@ def before_insert_or_update_tag(mapper, connection, target):
     if dirty:
         target.created_at = datetime.now()
 
-    if dirty or target.embedding is None:
-        text = f"""{target.tag}"""
-        target.embedding = get_embedding(text)
+    # if dirty or target.embedding is None:
+    #     text = f"""{target.tag}"""
+    #     target.embedding = get_embedding(text)
 
 
 @event.listens_for(Filing, "before_insert")

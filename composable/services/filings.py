@@ -72,7 +72,7 @@ async def save_filing_from_yaml(args):
         return save_filing(data)
 
 
-async def save_filing(data: dict):
+async def save_filing(data: dict, model=MODEL):
     log.info(f"save_filing: {data}")
     cik = data.get("cik")
     ticker = data.get("ticker")
@@ -110,7 +110,7 @@ async def save_filing(data: dict):
                     "reporting_for": reporting_for,
                     "url": url,
                     "company_id": company.id,
-                    "model": MODEL,
+                    "model": model,
                 }
             )
             filing.company_id = company.id
@@ -154,12 +154,23 @@ async def save_excerpts(company, filing, model=MODEL):
         log.error(f"save_filing: file not found: {file} and no url provided")
         return
 
-    await save_filing_excerpts(company, filing, file, model)
+    try:
+        cost = await save_filing_excerpts(company, filing, file, model)
+    except Exception as e:
+        log.error(f"save_filing: error: {e}")
+        cost = 0.0
+        async with db.Session.context() as session:
+            filing.status = "error"
+            filing = await session.merge(filing)
+            await session.commit()
+            return False
 
     async with db.Session.context() as session:
         filing.status = "processed"
+        filing.cost = cost
         filing = await session.merge(filing)
         await session.commit()
+        return True
 
 
 _TAGGING_TEMPLATE = """You are creating a rolling extract for the company. This will be used in a value proposition for investment.
@@ -219,6 +230,81 @@ tagging_schema = {
 }
 
 
+async def process_section(
+    section_text: str,
+    llm: ChatOpenAI,
+    chain,
+    filing,
+    company,
+    session,
+    section_count: int,
+) -> (float, int):
+    """Process a section and return the total cost"""
+    section_text = section_text.replace("\n", " ")
+
+    num_tokens = llm.get_num_tokens_from_messages([HumanMessage(content=section_text)])
+
+    log.info(f"section: {num_tokens} tokens")
+
+    # If token count exceeds 4096, split and recursively process
+    if num_tokens > 4096:
+        log.info(f"splitting section: {num_tokens}")
+        halfway_point = len(section_text) // 2
+        split_point = section_text.rfind(" ", 0, halfway_point)
+
+        first_half = section_text[:split_point]
+        second_half = section_text[split_point:]
+
+        cost1, section_count = await process_section(
+            first_half, llm, chain, filing, company, session, section_count
+        )
+        cost2, section_count = await process_section(
+            second_half, llm, chain, filing, company, session, section_count
+        )
+
+        return cost1 + cost2, section_count
+
+    # Current processing logic
+    total_cost = 0.0
+
+    section_count += 1
+
+    with get_openai_callback() as cb:
+        tags = await chain.arun(section_text)
+        total_cost = cb.total_cost
+
+    excerpt = await session.get_excerpt_by_keys(
+        filing_id=filing.id, index=section_count
+    )
+    if not excerpt:
+        excerpt = db.Excerpt(index=section_count, filing_id=filing.id)
+
+    excerpt.excerpt = section_text
+    excerpt.title = tags.get("title")
+    excerpt.category = tags.get("category")
+    excerpt.subcategory = tags.get("subcategory")
+    excerpt.sentiment = tags.get("analysis")
+    excerpt.insight = tags.get("insight")
+    excerpt.cost = total_cost
+    excerpt.tokens = num_tokens
+    excerpt.company_name = company.name
+    excerpt.company_ticker = company.ticker
+
+    excerpt = await session.merge(excerpt)
+    await session.commit()
+
+    log.info(f"excerpt: {excerpt} tags: {tags}")
+
+    tags = tags.get("tags")
+    if tags and isinstance(tags, list):
+        tags = set(tags)
+        await session.set_tags(excerpt.id, tags)
+
+    await session.commit()
+
+    return total_cost, section_count
+
+
 async def save_filing_excerpts(
     company: db.Company, filing: db.Filing, file: str, model: str = "gpt-3.5-turbo-16k"
 ):
@@ -229,50 +315,20 @@ async def save_filing_excerpts(
     chain = create_tagging_chain(tagging_schema, llm)
 
     running_cost = 0.0
+    current_section_count = 0
 
     async with db.Session.context() as session:
         for s in sections:
-            excerpt = await session.get_excerpt_by_keys(
-                filing_id=filing.id, index=s.cnt
+            log.info(f"****** section: {s}")
+            if not current_section_count:
+                log.info(f"setting current_section_count {s.cnt}")
+                current_section_count = s.cnt
+            cost, current_section_count = await process_section(
+                s.text, llm, chain, filing, company, session, current_section_count
             )
-            if not excerpt:
-                excerpt = db.Excerpt(index=s.cnt, filing_id=filing.id)
+            running_cost += cost
 
-            s.text = s.text.replace("\n", " ")
-
-            with get_openai_callback() as cb:
-                tags = await chain.arun(s.text)
-                running_cost += cb.total_cost
-                log.info(
-                    f"Total Cost (USD): ${cb.total_cost} tokens: {cb.total_tokens} input_tokens: {cb.prompt_tokens} output_tokens: {cb.completion_tokens}"
-                )
-
-            log.info(f"tags: {tags}")
-            log.info(f"running_cost: ${running_cost}")
-
-            excerpt.excerpt = s.text
-            excerpt.title = tags.get("title")
-            excerpt.category = tags.get("category")
-            excerpt.subcategory = tags.get("subcategory")
-            excerpt.sentiment = tags.get("analysis")
-            excerpt.insight = tags.get("insight")
-            excerpt.tokens = llm.get_num_tokens_from_messages(
-                [HumanMessage(content=s.text)]
-            )
-            excerpt.company_name = company.name
-            excerpt.company_ticker = company.ticker
-
-            excerpt = await session.merge(excerpt)
-            await session.commit()
-
-            log.info(f"excerpt: {excerpt} tags: {tags}")
-
-            tags = tags.get("tags")
-            if tags and isinstance(tags, list):
-                tags = set(tags)
-                await session.set_tags(excerpt.id, tags)
-
-            await session.commit()
+    return running_cost
 
 
 async def main(args):

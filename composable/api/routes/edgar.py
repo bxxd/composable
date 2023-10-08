@@ -40,15 +40,23 @@ class EdgarResponse(BaseModel):
 class EdgarDocument(BaseModel):
     cik: CIKResponse
     filing: FilingsItem
+    force: Optional[bool] = False
 
 
 @router.get("/cik/{ticker}", response_model=CIKResponse)
 async def get_cik(ticker: str):
     try:
         cik_data = await get_cik_data_for_ticker(ticker.upper())
-        if not cik_data:
+        log.info(f"CIK: {cik_data}")
+        resp = namespace_to_dict(cik_data)
+        if not resp:
+            log.error(f"Ticker not found: {ticker}")
             raise HTTPException(status_code=404, detail="Ticker not found")
-        return namespace_to_dict(cik_data)
+
+        log.info(f"CIK: {resp}")
+        return resp
+    except HTTPException as e:
+        raise e
     except Exception as e:
         log.error(f"Error while fetching CIK for {ticker}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -64,14 +72,18 @@ async def get_ticker_filings(
 ):
     try:
         cik_data = await get_cik_data_for_ticker(ticker.upper())
-        if not cik_data:
+        if not cik_data.cik_str:
+            log.error(f"Ticker not found: {ticker}")
             raise HTTPException(status_code=404, detail="Ticker not found")
         filings = await get_filings(
             cik_data.cik_str, year, quarter, filing_type, annual
         )
         filings = [namespace_to_dict(item) for item in filings]
-
-        return {"cik": namespace_to_dict(cik_data), "filings": filings}
+        log.info(f"Filings: {filings}")
+        resp = {"cik": namespace_to_dict(cik_data), "filings": filings}
+        return resp
+    except HTTPException as e:
+        raise e
     except Exception as e:
         log.error(f"Error while fetching filings for {ticker}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -94,6 +106,12 @@ async def upload_edgar(document: EdgarDocument, background_tasks: BackgroundTask
 
     filing = await filings.save_filing(filing_data)
 
-    background_tasks.add_task(filings.save_excerpts, company, filing)
+    if filing.status == "processing":
+        log.info(f"already processing filing: {filing}")
+        if data.get("force"):
+            log.info(f"forcing processing of filing: {filing}")
+        else:
+            return {"message": "processing", "filing": filing.id}
 
-    return {"parsed_content": "test"}
+    background_tasks.add_task(filings.save_excerpts, company, filing)
+    return {"message": "processing", "filing": filing.id}

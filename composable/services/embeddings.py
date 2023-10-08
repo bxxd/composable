@@ -10,7 +10,7 @@ def get_embedding(text, engine="text-embedding-ada-002"):
     if not text:
         log.info(f"get_embedding: text is empty")
         return None
-    log.info(f"get_embedding: {text}")
+    log.info(f"get_embedding...")
     text = text.replace("\n", " ")
     result = openai.Embedding.create(input=[text], model=engine)
     # log.info(f"get_embedding: {result}")
