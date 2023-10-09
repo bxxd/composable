@@ -81,6 +81,7 @@ async def get_filings(cik_str, year=None, quarter=None, filing_type=None, annual
             item.reportDate = reportDates[index]
             item.filingType = description
             item.url = f"https://www.sec.gov/Archives/edgar/data/{cik_str}/{accession_number}/{primaryDocument}"
+            item.cik = cik_str
             filing_urls.append(item)
 
         return filing_urls

@@ -36,7 +36,54 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error(err);
+    console.error("error", err);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  } finally {
+    await releaseDbInstance();
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const db = await getDbInstance();
+
+  try {
+    const { id } = await req.json(); // Extract the ID from the request body
+
+    console.log("DELETE req", req, "id", id);
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "File ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // 1. Delete related tags
+    const deleteTagsQuery = `
+      DELETE FROM tags WHERE excerpt_id IN (SELECT id FROM excerpts WHERE filing_id = $1)
+    `;
+    await db.none(deleteTagsQuery, [id]);
+
+    // 2. Delete related excerpts
+    const deleteExcerptsQuery = `
+      DELETE FROM excerpts WHERE filing_id = $1
+    `;
+    await db.none(deleteExcerptsQuery, [id]);
+
+    // 3. Delete the filing
+    const deleteFilingQuery = `
+      DELETE FROM filings WHERE id = $1
+    `;
+    await db.none(deleteFilingQuery, [id]);
+
+    return NextResponse.json({
+      message: "File and its related records deleted successfully",
+    });
+  } catch (err) {
+    console.error(`error deleting file and its related records: ${err}`);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

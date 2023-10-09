@@ -30,6 +30,7 @@ class FilingsItem(BaseModel):
     reportDate: str
     filingType: str
     url: str
+    cik: str
 
 
 class EdgarResponse(BaseModel):

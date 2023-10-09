@@ -69,12 +69,16 @@ export default function Docs() {
   const proxy: string = "api/docs/proxy";
 
   const handleSearchTicker = async (ticker: string) => {
+    setSelectedFilings([]);
+    setCurrentCIK(null);
     try {
       const response = await fetch(`/${proxy}/edgar/cik/${ticker}`);
       if (!response.ok) {
         throw new Error(`Failed to search ticker: ${response.statusText}`);
       }
       const data: CIKResponse = await response.json();
+      console.log("setCIK", data);
+
       setCurrentCIK(data);
       await handleFetchFilings(ticker);
     } catch (error) {
@@ -116,6 +120,7 @@ export default function Docs() {
         cik: currentCIK as any,
         filing: filing,
       };
+      console.log("docToUpload", docToUpload);
       await fetch(`/${proxy}/edgar/upload`, {
         method: "POST",
         headers: {
@@ -125,7 +130,7 @@ export default function Docs() {
       });
     }
     setAvailableFilings([]);
-    setTimeout(updateEdgarDocs, 1000);
+    timeoutRef.current = setTimeout(updateEdgarDocs, 5000);
   };
 
   const fetchEdgarDocs = async () => {
@@ -134,7 +139,7 @@ export default function Docs() {
     await updateEdgarDocs();
 
     if (shouldPoll) {
-      timeoutRef.current = setTimeout(fetchEdgarDocs, 1000);
+      timeoutRef.current = setTimeout(fetchEdgarDocs, 5000);
     }
   };
 
@@ -208,6 +213,25 @@ export default function Docs() {
   useEffect(() => {
     console.log(`..shouldPoll: ${shouldPoll}`);
   }, [shouldPoll]);
+
+  const handleDeleteFiling = async (id: number) => {
+    try {
+      const response = await fetch(`/api/docs/edgar`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error(response.statusText);
+
+      toast.success("Filing deleted successfully");
+      updateEdgarDocs();
+    } catch (error) {
+      toast.error(`Error deleting filing: ${error}`);
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen font-sans">
@@ -288,7 +312,7 @@ export default function Docs() {
             <thead>
               <tr>
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
-                  Ticker
+                  Company
                 </th>
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
                   Date
@@ -302,13 +326,17 @@ export default function Docs() {
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody>
               {edgarDocs.map((doc) => (
                 <tr key={doc.id}>
                   <td className="py-2 px-3 border-b border-gray-200">
+                    {doc.name}
+                    {" ("}
                     {doc.ticker.toUpperCase()}
+                    {")"}
                   </td>
                   <td className="py-2 px-3 border-b border-gray-200">
                     {new Date(doc.reporting_for).toLocaleDateString()}
@@ -328,6 +356,16 @@ export default function Docs() {
                   </td>
                   <td className="py-2 px-3 border-b border-gray-200">
                     {doc.status}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    <Icon
+                      className="cursor-pointer"
+                      icon="icon-park-twotone:delete"
+                      color="#c25d55"
+                      width="20"
+                      height="20"
+                      onClick={() => handleDeleteFiling(doc.id)}
+                    />
                   </td>
                 </tr>
               ))}

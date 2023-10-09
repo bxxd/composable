@@ -12,9 +12,10 @@ export const getDbInstance = async (): Promise<pgp.IDatabase<any, any>> => {
 
   mutex = (async () => {
     if (!dbInstance) {
-      console.log(
-        `creating db instance... host: ${process.env.PGHOST} db: ${process.env.PGDATABASE}`
-      );
+      // console
+      //   .log
+      // `creating db instance... host: ${process.env.PGHOST} db: ${process.env.PGDATABASE}`
+      // ();
       dbInstance = pgp()(
         process.env.DATABASE_URL || {
           host: process.env.PGHOST || "localhost",
@@ -38,7 +39,7 @@ export const releaseDbInstance = async (): Promise<void> => {
   mutex = (async () => {
     usageCounter -= 1;
     if (usageCounter === 0 && dbInstance) {
-      console.log("Closing db instance...");
+      // console.log("Closing db instance...");
       await dbInstance.$pool.end();
       dbInstance = null;
     }
