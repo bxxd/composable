@@ -326,6 +326,12 @@ export default function Docs() {
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
+                  Cost
+                </th>
+                <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
+                  Model
+                </th>
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider"></th>
               </tr>
             </thead>
@@ -356,6 +362,12 @@ export default function Docs() {
                   </td>
                   <td className="py-2 px-3 border-b border-gray-200">
                     {doc.status}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    ${doc.cost}
+                  </td>
+                  <td className="py-2 px-3 border-b border-gray-200">
+                    {doc.model}
                   </td>
                   <td className="py-2 px-3 border-b border-gray-200">
                     <Icon
