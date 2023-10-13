@@ -4,11 +4,6 @@ import { Icon } from "@iconify/react";
 
 type DocumentStatus = "pending" | "processed" | "processing" | null;
 
-type DocumentType = {
-  name: string;
-  status: DocumentStatus;
-};
-
 type EdgarDocType = {
   id: number;
   company_id: number;
@@ -51,11 +46,8 @@ type EdgarDocument = {
 };
 
 export default function Docs() {
-  const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [edgarDocs, setEdgarDocs] = useState<EdgarDocType[]>([]);
-  const [keywords, setKeywords] = useState<string>("");
-  const [entity, setEntity] = useState<string>("");
-  const [dateRange, setDateRange] = useState<string>("5y");
+
   const [shouldPoll, setShouldPoll] = useState<boolean>(true);
 
   const [currentCIK, setCurrentCIK] = useState<CIKResponse | null>(null);
@@ -98,7 +90,41 @@ export default function Docs() {
       }
       const data: EdgarResponse = await response.json();
       if (data && data.filings) {
-        setAvailableFilings(data.filings);
+        const filteredFilings = data.filings.filter((newFiling) => {
+          return !edgarDocs.some((existingDoc) => {
+            const normalizedNewFilingDate = newFiling.filingDate.split("T")[0];
+            const normalizedExistingFilingDate =
+              existingDoc.filed_at.split("T")[0];
+            const normalizedNewReportDate = newFiling.reportDate.split("T")[0];
+            const normalizedExistingReportDate =
+              existingDoc.reporting_for.split("T")[0];
+
+            const matchFilingDate =
+              normalizedNewFilingDate === normalizedExistingFilingDate;
+            const matchReportDate =
+              normalizedNewReportDate === normalizedExistingReportDate;
+            const matchFilingType =
+              newFiling.filingType.toUpperCase() ===
+              existingDoc.filing_type.toUpperCase();
+
+            if (matchFilingDate && matchReportDate && matchFilingType) {
+              console.log("Match found:", { newFiling, existingDoc });
+            } else {
+              console.log("No match:", {
+                newFiling,
+                existingDoc,
+                matchFilingDate,
+                matchReportDate,
+                matchFilingType,
+              });
+            }
+
+            return matchFilingDate && matchReportDate && matchFilingType;
+          });
+        });
+
+        console.log("Filtered Filings:", filteredFilings);
+        setAvailableFilings(filteredFilings);
       } else {
         throw new Error("No filings found.");
       }
