@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
-const FASTAPI_URL = "http://localhost:8000";
+const FASTAPI_URL = process.env.FASTAPI_URL || "https://api.kittie.ai";
 
 // Define a function for handling GET requests
 export async function GET(req: Request, res: Response) {
