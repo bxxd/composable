@@ -130,7 +130,7 @@ export default function Docs() {
       });
     }
     setAvailableFilings([]);
-    timeoutRef.current = setTimeout(updateEdgarDocs, 5000);
+    timeoutRef.current = setTimeout(updateEdgarDocs, 1000);
   };
 
   const fetchEdgarDocs = async () => {

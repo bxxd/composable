@@ -43,6 +43,8 @@ export interface Company {
   company_name: string;
   company_ticker: string;
   filings: Record<number, Filing>;
+  total_embedding_distance?: number; // cumulative embedding distance
+  count_embeddings?: number; // count of excerpts with embedding distance
 }
 
 export type RoleType = "assistant" | "data" | "user";

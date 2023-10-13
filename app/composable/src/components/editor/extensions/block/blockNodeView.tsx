@@ -316,9 +316,6 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
                 ? data.excerpt
                 : data.excerpt.substring(0, 25) + "...s"}{" "}
             </div>
-            <div>
-              <strong>Tags:</strong> {data.tags.join(", ")}
-            </div>
           </div>
         )}
       </div>

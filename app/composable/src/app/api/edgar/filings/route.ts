@@ -213,10 +213,33 @@ export async function GET(req: NextRequest) {
           tags: row.tags,
           embedding_distance: row.embedding_distance,
         });
+        // Accumulate embedding distances
+        if (row.embedding_distance) {
+          acc[companyId].total_embedding_distance =
+            (acc[companyId].total_embedding_distance || 0) +
+            row.embedding_distance;
+          acc[companyId].count_embeddings =
+            (acc[companyId].count_embeddings || 0) + 1;
+        }
       }
 
       return acc;
     }, {});
+
+    if (embedding) {
+      const sortedCompanies = Object.values(groupedData).sort((a, b) => {
+        // If excerpts had embedding distances, then compute the average for comparison
+        const avgA = a.count_embeddings
+          ? (a.total_embedding_distance ?? 0) / a.count_embeddings
+          : 0;
+        const avgB = b.count_embeddings
+          ? (b.total_embedding_distance ?? 0) / b.count_embeddings
+          : 0;
+
+        return avgA - avgB; // Sort in ascending order
+      });
+      return NextResponse.json(sortedCompanies);
+    }
 
     return NextResponse.json(groupedData);
   } catch (err) {

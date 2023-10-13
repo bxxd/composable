@@ -27,8 +27,12 @@ def get_elements(element):
         return []
     texts = []
     for child in element.children:
+        if not child.name or "xbrl" in child.name or "ix" in child.name:
+            continue
+        # log.info(f"child: `{child.name}`")
         s = SimpleNamespace()
         if child.name == "table":
+            # log.info(f"table")
             table = child
             rows = table.find_all("tr")
             table_text = ""
@@ -50,6 +54,7 @@ def get_elements(element):
             texts.append(s)
         elif child.name == "span":
             s.text = f"{clean_text(child.text)}"
+            # log.info(f"span: `{s.text}`")
             s.type = "span"
             style = child.get("style", "")
             style_elements = style.split(";")
@@ -87,12 +92,13 @@ def get_elements(element):
 
                 # print(f"s type: `{s.type}` text: `{s.text}` weight: `{weight}`")
             texts.append(s)
+            # log.info(f"adding span")
         else:
             texts.extend(get_elements(child))
     return texts
 
 
-def get_sections(file_path, break_on_h3=True, break_on_h4=True):
+def get_sections(file_path, break_on_h3=True, break_on_h4=False):
     if not file_path:
         raise ValueError("file_path is required")
     if not "htm" in file_path:
@@ -134,6 +140,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
 
         ## low information sections
         if len(text) <= 150:
+            # log.info(f"skipping low information section")
             return
 
         section = SimpleNamespace()
@@ -148,7 +155,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
                 and "balance" in lowered
                 and "sheets" in lowered
                 and ("table of contents" not in lowered and "index" not in lowered)
-            ):
+            ) or ("part 1" in lowered):
                 start = True
                 # print(f"Found start")
                 complete_sections = [section]
@@ -157,15 +164,21 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
 
     last_section = None
 
+    log.info(f"have {len(sections)} sections")
+
     for s in sections[:]:
         text = s.text
         if len(text) <= 3:
+            # log.info(f"skipping short section: {text}")
             continue
+
+        log.info(f"s: `{s}`")
 
         lowered = text.lower()
         if lowered.startswith("table of contents"):
             # print(f"Found table of contents: `{text}` {toc}")
             if toc >= 2:
+                log.info("skipping table of contents")
                 continue
 
             toc += 1
@@ -186,10 +199,9 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
                 break
             if part and span_found:
                 cnt += 1
-                # log.info(f"creating section {cnt}")
+                log.info(f"creating section {part} {cnt}")
                 last_section = add_section(part, cnt)
-                # section = None
-                # print(f"section: `{section.text}`")
+
                 part = f"*{text}*"
                 span_found = False
             else:
@@ -202,6 +214,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
             if not span_found:
                 # use previous section if cont.
                 if lowered.startswith("(cont.)") and last_section:
+                    log.info(f"found cont.")
                     part = last_section.text
                     complete_sections = complete_sections[:-1]
                     text.replace("(cont.)", "")
@@ -214,7 +227,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=True):
             else:
                 part = text
 
-        # log.info(f"part: `{part}`")
+        log.info(f"part: `{part}`")
 
     if part:
         add_section(part, cnt + 1)

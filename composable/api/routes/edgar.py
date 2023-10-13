@@ -10,7 +10,7 @@ from pydantic import BaseModel, HttpUrl
 import aiohttp
 from composable.services import filings
 from fastapi import BackgroundTasks
-
+import json
 
 import logging
 
@@ -93,6 +93,8 @@ async def get_ticker_filings(
 @router.post("/upload")
 async def upload_edgar(document: EdgarDocument, background_tasks: BackgroundTasks):
     data = document.dict()
+
+    log.info(f"upload_edgar: {json.dumps(data, indent=2)}")
 
     company = await filings.save_company_from_cik_data(data["cik"])
 

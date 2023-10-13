@@ -92,6 +92,7 @@ class Excerpt(Base):
     tokens = Column(Integer)
     company_name = Column(String(255))
     company_ticker = Column(String(255))
+    filing_name = Column(String(255))
     cost = Column(Float)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
@@ -141,7 +142,11 @@ def before_insert_or_update_excerpt(mapper, connection, target):
         target.created_at = datetime.now()
 
     if dirty or target.embedding is None:
-        text = f"""{target.company_name + " " if target.company_name else ""}{"("+target.company_ticker.upper()+")" if target.company_ticker else ""}) {target.excerpt}"""
+        text = f"""{target.company_name + " " if target.company_name else ""}{"("+target.company_ticker.upper()+")" if target.company_ticker else ""})"""
+        if target.filing_name:
+            text += f""" {target.filing_name}"""
+        text += """ {target.excerpt}"""
+
         target.embedding = get_embedding(text)
 
     if dirty or target.category_embedding is None:

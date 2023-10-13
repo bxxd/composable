@@ -114,9 +114,51 @@ async def test1(args):
     print(f"Execution time: {end_time - start_time:.2f} seconds")
 
 
+async def test2(args):
+    data = {
+        "cik": {
+            "cik_str": "0001679268",
+            "title": "MAMMOTH ENERGY SERVICES, INC.",
+            "ticker": "TUSK",
+        },
+        "filing": {
+            "filingDate": "2023-02-24",
+            "reportDate": "2022-12-31",
+            "filingType": "10-K",
+            "url": "https://www.sec.gov/Archives/edgar/data/0001679268/000167926823000006/tusk-20221231.htm",
+            "cik": "0001679268",
+        },
+        "force": False,
+    }
+
+    log.info(f"upload_edgar: {json.dumps(data, indent=2)}")
+
+    company = await filings.save_company_from_cik_data(data["cik"])
+
+    filing_data = {}
+    filing_data["cik"] = int(data["cik"]["cik_str"])
+    filing_data["ticker"] = data["cik"]["ticker"]
+
+    filing_data["filing_type"] = data["filing"]["filingType"]
+    filing_data["filed_at"] = data["filing"]["filingDate"]
+    filing_data["reporting_for"] = data["filing"]["reportDate"]
+    filing_data["url"] = data["filing"]["url"]
+
+    filing = await filings.save_filing(filing_data)
+
+    if filing.status == "processing":
+        log.info(f"already processing filing: {filing}")
+        if data.get("force"):
+            log.info(f"forcing processing of filing: {filing}")
+        else:
+            return {"message": "processing", "filing": filing.id}
+
+    await filings.save_excerpts(company, filing)
+
+
 async def main(args):
     log.info(f"Hello there! {args}")
-    await process(args)
+    await test2(args)
 
 
 def parse_args():

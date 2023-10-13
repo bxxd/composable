@@ -189,14 +189,15 @@ Passage:
 {input}
 """
 
+# "tags": {
+#             "type": "array",
+#             "description": "If you had to look up this passage later, what unique set of tags would you use?",
+#             "items": {"type": "string"},
+#         },
+
 
 tagging_schema = {
     "properties": {
-        "tags": {
-            "type": "array",
-            "description": "If you had to look up this passage later, what unique set of tags would you use?",
-            "items": {"type": "string"},
-        },
         "category": {
             "type": "string",
             "description": "What main financial category does this passage apply to?",
@@ -238,6 +239,7 @@ async def process_section(
     company,
     session,
     section_count: int,
+    report_title: str = None,
 ) -> (float, int):
     """Process a section and return the total cost"""
     section_text = section_text.replace("\n", " ")
@@ -256,10 +258,24 @@ async def process_section(
         second_half = section_text[split_point:]
 
         cost1, section_count = await process_section(
-            first_half, llm, chain, filing, company, session, section_count
+            first_half,
+            llm,
+            chain,
+            filing,
+            company,
+            session,
+            section_count,
+            report_title,
         )
         cost2, section_count = await process_section(
-            second_half, llm, chain, filing, company, session, section_count
+            second_half,
+            llm,
+            chain,
+            filing,
+            company,
+            session,
+            section_count,
+            report_title,
         )
 
         return cost1 + cost2, section_count
@@ -290,6 +306,8 @@ async def process_section(
     excerpt.company_name = company.name
     excerpt.company_ticker = company.ticker
 
+    excerpt.filing_name = report_title
+
     excerpt = await session.merge(excerpt)
     await session.commit()
 
@@ -317,6 +335,12 @@ async def save_filing_excerpts(
     running_cost = 0.0
     current_section_count = 0
 
+    upper_filing_period = filing.filing_period.upper()
+    reporting_year = filing.reporting_for.year
+    upper_filing_type = filing.filing_type.upper()
+
+    report_title = f"{upper_filing_type} ({upper_filing_period} {reporting_year})"
+
     async with db.Session.context() as session:
         for s in sections:
             log.info(f"****** section: {s}")
@@ -324,7 +348,14 @@ async def save_filing_excerpts(
                 log.info(f"setting current_section_count {s.cnt}")
                 current_section_count = s.cnt
             cost, current_section_count = await process_section(
-                s.text, llm, chain, filing, company, session, current_section_count
+                s.text,
+                llm,
+                chain,
+                filing,
+                company,
+                session,
+                current_section_count,
+                report_title=report_title,
             )
             running_cost += cost
 
