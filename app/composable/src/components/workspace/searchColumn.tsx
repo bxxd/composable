@@ -27,7 +27,6 @@ const toDataItem = (excerpt: Excerpt): DataItem => {
 
 const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  // const [collapsed, setCollapsed] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [data, setData] = useState<Record<number, Company>>({});
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
@@ -67,8 +66,24 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
         }
         const groupedData: Record<number, Company> = await response.json();
         console.log("groupedData", groupedData);
+
         resetStates();
-        setData(groupedData);
+
+        // If there's no search term, collapse all companies by adding their IDs to setCollapsedCompanies
+        if (searchTerm) {
+          // Calculate average embedding distance for each company
+          setData(groupedData);
+        } else {
+          // If no search term, collapse all companies
+          const newCollapsedCompanies: { [key: number]: boolean } = {};
+          Object.keys(groupedData).forEach((key) => {
+            newCollapsedCompanies[parseInt(key)] = true;
+          });
+          setCollapsedCompanies(newCollapsedCompanies);
+
+          // Update the state with the unsorted data
+          setData(groupedData);
+        }
       } catch (err) {
         console.warn("An error occurred in fetchData:", err);
         setData({});
@@ -93,7 +108,6 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
       setData((prevData) => {
         const updatedData = { ...prevData };
-
         for (const company of Object.values(updatedData)) {
           for (const filing of Object.values(company.filings)) {
             if (filing.filing_id === filing_id) {
@@ -101,7 +115,6 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
             }
           }
         }
-
         return updatedData;
       });
     } catch (err) {

@@ -1,14 +1,3 @@
-// export interface DataItem {
-//   id: number;
-//   title: string;
-//   category: string;
-//   subcategory: string;
-//   insight: string;
-//   excerpt: string;
-//   tags: string[];
-//   tokens: number;
-// }
-
 export interface Excerpt {
   id: number;
   filing_id: number;
