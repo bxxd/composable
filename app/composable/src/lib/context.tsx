@@ -43,14 +43,6 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     saveToLocalStorage("savedList", newList);
   };
 
-  // useEffect(() => {
-  //   // Fetch the aiModel from local storage on component mount
-  //   const savedModel = readFromLocalStorage("aiModel");
-
-  //   // If there is a saved value in local storage, use it to set the state, else use the default value
-  //   setAiModel(savedModel ?? defaultAiModel);
-  // }, []); // Empty dependency array ensures this runs once on component mount
-
   useEffect(() => {
     console.log("saving aiModel to local storage");
     saveToLocalStorage("aiModel", aiModel);

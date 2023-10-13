@@ -29,11 +29,18 @@ const timeout = (ms: number, promise: Promise<any>) => {
 export async function POST(req: NextRequest) {
   console.log("generate AI response..");
 
-  const payload = await req.json();
-  console.log("payload", payload);
-  let { prompt, aiModel } = payload;
+  let payload = await req.json();
+  // console.log("payload", payload);
 
-  let messages = JSON.parse(prompt);
+  let { prompt } = payload;
+  payload = JSON.parse(prompt);
+
+  let { messages, aiModel } = payload;
+
+  // console.log(`messages: ${messages}`);
+  console.log(`aiModel: ${aiModel}`);
+
+  // return NextResponse.json({}, { status: 400 });
 
   if (
     (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN,

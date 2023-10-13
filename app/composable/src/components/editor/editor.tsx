@@ -276,10 +276,14 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
 
     data = extractTextFromJSON(data);
 
-    toast.message("Sending to AI...");
+    let payload = { messages: data, aiModel: aiModelRef.current };
+
+    toast.message(`Sending to AI ${aiModelRef.current}...`);
+    console.log(`Sending to AI... ${aiModelRef.current}`);
     // console.log("payload ", payload);
 
-    complete(JSON.stringify(data));
+    complete(JSON.stringify(payload));
+    // toast(`aiModel: ${aiModelRef.current}`);
   };
 
   const editor = useEditor({
@@ -324,9 +328,6 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     onError: (error) => {
       console.log("error", error);
       toast(error.message);
-    },
-    body: {
-      aiModel: aiModelRef.current,
     },
   });
 
