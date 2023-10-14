@@ -15,13 +15,19 @@ import { useCallback } from "react";
 import { Company, Excerpt, Filing } from "@/lib/types";
 
 interface SearchColumnProps {
-  handleAddData: (content: Excerpt | DataItem) => void;
+  handleAddData: (content: DataItem) => void;
 }
 
-const toDataItem = (excerpt: Excerpt): DataItem => {
+const toDataItem = (
+  excerpt: Excerpt,
+  filing: Filing,
+  company: Company
+): DataItem => {
   return {
     ...excerpt,
-    // Add or change properties if required.
+    report_title: filing.report_title,
+    company_name: company.company_name,
+    company_ticker: company.company_ticker,
   };
 };
 
@@ -281,7 +287,9 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                         type="button"
                                         className="mr-2 opacity-10 group-hover:opacity-100 cursor-pointer"
                                         onClick={() =>
-                                          handleAddData(toDataItem(item))
+                                          handleAddData(
+                                            toDataItem(item, filing, company)
+                                          )
                                         }
                                         title="Add data to context"
                                       >

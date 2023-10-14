@@ -78,10 +78,24 @@ function extractTextFromJSON(
               // Check if textItem is of type text and has text property
               if (textItem.type === "text" && textItem.text) {
                 if (role === "data") {
-                  result.push({
-                    role: "user",
-                    content: item.attrs?.data.excerpt,
-                  });
+                  let data = item.attrs?.data as DataItem;
+                  if (data) {
+                    let excerpt = data.excerpt;
+                    if (
+                      data.report_title &&
+                      data.company_name &&
+                      data.company_ticker
+                    ) {
+                      excerpt = `From filing ${data.report_title} - ${data.company_name} (${data.company_ticker}): ${excerpt}`;
+                    }
+                    if (excerpt) {
+                      console.log("excerpt", excerpt);
+                      result.push({
+                        role: "user",
+                        content: excerpt,
+                      });
+                    }
+                  }
                 } else {
                   if (role === "thought") {
                     result.push({

@@ -18,14 +18,6 @@ export default function Workspace({}: WorkspaceProps) {
 
   const [showCatalog, setShowCatalog] = useState(true);
 
-  // useEffect(() => {
-  //   if (slug && slug !== "") {
-  //     setShowCatalog(true);
-  //   } else {
-  //     setShowCatalog(false);
-  //   }
-  // }, [slug]);
-
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;

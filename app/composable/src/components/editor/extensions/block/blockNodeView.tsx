@@ -17,7 +17,6 @@ import { JSONContent } from "@tiptap/react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import IconButton from "@mui/material/IconButton";
 
 import {
   createNodeJSON,
@@ -282,13 +281,20 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           )}
         </div>
         {isDataBlock && isExpanded && (
-          <div className="ml-0 mt-1 ">
+          <div className="ml-1 mt-1 ">
             <div>
+              {data.report_title &&
+                data.company_name &&
+                data.company_ticker && (
+                  <div>
+                    <strong>Report:</strong> {data.report_title},{" "}
+                    {data.company_name} ({data.company_ticker})
+                  </div>
+                )}
               <div>
                 <strong>Category:</strong> {data.category}
-              </div>
-              <div>
-                <strong>Subcategory:</strong> {data.subcategory}
+                {" - "}
+                {data.subcategory}
               </div>
               <div>
                 <strong>Insight:</strong> {data.insight}
