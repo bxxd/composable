@@ -122,40 +122,82 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedExcerpt, setExpandedExcerpt] = useState<string | null>(null);
 
+  // const handleOpenEditorOld = (node: any) => {
+  //   const store = BlockStore.getInst();
+  //   let currentDoc = editor.getJSON();
+
+  //   let ctxStack = store.get().ctxStack;
+  //   ctxStack[getBlockIdLevel(node.attrs.id)] = currentDoc;
+
+  //   let content = node.attrs.children;
+
+  //   if (content === null || content === undefined) {
+  //     let thisNode = node.toJSON();
+  //     thisNode = _.cloneDeep(thisNode);
+  //     thisNode.attrs.id = node.attrs.id + ".1";
+
+  //     content = [thisNode];
+
+  //     let currentContent: JSONContent[] | undefined = currentDoc.content;
+  //     if (
+  //       currentContent &&
+  //       currentContent.length > 0 &&
+  //       thisNode.attrs.role != "system"
+  //     ) {
+  //       let possibleSystemNode = currentContent[0];
+  //       if (possibleSystemNode?.attrs?.role === "system") {
+  //         possibleSystemNode = _.cloneDeep(possibleSystemNode);
+  //         if (possibleSystemNode && possibleSystemNode.attrs) {
+  //           possibleSystemNode.attrs.id = node.attrs.id + ".0";
+  //           content.unshift(possibleSystemNode);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   pushSubContent(editor, content);
+  // };
+
   const handleOpenEditor = (node: any) => {
     const store = BlockStore.getInst();
     let currentDoc = editor.getJSON();
+
+    if (!currentDoc.content) {
+      return;
+    }
 
     let ctxStack = store.get().ctxStack;
     ctxStack[getBlockIdLevel(node.attrs.id)] = currentDoc;
 
     let content = node.attrs.children;
 
-    if (content === null || content === undefined) {
-      let thisNode = node.toJSON();
-      thisNode = _.cloneDeep(thisNode);
-      thisNode.attrs.id = node.attrs.id + ".1";
+    if (content) {
+      pushSubContent(editor, content);
+      return;
+    }
 
-      content = [thisNode];
+    content = [];
 
-      let currentContent: JSONContent[] | undefined = currentDoc.content;
-      if (
-        currentContent &&
-        currentContent.length > 0 &&
-        thisNode.attrs.role != "system"
-      ) {
-        let possibleSystemNode = currentContent[0];
-        if (possibleSystemNode?.attrs?.role === "system") {
-          possibleSystemNode = _.cloneDeep(possibleSystemNode);
-          if (possibleSystemNode && possibleSystemNode.attrs) {
-            possibleSystemNode.attrs.id = node.attrs.id + ".0";
-            content.unshift(possibleSystemNode);
-          }
-        }
+    for (let i = 0; i < currentDoc.content.length; i++) {
+      const element = currentDoc.content[i];
+      if (!element) {
+        continue;
+      }
+
+      console.log("element", element);
+
+      let thisNode = _.cloneDeep(element);
+      thisNode.attrs.id = element.attrs.id + `.${i}`;
+
+      content.push(thisNode);
+
+      if (element.attrs?.id === node.attrs.id) {
+        break;
       }
     }
 
     pushSubContent(editor, content);
+    return;
   };
 
   const toggleExpanded = () => {
