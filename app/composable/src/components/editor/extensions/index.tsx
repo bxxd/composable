@@ -26,7 +26,7 @@ import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
 import { Italic } from "@tiptap/extension-italic";
 import { ListItem } from "@tiptap/extension-list-item";
 import { OrderedList } from "@tiptap/extension-ordered-list";
-
+import { Markdown } from "tiptap-markdown";
 import { Strike } from "@tiptap/extension-strike";
 
 export function defaultExtensions(
@@ -74,9 +74,6 @@ export function defaultExtensions(
 
     TiptapLink,
 
-    // Markdown.configure({
-    //   html: false,
-    //   transformCopiedText: true,
-    // }),
+    Markdown,
   ];
 }

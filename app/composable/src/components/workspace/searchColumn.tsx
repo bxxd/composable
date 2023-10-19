@@ -176,7 +176,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   };
 
   return (
-    <div className="flex flex-col m-1 border rounded p-1 border-red-200">
+    <div className="flex flex-col m-1 border rounded p-1 border-red-200 opacity-60">
       <div
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}

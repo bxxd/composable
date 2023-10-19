@@ -246,8 +246,15 @@ const Play: React.FC<PlayProps> = () => {
         break;
       case "user":
         console.log("user");
-        next();
+
+        item.text = "";
+
+        applyDelay(() => {
+          editor?.commands.clearContent();
+          setDisplayUserInput(true);
+        });
         break;
+
       case "system":
         console.log("system");
         setMessages((prevMessages) => [
@@ -273,12 +280,7 @@ const Play: React.FC<PlayProps> = () => {
       case "assistant":
         console.log("assistant");
 
-        item.text = "";
-
-        applyDelay(() => {
-          editor?.commands.clearContent();
-          setDisplayUserInput(true);
-        });
+        next();
         break;
       case "data":
         console.log("data");
@@ -317,7 +319,9 @@ const Play: React.FC<PlayProps> = () => {
 
     messages.push({ role: "user", content: text });
 
-    complete(JSON.stringify(messages));
+    let payload = { messages: messages, aiModel: aiModelRef.current };
+
+    complete(JSON.stringify(payload));
   };
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -413,7 +417,7 @@ const Play: React.FC<PlayProps> = () => {
                     <div className="">
                       <Icon icon="mdi:robot" className="icon-size mr-2" />
                       <ReactMarkdown
-                        className="prose"
+                        className="prose dark:prose-invert"
                         remarkPlugins={[remarkGfm]}
                       >
                         {item.text || ""}

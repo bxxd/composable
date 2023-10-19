@@ -62,7 +62,7 @@ const SavedItems = forwardRef<any, SavedItemsProps>(
     };
 
     return (
-      <div className="border p-2 rounded m-1 border-amber-200">
+      <div className="border p-2 rounded m-1 border-amber-200 opacity-60">
         <div
           className="flex justify-between items-center cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}

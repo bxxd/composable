@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { JSONContent } from "@tiptap/react";
-import { saveToLocalStorage, readFromLocalStorage } from "./utils"; // Make sure utils is correctly imported
+import { saveToLocalStorage, readFromLocalStorage } from "./utils";
 import { defaultAiModel } from "./models";
 
 type GlobalContextType = {

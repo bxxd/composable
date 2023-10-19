@@ -184,10 +184,15 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         continue;
       }
 
-      console.log("element", element);
+      console.log("element", JSON.stringify(element));
 
       let thisNode = _.cloneDeep(element);
-      thisNode.attrs.id = element.attrs.id + `.${i}`;
+
+      if (thisNode.attrs) {
+        thisNode.attrs.id = element.attrs?.id ?? `0.${i}`;
+      } else {
+        thisNode.attrs = { id: element.attrs?.id ?? `0.${i}` };
+      }
 
       content.push(thisNode);
 
@@ -311,7 +316,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           }`}
           onMouseDown={isDataBlock ? toggleExpanded : undefined}
         >
-          <NodeViewContent className="node-view-content w-full pl-2 pr-2 max-w-none prose" />
+          <NodeViewContent className="node-view-content w-full pl-2 pr-2 max-w-none prose dark:prose-invert" />
           {isDataBlock && (
             <span className="ml-2">
               <Icon
