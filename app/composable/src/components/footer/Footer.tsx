@@ -13,7 +13,7 @@ const Footer = () => {
             color="#aaaa"
             className="flex my-1 mx-1 mt-1"
           />{" "}
-          by{" "}
+          in Darien, CT by{" "}
           <a
             href="https://twitter.com/bri4nr33d"
             className="hover:underline mx-1"
