@@ -85,6 +85,7 @@ const Play: React.FC<PlayProps> = () => {
   }
   const [hydrated, setHydrated] = useState(false);
   const [isFirst, setIsFirst] = useState(false);
+  const [instruction, setInstruction] = useState("");
   // const [showAI, setShowAI] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [script, setScript] = useState<ScriptItem[]>([]);
@@ -96,6 +97,8 @@ const Play: React.FC<PlayProps> = () => {
   const [displayUserInput, setDisplayUserInput] = useState(false);
   // const [userInput, setUserInput] = useState<string | null | undefined>(null);
   const aiModelRef = useLatestContextValue("aiModel");
+
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
   const { setAiModel } = useGlobalContext();
 
@@ -247,12 +250,7 @@ const Play: React.FC<PlayProps> = () => {
       case "user":
         console.log("user");
 
-        item.text = "";
-
-        applyDelay(() => {
-          editor?.commands.clearContent();
-          setDisplayUserInput(true);
-        });
+        next();
         break;
 
       case "system":
@@ -268,17 +266,20 @@ const Play: React.FC<PlayProps> = () => {
         break;
       case "thought":
         console.log("thought");
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            role: "assistant",
-            content: extractAllText(item.content),
-          },
-        ]);
+
+        setInstruction(instruction + " " + extractAllText(item.content));
+
         next();
         break;
       case "assistant":
         console.log("assistant");
+
+        item.text = "";
+
+        applyDelay(() => {
+          editor?.commands.clearContent();
+          setDisplayUserInput(true);
+        });
 
         next();
         break;
@@ -317,7 +318,15 @@ const Play: React.FC<PlayProps> = () => {
       return;
     }
 
-    messages.push({ role: "user", content: text });
+    messages.push({
+      role: "user",
+      content:
+        instruction != ""
+          ? text
+          : `I suggest that ${instruction}.\nAlso, I say ${text}`,
+    });
+
+    setInstruction("");
 
     let payload = { messages: messages, aiModel: aiModelRef.current };
 
@@ -384,6 +393,12 @@ const Play: React.FC<PlayProps> = () => {
 
   const router = useRouter();
 
+  useEffect(() => {
+    console.log("useEffect called", bottomRef.current); // Debugging line
+
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [displayedItems, displayUserInput, currentItem, completion]);
+
   if (!hydrated) {
   }
 
@@ -394,7 +409,7 @@ const Play: React.FC<PlayProps> = () => {
   // console.log("completion", completion);
 
   return (
-    <>
+    <div ref={bottomRef}>
       {!loadedFromLocalStorage && (
         <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm ">
           <button onMouseDown={() => router.push("/work/" + slug)}>
@@ -413,7 +428,7 @@ const Play: React.FC<PlayProps> = () => {
             <>
               {item.role == "assistant" ? (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                     <div className="">
                       <Icon icon="mdi:robot" className="icon-size mr-2" />
                       <ReactMarkdown
@@ -426,7 +441,7 @@ const Play: React.FC<PlayProps> = () => {
                   </div>
                 </FadeIn>
               ) : item.role === "user" ? (
-                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                   <Icon
                     icon="mdi-light:chevron-right"
                     className="icon-size mr-2"
@@ -438,7 +453,7 @@ const Play: React.FC<PlayProps> = () => {
                 </div>
               ) : (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                     <Icon icon="mdi:robot" className="icon-size mr-2" />
                     <div
                       className="prose dark:prose-invert"
@@ -453,7 +468,7 @@ const Play: React.FC<PlayProps> = () => {
 
         {displayUserInput && (
           <FadeIn>
-            <div className="max-w-2xl">
+            <div className="max-w-[90ch]">
               <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 ">
                 <EditorContent
                   editor={editor}
@@ -479,7 +494,7 @@ const Play: React.FC<PlayProps> = () => {
           </FadeIn>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -57,7 +57,7 @@ export default function Workspace({}: WorkspaceProps) {
       </div>
 
       {/* SearchColumn Component */}
-      <div className="flex-grow  min-w-[36ch] max-w-[65ch]">
+      <div className="flex-grow  min-w-[36ch] max-w-[55ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
         <SearchColumn handleAddData={handleAddData} />
       </div>
