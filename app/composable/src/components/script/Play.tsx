@@ -321,7 +321,7 @@ const Play: React.FC<PlayProps> = () => {
     messages.push({
       role: "user",
       content:
-        instruction != ""
+        instruction == ""
           ? text
           : `I suggest that ${instruction}.\nAlso, I say ${text}`,
     });
@@ -376,20 +376,6 @@ const Play: React.FC<PlayProps> = () => {
       setHydrated(true);
     }
   }, [setHydrated, setScript, blockState, slug, setAiModel]);
-
-  // useEffect(() => {
-  //   if (!hydrated) {
-  //     return;
-  //   }
-
-  //   console.log("script", script);
-
-  //   if (script.length === 0) {
-  //     return;
-  //   }
-
-  //   playNext();
-  // }, [hydrated]);
 
   const router = useRouter();
 
