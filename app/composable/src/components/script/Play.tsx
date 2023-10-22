@@ -84,6 +84,8 @@ const Play: React.FC<PlayProps> = () => {
     slug = "";
   }
   const [hydrated, setHydrated] = useState(false);
+  const [previouslyUser, setPreviouslyUser] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(false);
   const [isFirst, setIsFirst] = useState(false);
   const [instruction, setInstruction] = useState("");
   // const [showAI, setShowAI] = useState(false);
@@ -125,6 +127,7 @@ const Play: React.FC<PlayProps> = () => {
       console.log("currentItem", currentItem);
 
       setDisplayUserInput(false);
+      setAutoPlay(false);
       if (currentItem) {
         displayedItems.push({
           role: "user",
@@ -137,8 +140,6 @@ const Play: React.FC<PlayProps> = () => {
 
         setDisplayedItems(displayedItems);
       }
-
-      // next();
     },
     onFinish: (_prompt, _completion) => {
       // console.log("AI finished", editor);
@@ -250,6 +251,8 @@ const Play: React.FC<PlayProps> = () => {
       case "user":
         console.log("user");
 
+        setPreviouslyUser(true);
+
         next();
         break;
 
@@ -267,21 +270,32 @@ const Play: React.FC<PlayProps> = () => {
       case "thought":
         console.log("thought");
 
-        setInstruction(instruction + " " + extractAllText(item.content));
+        item.role = "assistant";
+        item.text = "";
 
-        next();
+        applyDelay(() => {
+          editor?.commands.setContent(item.content);
+          setAutoPlay(true);
+          setDisplayUserInput(true);
+        });
+
+        // next();
         break;
       case "assistant":
         console.log("assistant");
 
-        item.text = "";
+        if (previouslyUser) {
+          item.text = "";
 
-        applyDelay(() => {
-          editor?.commands.clearContent();
-          setDisplayUserInput(true);
-        });
+          applyDelay(() => {
+            editor?.commands.clearContent();
+            setDisplayUserInput(true);
+          });
 
-        next();
+          setPreviouslyUser(false);
+        } else {
+          next();
+        }
         break;
       case "data":
         console.log("data");
@@ -299,6 +313,14 @@ const Play: React.FC<PlayProps> = () => {
         console.log("default", item.role);
     }
   };
+
+  useEffect(() => {
+    if (displayUserInput && autoPlay) {
+      console.log("autoPlay");
+
+      handleAIButtonClick({ editor });
+    }
+  }, [displayUserInput]);
 
   useEffect(() => {
     if (currentItem) {
@@ -380,7 +402,7 @@ const Play: React.FC<PlayProps> = () => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("useEffect called", bottomRef.current); // Debugging line
+    // console.log("useEffect called", bottomRef.current); // Debugging line
 
     window.scrollTo(0, document.body.scrollHeight);
   }, [displayedItems, displayUserInput, currentItem, completion]);
@@ -389,7 +411,7 @@ const Play: React.FC<PlayProps> = () => {
   }
 
   console.log(
-    `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}}`
+    `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}} autoPlay: ${autoPlay}`
   );
 
   // console.log("completion", completion);
@@ -462,20 +484,22 @@ const Play: React.FC<PlayProps> = () => {
                 />
               </div>
 
-              <button
-                type="button"
-                className="ml-auto mt-1 w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-                onMouseDown={() => {
-                  handleAIButtonClick({ editor });
-                }}
-                title="Send context to AI"
-              >
-                <Icon
-                  icon="ant-design:down"
-                  className="icon-size"
-                  color="green"
-                />
-              </button>
+              {!autoPlay && (
+                <button
+                  type="button"
+                  className="ml-auto mt-1 w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+                  onMouseDown={() => {
+                    handleAIButtonClick({ editor });
+                  }}
+                  title="Send context to AI"
+                >
+                  <Icon
+                    icon="ant-design:down"
+                    className="icon-size"
+                    color="green"
+                  />
+                </button>
+              )}
             </div>
           </FadeIn>
         )}

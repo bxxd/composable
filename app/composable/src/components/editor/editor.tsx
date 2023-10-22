@@ -84,7 +84,7 @@ function extractTextFromJSON(
           if (role === "thought") {
             result.push({
               role: "assistant",
-              content: `THOUGHT:\n${blockContent}\nnow go.`,
+              content: `${blockContent}`,
             });
           } else {
             if (role !== "user" && role !== "assistant" && role !== "system") {
