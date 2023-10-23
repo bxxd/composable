@@ -132,7 +132,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
       const responseBody = await response.json();
       const id = responseBody.id;
 
-      router.push(`/ai-created/${id}`);
+      router.push(`/published/${id}`);
     } catch (error) {
       console.error("Error publishing content:", error);
     }
