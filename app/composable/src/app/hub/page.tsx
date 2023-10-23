@@ -202,7 +202,7 @@ const Page: React.FC = () => {
                     />
                   </button>
                 )}
-                <Link href={`/ai-created/${item.id}`}>
+                <Link href={`/published/${item.id}`}>
                   <div className="card rounded-lg border cursor-pointer">
                     <div className="pointer-events-none">
                       <MemoizedCard id={item.id} />

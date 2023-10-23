@@ -30,7 +30,7 @@ export default async function Published({ id }: PublishedProps) {
   availableLength = maxDescriptionLength - prefix.length;
   const pageDescription = prefix + extractSummary(text, availableLength);
 
-  const pageImage = "URL_to_your_image";
+  const pageImage = `https://composable.parts/api/social-image/${id}`;
 
   return (
     <>
