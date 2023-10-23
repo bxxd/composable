@@ -31,8 +31,7 @@ const Layout: React.FC<LayoutProps> = ({
           dark: "dark-theme",
         }}
       >
-        {/* <div className="flex flex-col min-h-screen"> */}
-        <div>
+        <div className="flex flex-col min-h-screen">
           <Header childrenComponents={headerChildrenComponents} />
           <main className="App w-full flex-grow">{children}</main>
           <Footer />
