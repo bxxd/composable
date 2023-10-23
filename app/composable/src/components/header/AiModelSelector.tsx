@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useCallback } from "react";
 
 import { aiModels } from "@/lib/models";

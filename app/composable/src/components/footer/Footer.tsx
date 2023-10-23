@@ -1,6 +1,6 @@
 import React from "react";
-import { Icon } from "@iconify/react";
-import heartIcon from "@iconify/icons-ic/baseline-favorite";
+// import { Icon } from "@iconify/react";
+// import heartFill from "@iconify/icons-ph/heart-fill";
 
 const Footer = () => {
   return (
@@ -8,11 +8,17 @@ const Footer = () => {
       <div className="opacity-75 px-4 md:flex md:items-center md:justify-between py-1 prose dark:prose-invert">
         <div className="text-center md:text-left font-serif flex">
           Made with{" "}
-          <Icon
-            icon="ph:heart-fill"
-            color="#aaaa"
-            className="flex my-1 mx-1 mt-1"
-          />{" "}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 256 256"
+          >
+            <path
+              fill="#aaa"
+              d="M240 94c0 70-103.79 126.66-108.21 129a8 8 0 0 1-7.58 0C119.79 220.66 16 164 16 94a62.07 62.07 0 0 1 62-62c20.65 0 38.73 8.88 50 23.89C139.27 40.88 157.35 32 178 32a62.07 62.07 0 0 1 62 62Z"
+            />
+          </svg>{" "}
           in Darien, CT by{" "}
           <a
             href="https://twitter.com/bri4nr33d"

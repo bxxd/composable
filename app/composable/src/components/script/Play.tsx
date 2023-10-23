@@ -8,7 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { JSONContent, useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
 import { Editor } from "@tiptap/core";
-import { extractAllText } from "@/lib/editor";
+import { extractAllText } from "@/lib/dataUtils";
 // import { CSSTransition } from "react-transition-group";
 import { Icon } from "@iconify/react";
 import FadeIn from "react-fade-in";
