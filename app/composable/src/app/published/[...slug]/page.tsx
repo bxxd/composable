@@ -10,7 +10,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   return (
     <>
       <Layout>
-        <div>
+        <div className="relative">
           <Published id={slug} />
         </div>
       </Layout>

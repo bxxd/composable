@@ -32,19 +32,21 @@ export default async function Published({ id }: PublishedProps) {
 
   const pageImage = `https://composable.parts/api/social-image/published/${id}`;
 
+  // className="prose dark:prose-invert p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]"
+  // <div className="pl-2 pt-2 bg-gray-200 dark:bg-gray-900 flex w-full">
+
   return (
     <>
-      <PublishedSEO
+      {/* <PublishedSEO
         title={pageTitle}
         description={pageDescription}
         image={pageImage}
-      />
-      <header className="sticky  top-[42px] z-49 w-full transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
-        <PublishedHeader data={data} id={id} />
-      </header>
-      <div className="pl-2 pt-2 bg-gray-200 dark:bg-gray-900 flex justify-center">
+      /> */}
+      <PublishedHeader data={data} id={id} />
+
+      <div className="flex pl-3 pt-2">
         <div
-          className="prose dark:prose-invert p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]"
+          className="prose dark:prose-invert rounded-lg p-2 leading-relaxed outline-none w-full break-words"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>
