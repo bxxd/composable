@@ -10,8 +10,8 @@ import closeIcon from "@iconify/icons-ic/baseline-close";
 import { Icon } from "@iconify/react";
 import searchIcon from "@iconify/icons-ic/search";
 import React from "react";
-import { Menu, MenuItem } from "@material-ui/core";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import { Menu, MenuItem } from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 interface MemoizedCardProps {
   id: string;

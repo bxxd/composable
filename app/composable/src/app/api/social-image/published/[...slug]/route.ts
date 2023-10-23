@@ -7,7 +7,9 @@ export async function GET(req: NextRequest) {
   const pathName = url.pathname.split("/");
   const id = pathName[4];
 
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: true,
+  });
   const page = await browser.newPage();
 
   await page.setViewport({
