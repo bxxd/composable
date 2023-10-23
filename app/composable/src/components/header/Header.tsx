@@ -37,16 +37,17 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
             <Navigation routes={routes} />
           </div>
         </div>
-
-        <div className=" ml-auto inline-flex flex-shrink-0">
-          <div className="flex ml-1 mr-1 ">
-            {childrenComponents.map((component, index) => (
-              <div key={index} className="mr-2">
-                {component}
-              </div>
-            ))}
+        {childrenComponents.length > 0 && (
+          <div className=" ml-auto inline-flex flex-shrink-0">
+            <div className="flex ml-1 mr-1 ">
+              {childrenComponents.map((component, index) => (
+                <div key={index} className="mr-2">
+                  {component}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         {/* <ThemePicker /> */}
       </div>
     </header>
