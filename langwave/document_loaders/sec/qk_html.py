@@ -140,7 +140,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
 
         ## low information sections
         if len(text) <= 150:
-            # log.info(f"skipping low information section")
+            log.info(f"skipping low information section")
             return
 
         section = SimpleNamespace()
@@ -158,7 +158,12 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
             ) or ("part 1" in lowered):
                 start = True
                 # print(f"Found start")
+                log.info(f"Found start: `{text}`")
                 complete_sections = [section]
+            elif "table of contents" in lowered or "index" in lowered:
+                start = True
+                log.info(f"Found start: `{text}`")
+                complete_sections = []
 
         return section
 
@@ -172,7 +177,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
             # log.info(f"skipping short section: {text}")
             continue
 
-        log.info(f"s: `{s}`")
+        # log.info(f"s: `{s}`")
 
         lowered = text.lower()
         if lowered.startswith("table of contents"):
@@ -195,11 +200,11 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
             if (
                 "item 6" in lowered and "exhibits" in lowered
             ) or "signatures" in lowered:
-                # log.info(f"Found end: `{text}`")
+                log.info(f"Found end: `{text}`")
                 break
             if part and span_found:
                 cnt += 1
-                log.info(f"creating section {part} {cnt}")
+                log.info(f"creating section {cnt}) {part}")
                 last_section = add_section(part, cnt)
 
                 part = f"*{text}*"
@@ -227,7 +232,7 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
             else:
                 part = text
 
-        log.info(f"part: `{part}`")
+        # log.info(f"part: `{part}`")
 
     if part:
         add_section(part, cnt + 1)

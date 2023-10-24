@@ -11,6 +11,7 @@ from langchain.schema.messages import HumanMessage
 from langchain.callbacks import get_openai_callback
 from composable.services.edgar import fetch_document
 from datetime import datetime
+from types import SimpleNamespace
 
 import logging
 
@@ -134,9 +135,13 @@ async def save_excerpts(company, filing, model=MODEL):
     log.info(f"have filing: {filing}")
 
     async with db.Session.context() as session:
+        await session.delete_excerpts(filing_id=filing.id)
+
         filing.status = "processing"
         filing = await session.merge(filing)
         await session.commit()
+
+    log.info("here...")
 
     url = filing.url
     file = None
@@ -200,15 +205,15 @@ tagging_schema = {
     "properties": {
         "category": {
             "type": "string",
-            "description": "What main financial category does this passage apply to?",
+            "description": "What is the main intent of this excerpt?",
         },
         "subcategory": {
             "type": "string",
-            "description": "Give a concise subcategory for the passage, if there is one, to distinguish this passage.",
+            "description": "What is the main thing this excerpt is about?",
         },
         "insight": {
             "type": "string",
-            "description": "In a sentence, what is an insight of this passage?",
+            "description": "What is the main thing people should know about this excerpt, if you could tell them one thing?",
         },
         "analysis": {
             "type": "string",
@@ -242,6 +247,7 @@ async def process_section(
     report_title: str = None,
 ) -> (float, int):
     """Process a section and return the total cost"""
+    log.info(f"process section {section_count}")
     section_text = section_text.replace("\n", " ")
 
     num_tokens = llm.get_num_tokens_from_messages([HumanMessage(content=section_text)])
@@ -289,6 +295,8 @@ async def process_section(
         tags = await chain.arun(section_text)
         total_cost = cb.total_cost
 
+    log.info(f"saving excerpt {section_count} for filing: {filing.id}")
+
     excerpt = await session.get_excerpt_by_keys(
         filing_id=filing.id, index=section_count
     )
@@ -323,12 +331,75 @@ async def process_section(
     return total_cost, section_count
 
 
+def split_closest_sentence(text, halfway):
+    sentences = text.split(". ")
+    current_count = 0
+    for i, sentence in enumerate(sentences):
+        current_count += len(sentence.split())
+        if current_count >= halfway:
+            return ". ".join(sentences[: i + 1]), ". ".join(sentences[i + 1 :])
+    return text, ""
+
+
+def aggregate_sections(sections, llm):
+    section_text = ""
+    aggregated_sections = []
+    max_tokens = 3072
+    min_tokens = 1024
+
+    for s in sections:
+        projected_tokens = llm.get_num_tokens_from_messages(
+            [HumanMessage(content=section_text + s.text)]
+        )
+
+        if projected_tokens > max_tokens:
+            halfway = projected_tokens // 2
+            first_half, second_half = split_closest_sentence(
+                section_text + s.text, halfway
+            )
+            new_s = SimpleNamespace()
+            new_s.text = first_half
+            new_s.tokens = llm.get_num_tokens_from_messages(
+                [HumanMessage(content=new_s.text)]
+            )
+            new_s.cnt = len(aggregated_sections) + 1
+            aggregated_sections.append(new_s)
+            section_text = second_half
+        else:
+            section_text += s.text
+            if projected_tokens >= min_tokens:
+                new_s = SimpleNamespace()
+                new_s.text = section_text
+                new_s.tokens = llm.get_num_tokens_from_messages(
+                    [HumanMessage(content=new_s.text)]
+                )
+                new_s.cnt = len(aggregated_sections) + 1
+                aggregated_sections.append(new_s)
+                section_text = ""
+
+    if section_text:
+        new_s = SimpleNamespace()
+        new_s.text = section_text
+        new_s.tokens = llm.get_num_tokens_from_messages(
+            [HumanMessage(content=new_s.text)]
+        )
+        new_s.cnt = len(aggregated_sections) + 1
+        aggregated_sections.append(new_s)
+
+    return aggregated_sections
+
+
 async def save_filing_excerpts(
     company: db.Company, filing: db.Filing, file: str, model: str = "gpt-3.5-turbo-16k"
 ):
     sections = qk_html.get_sections(file)
 
     llm = ChatOpenAI(temperature=0.2, verbose=False, model=model)
+
+    sections = aggregate_sections(sections, llm)
+
+    for s in sections:
+        log.info(f"****** section: {s}")
 
     chain = create_tagging_chain(tagging_schema, llm)
 
@@ -358,6 +429,7 @@ async def save_filing_excerpts(
                 report_title=report_title,
             )
             running_cost += cost
+            # break
 
     return running_cost
 

@@ -24,19 +24,24 @@ export async function GET(req: Request) {
     e.insight AS insight,
     e.excerpt AS excerpt,
     e.tokens AS tokens,
+    e.index AS index,
     ARRAY_AGG(t.tag) AS tags
 FROM (
     SELECT * FROM excerpts
-    WHERE filing_id = $1
+    WHERE filing_id = ${filing_id}
     ORDER BY id ASC
     LIMIT 100
 ) AS e
 LEFT JOIN tags AS t ON e.id = t.excerpt_id
-GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens
-ORDER BY e.id ASC;`;
+GROUP BY e.id, e.title, e.category, e.subcategory, e.insight, e.excerpt, e.tokens, e.index
+ORDER BY e.index ASC;`;
 
-    const result: QueryResult[] = await db.any(query, filing_id);
+    console.log("query", query);
+
+    const result: QueryResult[] = await db.any(query);
     console.log("result length", result.length);
+
+    // console.log(JSON.stringify(result));
     // Send the results as JSON
     return NextResponse.json(result);
   } catch (err) {

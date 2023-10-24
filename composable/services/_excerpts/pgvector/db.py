@@ -294,3 +294,8 @@ class Session(AbstractSessionEdgar):
         for tag in tags:
             tag = tag.strip().lower()
             await self.save(Tag(excerpt_id=excerpt_id, tag=tag))
+
+    async def delete_excerpts(self, filing_id):
+        log.info(f"delete_excerpts: {filing_id}")
+        await self.execute(delete(Excerpt).where(Excerpt.filing_id == filing_id))
+        await self.commit()
