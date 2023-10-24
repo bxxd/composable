@@ -331,14 +331,24 @@ async def process_section(
     return total_cost, section_count
 
 
-def split_closest_sentence(text, halfway):
-    sentences = text.split(". ")
-    current_count = 0
-    for i, sentence in enumerate(sentences):
-        current_count += len(sentence.split())
-        if current_count >= halfway:
-            return ". ".join(sentences[: i + 1]), ". ".join(sentences[i + 1 :])
-    return text, ""
+import re
+
+
+def split_closest_sentence(text):
+    log.info(f"split_closest_sentence")
+    halfway = len(text) // 2
+    # Go halfway in terms of characters
+    first_half = text[:halfway]
+    second_half = text[halfway:]
+
+    # Look for the nearest sentence end (., !, ?) to complete the first half
+    match = re.search(r"[.!?]", second_half)
+    if match:
+        pos = match.start()
+        first_half += second_half[: pos + 1]
+        second_half = second_half[pos + 1 :]
+
+    return first_half, second_half
 
 
 def aggregate_sections(sections, llm):
@@ -347,22 +357,25 @@ def aggregate_sections(sections, llm):
     max_tokens = 3072
     min_tokens = 1024
 
+    log.info("aggregating sections...")
+
     for s in sections:
         projected_tokens = llm.get_num_tokens_from_messages(
             [HumanMessage(content=section_text + s.text)]
         )
+        log.info(f"projected_tokens: {projected_tokens}")
 
         if projected_tokens > max_tokens:
-            halfway = projected_tokens // 2
-            first_half, second_half = split_closest_sentence(
-                section_text + s.text, halfway
-            )
+            log.info("splitting section...")
+
+            first_half, second_half = split_closest_sentence(section_text + s.text)
             new_s = SimpleNamespace()
             new_s.text = first_half
             new_s.tokens = llm.get_num_tokens_from_messages(
                 [HumanMessage(content=new_s.text)]
             )
             new_s.cnt = len(aggregated_sections) + 1
+            log.info("adding section... %d", new_s.cnt)
             aggregated_sections.append(new_s)
             section_text = second_half
         else:
@@ -374,6 +387,7 @@ def aggregate_sections(sections, llm):
                     [HumanMessage(content=new_s.text)]
                 )
                 new_s.cnt = len(aggregated_sections) + 1
+                log.info("adding section... %d", new_s.cnt)
                 aggregated_sections.append(new_s)
                 section_text = ""
 
@@ -384,6 +398,7 @@ def aggregate_sections(sections, llm):
             [HumanMessage(content=new_s.text)]
         )
         new_s.cnt = len(aggregated_sections) + 1
+        log.info("adding remaining section... %d", new_s.cnt)
         aggregated_sections.append(new_s)
 
     return aggregated_sections
