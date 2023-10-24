@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getDbInstance, releaseDbInstance } from "@/lib/db";
-import { getEmbedding } from "@/app/api/lib/embedding";
-import { extractAllText } from "@/lib/editor";
+import { getEmbedding } from "@/lib/embedding";
+import { extractAllText } from "@/lib/dataUtils";
 
 export const dynamic = "force-dynamic";
 

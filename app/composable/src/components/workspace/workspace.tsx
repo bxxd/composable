@@ -18,14 +18,6 @@ export default function Workspace({}: WorkspaceProps) {
 
   const [showCatalog, setShowCatalog] = useState(true);
 
-  // useEffect(() => {
-  //   if (slug && slug !== "") {
-  //     setShowCatalog(true);
-  //   } else {
-  //     setShowCatalog(false);
-  //   }
-  // }, [slug]);
-
   const tiptapRef = useRef<{
     getEditor: () => { commands: { setContent: (content: string) => void } };
     appendDataContentToEnd?: (content: DataItem) => void;
@@ -65,7 +57,7 @@ export default function Workspace({}: WorkspaceProps) {
       </div>
 
       {/* SearchColumn Component */}
-      <div className="flex-grow  min-w-[36ch] max-w-[65ch]">
+      <div className="flex-grow  min-w-[36ch] max-w-[55ch]">
         <SavedItems handleAddSaved={handleAddSaved} />
         <SearchColumn handleAddData={handleAddData} />
       </div>

@@ -17,7 +17,6 @@ import { JSONContent } from "@tiptap/react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import IconButton from "@mui/material/IconButton";
 
 import {
   createNodeJSON,
@@ -123,40 +122,87 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedExcerpt, setExpandedExcerpt] = useState<string | null>(null);
 
+  // const handleOpenEditorOld = (node: any) => {
+  //   const store = BlockStore.getInst();
+  //   let currentDoc = editor.getJSON();
+
+  //   let ctxStack = store.get().ctxStack;
+  //   ctxStack[getBlockIdLevel(node.attrs.id)] = currentDoc;
+
+  //   let content = node.attrs.children;
+
+  //   if (content === null || content === undefined) {
+  //     let thisNode = node.toJSON();
+  //     thisNode = _.cloneDeep(thisNode);
+  //     thisNode.attrs.id = node.attrs.id + ".1";
+
+  //     content = [thisNode];
+
+  //     let currentContent: JSONContent[] | undefined = currentDoc.content;
+  //     if (
+  //       currentContent &&
+  //       currentContent.length > 0 &&
+  //       thisNode.attrs.role != "system"
+  //     ) {
+  //       let possibleSystemNode = currentContent[0];
+  //       if (possibleSystemNode?.attrs?.role === "system") {
+  //         possibleSystemNode = _.cloneDeep(possibleSystemNode);
+  //         if (possibleSystemNode && possibleSystemNode.attrs) {
+  //           possibleSystemNode.attrs.id = node.attrs.id + ".0";
+  //           content.unshift(possibleSystemNode);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   pushSubContent(editor, content);
+  // };
+
   const handleOpenEditor = (node: any) => {
     const store = BlockStore.getInst();
     let currentDoc = editor.getJSON();
+
+    if (!currentDoc.content) {
+      return;
+    }
 
     let ctxStack = store.get().ctxStack;
     ctxStack[getBlockIdLevel(node.attrs.id)] = currentDoc;
 
     let content = node.attrs.children;
 
-    if (content === null || content === undefined) {
-      let thisNode = node.toJSON();
-      thisNode = _.cloneDeep(thisNode);
-      thisNode.attrs.id = node.attrs.id + ".1";
+    if (content) {
+      pushSubContent(editor, content);
+      return;
+    }
 
-      content = [thisNode];
+    content = [];
 
-      let currentContent: JSONContent[] | undefined = currentDoc.content;
-      if (
-        currentContent &&
-        currentContent.length > 0 &&
-        thisNode.attrs.role != "system"
-      ) {
-        let possibleSystemNode = currentContent[0];
-        if (possibleSystemNode?.attrs?.role === "system") {
-          possibleSystemNode = _.cloneDeep(possibleSystemNode);
-          if (possibleSystemNode && possibleSystemNode.attrs) {
-            possibleSystemNode.attrs.id = node.attrs.id + ".0";
-            content.unshift(possibleSystemNode);
-          }
-        }
+    for (let i = 0; i < currentDoc.content.length; i++) {
+      const element = currentDoc.content[i];
+      if (!element) {
+        continue;
+      }
+
+      console.log("element", JSON.stringify(element));
+
+      let thisNode = _.cloneDeep(element);
+
+      if (thisNode.attrs) {
+        thisNode.attrs.id = element.attrs?.id ?? `0.${i}`;
+      } else {
+        thisNode.attrs = { id: element.attrs?.id ?? `0.${i}` };
+      }
+
+      content.push(thisNode);
+
+      if (element.attrs?.id === node.attrs.id) {
+        break;
       }
     }
 
     pushSubContent(editor, content);
+    return;
   };
 
   const toggleExpanded = () => {
@@ -270,7 +316,7 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           }`}
           onMouseDown={isDataBlock ? toggleExpanded : undefined}
         >
-          <NodeViewContent className="node-view-content w-full pl-2 pr-2 max-w-none prose" />
+          <NodeViewContent className="node-view-content w-full pl-2 pr-2 max-w-none prose dark:prose-invert" />
           {isDataBlock && (
             <span className="ml-2">
               <Icon
@@ -282,13 +328,20 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
           )}
         </div>
         {isDataBlock && isExpanded && (
-          <div className="ml-0 mt-1 ">
+          <div className="ml-1 mt-1 ">
             <div>
+              {data.report_title &&
+                data.company_name &&
+                data.company_ticker && (
+                  <div>
+                    <strong>Report:</strong> {data.report_title},{" "}
+                    {data.company_name} ({data.company_ticker})
+                  </div>
+                )}
               <div>
                 <strong>Category:</strong> {data.category}
-              </div>
-              <div>
-                <strong>Subcategory:</strong> {data.subcategory}
+                {" - "}
+                {data.subcategory}
               </div>
               <div>
                 <strong>Insight:</strong> {data.insight}

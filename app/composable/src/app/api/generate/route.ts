@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     aiModel = aiModel.replace("openai/", "");
   }
 
-  // console.log("messages", messages);
+  console.log("messages", messages);
   try {
     // Ask OpenAI for a streaming chat completion given the prompt
     const apiCall = openai.chat.completions.create(

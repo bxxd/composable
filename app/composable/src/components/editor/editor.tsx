@@ -55,57 +55,45 @@ function extractTextFromJSON(
     return result;
   }
 
-  // Check if data has content and is an array
   if (data.content && Array.isArray(data.content)) {
     for (let item of data.content) {
-      // Determine the role based on attrs
       let role = item.attrs ? item.attrs.role : "user";
 
-      // Check if item is of type dBlock and has content
       if (
         item.type === "dBlock" &&
         item.content &&
         Array.isArray(item.content)
       ) {
+        let blockContent = "";
+
         for (let block of item.content) {
-          // Check if block is of type paragraph and has content
           if (
             block.type === "paragraph" &&
             block.content &&
             Array.isArray(block.content)
           ) {
             for (let textItem of block.content) {
-              // Check if textItem is of type text and has text property
               if (textItem.type === "text" && textItem.text) {
-                if (role === "data") {
-                  result.push({
-                    role: "user",
-                    content: item.attrs?.data.excerpt,
-                  });
-                } else {
-                  if (role === "thought") {
-                    result.push({
-                      role: "assistant",
-                      content: `THOUGHT:
-${textItem.text}
-now go.`,
-                    });
-                  } else {
-                    if (
-                      role !== "user" &&
-                      role !== "assistant" &&
-                      role !== "system"
-                    ) {
-                      role = "assistant";
-                    }
-                    result.push({
-                      role: role,
-                      content: textItem.text,
-                    });
-                  }
-                }
+                blockContent += textItem.text + " ";
               }
             }
+          }
+        }
+
+        if (blockContent) {
+          if (role === "thought") {
+            result.push({
+              role: "assistant",
+              content: `${blockContent}`,
+            });
+          } else {
+            if (role !== "user" && role !== "assistant" && role !== "system") {
+              role = "assistant";
+            }
+            result.push({
+              role: role,
+              content: blockContent.trim(),
+            });
           }
         }
       }
@@ -272,9 +260,11 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     let data = currentEditor?.getJSON();
 
     // console.log("editor", currentEditor);
-    // console.log("json", JSON.stringify(data));
+    console.log("json", JSON.stringify(data));
 
     data = extractTextFromJSON(data);
+
+    console.log("data", JSON.stringify(data));
 
     let payload = { messages: data, aiModel: aiModelRef.current };
 

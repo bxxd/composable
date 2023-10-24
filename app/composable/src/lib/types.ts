@@ -1,14 +1,3 @@
-// export interface DataItem {
-//   id: number;
-//   title: string;
-//   category: string;
-//   subcategory: string;
-//   insight: string;
-//   excerpt: string;
-//   tags: string[];
-//   tokens: number;
-// }
-
 export interface Excerpt {
   id: number;
   filing_id: number;
@@ -22,7 +11,11 @@ export interface Excerpt {
   embedding_distance?: number | null;
 }
 
-export interface DataItem extends Excerpt {}
+export interface DataItem extends Excerpt {
+  report_title: string;
+  company_name: string;
+  company_ticker: string;
+}
 
 export interface Filing {
   filing_id: number;

@@ -15,19 +15,24 @@ import { useCallback } from "react";
 import { Company, Excerpt, Filing } from "@/lib/types";
 
 interface SearchColumnProps {
-  handleAddData: (content: Excerpt | DataItem) => void;
+  handleAddData: (content: DataItem) => void;
 }
 
-const toDataItem = (excerpt: Excerpt): DataItem => {
+const toDataItem = (
+  excerpt: Excerpt,
+  filing: Filing,
+  company: Company
+): DataItem => {
   return {
     ...excerpt,
-    // Add or change properties if required.
+    report_title: filing.report_title,
+    company_name: company.company_name,
+    company_ticker: company.company_ticker,
   };
 };
 
 const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  // const [collapsed, setCollapsed] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [data, setData] = useState<Record<number, Company>>({});
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
@@ -67,8 +72,24 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
         }
         const groupedData: Record<number, Company> = await response.json();
         console.log("groupedData", groupedData);
+
         resetStates();
-        setData(groupedData);
+
+        // If there's no search term, collapse all companies by adding their IDs to setCollapsedCompanies
+        if (searchTerm) {
+          // Calculate average embedding distance for each company
+          setData(groupedData);
+        } else {
+          // If no search term, collapse all companies
+          const newCollapsedCompanies: { [key: number]: boolean } = {};
+          Object.keys(groupedData).forEach((key) => {
+            newCollapsedCompanies[parseInt(key)] = true;
+          });
+          setCollapsedCompanies(newCollapsedCompanies);
+
+          // Update the state with the unsorted data
+          setData(groupedData);
+        }
       } catch (err) {
         console.warn("An error occurred in fetchData:", err);
         setData({});
@@ -93,7 +114,6 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
 
       setData((prevData) => {
         const updatedData = { ...prevData };
-
         for (const company of Object.values(updatedData)) {
           for (const filing of Object.values(company.filings)) {
             if (filing.filing_id === filing_id) {
@@ -101,7 +121,6 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
             }
           }
         }
-
         return updatedData;
       });
     } catch (err) {
@@ -157,7 +176,7 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
   };
 
   return (
-    <div className="flex flex-col m-1 border rounded p-1 border-red-200">
+    <div className="flex flex-col m-1 border rounded p-1 border-red-200 opacity-60">
       <div
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -268,7 +287,9 @@ const SearchColumn: React.FC<SearchColumnProps> = ({ handleAddData }) => {
                                         type="button"
                                         className="mr-2 opacity-10 group-hover:opacity-100 cursor-pointer"
                                         onClick={() =>
-                                          handleAddData(toDataItem(item))
+                                          handleAddData(
+                                            toDataItem(item, filing, company)
+                                          )
                                         }
                                         title="Add data to context"
                                       >

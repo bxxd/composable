@@ -2,6 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { BlockNodeView, MemoizedBlockNodeView } from "./blockNodeView";
 import { Editor } from "@tiptap/core";
+import { DataItem } from "@/lib/types";
 
 export interface HandleAIButtonClickParams {
   editor?: Editor | null;
@@ -51,15 +52,7 @@ export const DBlock = Node.create<BlockOptions>({
         default: "user",
       },
       data: {
-        default: {
-          title: null,
-          category: null,
-          subcategory: null,
-          tokens: null,
-          insight: null,
-          excerpt: null,
-          tags: [],
-        },
+        default: null,
       },
       id: {
         default: null,

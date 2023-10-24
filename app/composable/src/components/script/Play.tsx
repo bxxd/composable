@@ -8,7 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { JSONContent, useEditor, EditorContent } from "@tiptap/react";
 import { publishedExtensions } from "./extensions";
 import { Editor } from "@tiptap/core";
-import { extractAllText } from "@/lib/editor";
+import { extractAllText } from "@/lib/dataUtils";
 // import { CSSTransition } from "react-transition-group";
 import { Icon } from "@iconify/react";
 import FadeIn from "react-fade-in";
@@ -84,7 +84,10 @@ const Play: React.FC<PlayProps> = () => {
     slug = "";
   }
   const [hydrated, setHydrated] = useState(false);
+  const [previouslyUser, setPreviouslyUser] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(false);
   const [isFirst, setIsFirst] = useState(false);
+  const [instruction, setInstruction] = useState("");
   // const [showAI, setShowAI] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [script, setScript] = useState<ScriptItem[]>([]);
@@ -96,6 +99,8 @@ const Play: React.FC<PlayProps> = () => {
   const [displayUserInput, setDisplayUserInput] = useState(false);
   // const [userInput, setUserInput] = useState<string | null | undefined>(null);
   const aiModelRef = useLatestContextValue("aiModel");
+
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
   const { setAiModel } = useGlobalContext();
 
@@ -122,6 +127,7 @@ const Play: React.FC<PlayProps> = () => {
       console.log("currentItem", currentItem);
 
       setDisplayUserInput(false);
+      setAutoPlay(false);
       if (currentItem) {
         displayedItems.push({
           role: "user",
@@ -134,8 +140,6 @@ const Play: React.FC<PlayProps> = () => {
 
         setDisplayedItems(displayedItems);
       }
-
-      // next();
     },
     onFinish: (_prompt, _completion) => {
       // console.log("AI finished", editor);
@@ -246,8 +250,12 @@ const Play: React.FC<PlayProps> = () => {
         break;
       case "user":
         console.log("user");
+
+        setPreviouslyUser(true);
+
         next();
         break;
+
       case "system":
         console.log("system");
         setMessages((prevMessages) => [
@@ -261,24 +269,33 @@ const Play: React.FC<PlayProps> = () => {
         break;
       case "thought":
         console.log("thought");
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            role: "assistant",
-            content: extractAllText(item.content),
-          },
-        ]);
-        next();
+
+        item.role = "assistant";
+        item.text = "";
+
+        applyDelay(() => {
+          editor?.commands.setContent(item.content);
+          setAutoPlay(true);
+          setDisplayUserInput(true);
+        });
+
+        // next();
         break;
       case "assistant":
         console.log("assistant");
 
-        item.text = "";
+        if (previouslyUser) {
+          item.text = "";
 
-        applyDelay(() => {
-          editor?.commands.clearContent();
-          setDisplayUserInput(true);
-        });
+          applyDelay(() => {
+            editor?.commands.clearContent();
+            setDisplayUserInput(true);
+          });
+
+          setPreviouslyUser(false);
+        } else {
+          next();
+        }
         break;
       case "data":
         console.log("data");
@@ -298,6 +315,14 @@ const Play: React.FC<PlayProps> = () => {
   };
 
   useEffect(() => {
+    if (displayUserInput && autoPlay) {
+      console.log("autoPlay");
+
+      handleAIButtonClick({ editor });
+    }
+  }, [displayUserInput]);
+
+  useEffect(() => {
     if (currentItem) {
       currentItem.text = completion;
       setCurrentItem(currentItem);
@@ -315,9 +340,19 @@ const Play: React.FC<PlayProps> = () => {
       return;
     }
 
-    messages.push({ role: "user", content: text });
+    messages.push({
+      role: "user",
+      content:
+        instruction == ""
+          ? text
+          : `I suggest that ${instruction}.\nAlso, I say ${text}`,
+    });
 
-    complete(JSON.stringify(messages));
+    setInstruction("");
+
+    let payload = { messages: messages, aiModel: aiModelRef.current };
+
+    complete(JSON.stringify(payload));
   };
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -364,33 +399,25 @@ const Play: React.FC<PlayProps> = () => {
     }
   }, [setHydrated, setScript, blockState, slug, setAiModel]);
 
-  // useEffect(() => {
-  //   if (!hydrated) {
-  //     return;
-  //   }
-
-  //   console.log("script", script);
-
-  //   if (script.length === 0) {
-  //     return;
-  //   }
-
-  //   playNext();
-  // }, [hydrated]);
-
   const router = useRouter();
+
+  useEffect(() => {
+    // console.log("useEffect called", bottomRef.current); // Debugging line
+
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [displayedItems, displayUserInput, currentItem, completion]);
 
   if (!hydrated) {
   }
 
   console.log(
-    `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}}`
+    `hydrated: ${hydrated} displayUserInput: ${displayUserInput} currentIndex: ${currentIndex} currentItem: {id: ${currentItem?.id}, role: ${currentItem?.role}} autoPlay: ${autoPlay}`
   );
 
   // console.log("completion", completion);
 
   return (
-    <>
+    <div ref={bottomRef}>
       {!loadedFromLocalStorage && (
         <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm ">
           <button onMouseDown={() => router.push("/work/" + slug)}>
@@ -409,11 +436,11 @@ const Play: React.FC<PlayProps> = () => {
             <>
               {item.role == "assistant" ? (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                     <div className="">
                       <Icon icon="mdi:robot" className="icon-size mr-2" />
                       <ReactMarkdown
-                        className="prose"
+                        className="prose dark:prose-invert"
                         remarkPlugins={[remarkGfm]}
                       >
                         {item.text || ""}
@@ -422,7 +449,7 @@ const Play: React.FC<PlayProps> = () => {
                   </div>
                 </FadeIn>
               ) : item.role === "user" ? (
-                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                   <Icon
                     icon="mdi-light:chevron-right"
                     className="icon-size mr-2"
@@ -434,7 +461,7 @@ const Play: React.FC<PlayProps> = () => {
                 </div>
               ) : (
                 <FadeIn>
-                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-2xl">
+                  <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]">
                     <Icon icon="mdi:robot" className="icon-size mr-2" />
                     <div
                       className="prose dark:prose-invert"
@@ -449,7 +476,7 @@ const Play: React.FC<PlayProps> = () => {
 
         {displayUserInput && (
           <FadeIn>
-            <div className="max-w-2xl">
+            <div className="max-w-[90ch]">
               <div className="p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 ">
                 <EditorContent
                   editor={editor}
@@ -457,25 +484,27 @@ const Play: React.FC<PlayProps> = () => {
                 />
               </div>
 
-              <button
-                type="button"
-                className="ml-auto mt-1 w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
-                onMouseDown={() => {
-                  handleAIButtonClick({ editor });
-                }}
-                title="Send context to AI"
-              >
-                <Icon
-                  icon="ant-design:down"
-                  className="icon-size"
-                  color="green"
-                />
-              </button>
+              {!autoPlay && (
+                <button
+                  type="button"
+                  className="ml-auto mt-1 w-6 h-6 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-md focus:outline-none transition duration-150 ease-in-out flex items-center justify-center m-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:text-gray-300"
+                  onMouseDown={() => {
+                    handleAIButtonClick({ editor });
+                  }}
+                  title="Send context to AI"
+                >
+                  <Icon
+                    icon="ant-design:down"
+                    className="icon-size"
+                    color="green"
+                  />
+                </button>
+              )}
             </div>
           </FadeIn>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

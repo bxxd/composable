@@ -10,8 +10,8 @@ import closeIcon from "@iconify/icons-ic/baseline-close";
 import { Icon } from "@iconify/react";
 import searchIcon from "@iconify/icons-ic/search";
 import React from "react";
-import { Menu, MenuItem } from "@material-ui/core";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import { Menu, MenuItem } from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 interface MemoizedCardProps {
   id: string;
@@ -202,7 +202,7 @@ const Page: React.FC = () => {
                     />
                   </button>
                 )}
-                <Link href={`/ai-created/${item.id}`}>
+                <Link href={`/published/${item.id}`}>
                   <div className="card rounded-lg border cursor-pointer">
                     <div className="pointer-events-none">
                       <MemoizedCard id={item.id} />

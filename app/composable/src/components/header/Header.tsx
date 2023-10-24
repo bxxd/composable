@@ -1,20 +1,11 @@
-import { useTheme } from "next-themes";
-import { Icon } from "@iconify/react";
-import darkMode from "@iconify/icons-ic/baseline-dark-mode";
-import lightMode from "@iconify/icons-ic/baseline-light-mode";
 import Navigation from "./Navigation";
 import Image from "next/image";
 import { ReactNode } from "react";
+// import ThemePicker from "./ThemePicker";
 
 type HeaderProps = { childrenComponents?: ReactNode[] };
 
 export default function Header({ childrenComponents = [] }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-
   const routes = [
     { path: "/work", label: "Workspace" },
     { path: "/docs", label: "Docs" },
@@ -46,31 +37,18 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
             <Navigation routes={routes} />
           </div>
         </div>
-
-        <div className=" ml-auto inline-flex flex-shrink-0">
-          <div className="flex ml-1 mr-1 ">
-            {childrenComponents.map((component, index) => (
-              <div key={index} className="mr-2">
-                {component}
-              </div>
-            ))}
+        {childrenComponents.length > 0 && (
+          <div className=" ml-auto inline-flex flex-shrink-0">
+            <div className="flex ml-1 mr-1 ">
+              {childrenComponents.map((component, index) => (
+                <div key={index} className="mr-2">
+                  {component}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="flex justify-center items-center">
-          <div className="justify-center inline-flex flex-shrink-0">
-            <button
-              onClick={toggleTheme}
-              className="p-1 focus:outline-none focus:bg-gray-200 dark:focus:bg-gray-700 rounded transition-all duration-300"
-            >
-              <Icon
-                icon={theme === "light" ? darkMode : lightMode}
-                width="18"
-                height="18"
-                className="transition-colors"
-              />
-            </button>
-          </div>
-        </div>
+        )}
+        {/* <ThemePicker /> */}
       </div>
     </header>
   );
