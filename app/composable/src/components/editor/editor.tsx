@@ -49,6 +49,7 @@ import { initData, introData, mockData, clearData } from "./samples";
 function extractTextFromJSON(
   data: JSONContent | null
 ): { role: string; content: string }[] {
+  console.log(`extractTextFromJSON: ${JSON.stringify(data)}`);
   let result: { role: string; content: string }[] = [];
 
   if (!data) {
@@ -74,7 +75,24 @@ function extractTextFromJSON(
           ) {
             for (let textItem of block.content) {
               if (textItem.type === "text" && textItem.text) {
-                blockContent += textItem.text + " ";
+                if (role === "data") {
+                  let dataItem = item.attrs?.data as DataItem;
+                  if (dataItem) {
+                    let excerpt = dataItem.excerpt;
+                    if (
+                      dataItem.report_title &&
+                      dataItem.company_name &&
+                      dataItem.company_ticker
+                    ) {
+                      excerpt = `From filing ${dataItem.report_title} - ${dataItem.company_name} (${dataItem.company_ticker}): ${excerpt}`;
+                    }
+                    if (excerpt) {
+                      blockContent += excerpt;
+                    }
+                  }
+                } else {
+                  blockContent += textItem.text + " ";
+                }
               }
             }
           }
@@ -88,7 +106,7 @@ function extractTextFromJSON(
             });
           } else {
             if (role !== "user" && role !== "assistant" && role !== "system") {
-              role = "assistant";
+              role = "user";
             }
             result.push({
               role: role,

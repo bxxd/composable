@@ -1,11 +1,12 @@
 import React from "react";
+import { version } from "@/lib/version";
 // import { Icon } from "@iconify/react";
 // import heartFill from "@iconify/icons-ph/heart-fill";
 
 const Footer = () => {
   return (
-    <footer className=" z-50 w-full border-t shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
-      <div className="opacity-75 px-4 md:flex md:items-center md:justify-between py-1 prose dark:prose-invert">
+    <footer className=" z-50 w-full border-t shadow-sm transition-all duration-300 opacity-85 bg-white text-black dark:border-gray-700 dark:bg-black-900 dark:text-gray-300 flex">
+      <div className="opacity-75 px-4 md:flex md:items-center md:justify-between py-1 prose dark:prose-invert text-sm">
         <div className="text-center md:text-left font-serif flex">
           Made with{" "}
           <svg
@@ -27,6 +28,9 @@ const Footer = () => {
             @bri4nr33d
           </a>
         </div>
+      </div>
+      <div className="text-xs opacity-50 pt-2 md:text-right ml-auto mr-2">
+        {" v" + version + " "}
       </div>
     </footer>
   );
