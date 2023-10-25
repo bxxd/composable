@@ -74,7 +74,7 @@ function extractMessagesFromJSON(
             dataItem.company_name &&
             dataItem.company_ticker
           ) {
-            excerpt = `From filing ${dataItem.report_title} - ${dataItem.company_name} (${dataItem.company_ticker}): ${excerpt}`;
+            excerpt = `${dataItem.report_title} - ${dataItem.company_name} (${dataItem.company_ticker}): ${excerpt}`;
           }
           if (excerpt) {
             newText = excerpt;
