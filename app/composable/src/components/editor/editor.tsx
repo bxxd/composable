@@ -23,6 +23,7 @@ import { defaultExtensions } from "./extensions";
 import { HandleAIButtonClickParams } from "./extensions/block";
 import { useLatestContextValue } from "@/lib/context";
 import { DataItem } from "@/lib/types";
+import { extractAllText } from "@/lib/dataUtils";
 
 import _ from "lodash";
 
@@ -46,76 +47,79 @@ import { toast } from "sonner";
 
 import { initData, introData, mockData, clearData } from "./samples";
 
-function extractTextFromJSON(
+function extractMessagesFromJSON(
   data: JSONContent | null
 ): { role: string; content: string }[] {
-  console.log(`extractTextFromJSON: ${JSON.stringify(data)}`);
+  console.log(`extractMessagesFromJSON: ${JSON.stringify(data)}`);
   let result: { role: string; content: string }[] = [];
 
-  if (!data) {
+  if (!data || !data.content || !Array.isArray(data.content)) {
     return result;
   }
 
-  if (data.content && Array.isArray(data.content)) {
-    for (let item of data.content) {
-      let role = item.attrs ? item.attrs.role : "user";
+  let currentRole = "";
+  let blockContent = "";
 
-      if (
-        item.type === "dBlock" &&
-        item.content &&
-        Array.isArray(item.content)
-      ) {
-        let blockContent = "";
+  for (let item of data.content) {
+    let role = item.attrs && item.attrs.role ? item.attrs.role : "user";
+    let newText = "";
 
-        for (let block of item.content) {
+    if (item.type === "dBlock" && item.content && Array.isArray(item.content)) {
+      if (role === "data") {
+        let dataItem = item.attrs?.data as DataItem;
+        if (dataItem) {
+          let excerpt = dataItem.excerpt;
           if (
-            block.type === "paragraph" &&
-            block.content &&
-            Array.isArray(block.content)
+            dataItem.report_title &&
+            dataItem.company_name &&
+            dataItem.company_ticker
           ) {
-            for (let textItem of block.content) {
-              if (textItem.type === "text" && textItem.text) {
-                if (role === "data") {
-                  let dataItem = item.attrs?.data as DataItem;
-                  if (dataItem) {
-                    let excerpt = dataItem.excerpt;
-                    if (
-                      dataItem.report_title &&
-                      dataItem.company_name &&
-                      dataItem.company_ticker
-                    ) {
-                      excerpt = `From filing ${dataItem.report_title} - ${dataItem.company_name} (${dataItem.company_ticker}): ${excerpt}`;
-                    }
-                    if (excerpt) {
-                      blockContent += excerpt;
-                    }
-                  }
-                } else {
-                  blockContent += textItem.text + " ";
-                }
-              }
-            }
+            excerpt = `From filing ${dataItem.report_title} - ${dataItem.company_name} (${dataItem.company_ticker}): ${excerpt}`;
           }
+          if (excerpt) {
+            newText = excerpt;
+          }
+        }
+      } else {
+        newText = extractAllText(item);
+      }
+
+      if (newText) {
+        newText = newText.trim();
+        if (role == "static") {
+          role = "assistant";
+        } else if (
+          role !== "user" &&
+          role !== "assistant" &&
+          role !== "system"
+        ) {
+          role = "user";
         }
 
-        if (blockContent) {
-          if (role === "thought") {
-            result.push({
-              role: "assistant",
-              content: `${blockContent}`,
-            });
-          } else {
-            if (role !== "user" && role !== "assistant" && role !== "system") {
-              role = "user";
-            }
-            result.push({
-              role: role,
-              content: blockContent.trim(),
-            });
-          }
+        console.log(`role: ${role} content: ${blockContent}`);
+
+        if (blockContent && currentRole && role !== currentRole) {
+          result.push({
+            role: currentRole,
+            content: blockContent.trim(),
+          });
+          blockContent = "";
         }
+
+        currentRole = role;
+        if (blockContent) {
+          blockContent += " \n\n";
+        }
+        blockContent += newText;
       }
     }
+  }
+
+  if (blockContent) {
+    result.push({
+      role: currentRole,
+      content: blockContent.trim(),
+    });
   }
 
   return result;
@@ -280,7 +284,7 @@ const TipTap = forwardRef((props: TipTapProps, ref: React.Ref<any>) => {
     // console.log("editor", currentEditor);
     console.log("json", JSON.stringify(data));
 
-    data = extractTextFromJSON(data);
+    data = extractMessagesFromJSON(data);
 
     console.log("data", JSON.stringify(data));
 
