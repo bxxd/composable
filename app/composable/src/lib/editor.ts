@@ -430,6 +430,8 @@ export const createNodeJSON = (
 };
 
 export function pushSubContent(editor: Editor, content: JSONContent[]) {
+  console.log("pushSubContent", content);
+
   const store = BlockStore.getInst();
   const currentDoc = editor.getJSON();
   const currentContent = currentDoc.content;

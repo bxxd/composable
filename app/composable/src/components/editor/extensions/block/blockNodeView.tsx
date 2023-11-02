@@ -189,9 +189,13 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
       let thisNode = _.cloneDeep(element);
 
       if (thisNode.attrs) {
-        thisNode.attrs.id = element.attrs?.id ?? `0.${i}`;
+        thisNode.attrs.id = element.attrs?.id
+          ? element.attrs.id + `.${i}`
+          : `0.${i}`;
       } else {
-        thisNode.attrs = { id: element.attrs?.id ?? `0.${i}` };
+        thisNode.attrs = {
+          id: `0.${i}`,
+        };
       }
 
       content.push(thisNode);
@@ -200,6 +204,8 @@ export const BlockNodeView: React.FC<ExtendedNodeViewProps> = ({
         break;
       }
     }
+
+    // console.log(`content ${JSON.stringify(content)}`);
 
     pushSubContent(editor, content);
     return;
