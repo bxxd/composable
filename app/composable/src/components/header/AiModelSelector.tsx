@@ -24,7 +24,7 @@ export const AiModelSelector = React.memo((): React.ReactElement => {
 
   return (
     <select
-      className="flex mr-1"
+      className="flex mr-1 text-black"
       value={selectedModel}
       onChange={handleOnChange}
     >
