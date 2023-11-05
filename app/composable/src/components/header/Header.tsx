@@ -14,7 +14,7 @@ export default function Header({ childrenComponents = [] }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b shadow-sm transition-all duration-300 opacity-85 bg-[#031d42] text-white dark:border-gray-700 dark:bg-black-900 dark:text-gray-300">
+    <header className="sticky top-0 z-50 w-full border-b transition-all duration-300 opacity-85 bg-[#031d42] text-white dark:border-gray-700 dark:bg-black-900 dark:text-gray-300 shadow-md">
       <div className="px-4 md:flex md:items-center md:justify-between py-1">
         <div className="px-4 md:flex md:items-center md:justify-between py-1">
           <div className="flex select-none justify-center pt-0">
