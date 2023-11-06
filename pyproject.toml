@@ -25,6 +25,9 @@ aiohttp = "^3.8.5"
 uvicorn = "^0.23.2"
 pyppeteer = "^1.0.2"
 aiofiles = "^23.2.1"
+selenium = "^4.15.2"
+chromedriver = "^2.24.1"
+webdriver-manager = "^4.0.1"
 
 
 [build-system]

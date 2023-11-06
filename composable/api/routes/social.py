@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import FileResponse
-from pyppeteer import launch
-import aiofiles
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 import os
 from datetime import datetime, timedelta
 import asyncio
@@ -32,44 +35,38 @@ async def get_screenshot(path: str, cache: bool = True):
             )
 
     log.info("creating screenshot")
-    # If the file doesn't exist or is outdated, create a new one
-    browser = await launch(
-        headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"], dumpio=True
-    )  # dumpio=True enables verbose logging
-    log.info("browser launched")
+
+    # Set up Selenium WebDriver
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument(
+        f"user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36"
+    )
+
+    # Initialize the WebDriver
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
     try:
-        pages = (
-            await browser.pages()
-        )  # Get all open pages, which should include the initial blank page
-        page = (
-            pages[0] if pages else await browser.newPage()
-        )  # Use the initial page if available
+        # Set the browser window size
+        driver.set_window_size(1200, 600)
+        log.info("browser window size set")
 
-        await page.setViewport({"width": 1200, "height": 600})
-        page = await browser.newPage()
-        log.info("new page created")
-        await page.setViewport({"width": 1200, "height": 600})
-        log.info("viewport set")
-
-        # Replace `getURL` with the actual logic you have to construct the URL
+        # Construct the URL and navigate to the page
         domain = "https://composable.parts"
-        # domain = "http://localhost:3000"
         page_url = f"{domain}/{path}"
-        log.info(f"page_url: {page_url}")
+        driver.get(page_url)
+        log.info(f"Page URL loaded: {page_url}")
 
-        await page.goto(
-            page_url, {"waitUntil": "networkidle0"}
-        )  # Wait for page to load
-
-        # Wait for 3 seconds
-        log.info("waiting for 3 seconds")
+        # Wait for 3 seconds to ensure all scripts are executed
         await asyncio.sleep(3)
         log.info("done waiting")
 
         # Take the screenshot
-        await page.screenshot({"path": cache_path})
+        driver.save_screenshot(cache_path)
         log.info("screenshot taken")
-        await browser.close()
 
         # Return the screenshot as a response
         log.info("returning screenshot")
@@ -83,5 +80,6 @@ async def get_screenshot(path: str, cache: bool = True):
 
     except Exception as e:
         log.error(f"An error occurred: {e}")
-        await browser.close()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        driver.quit()  # Close the browser
