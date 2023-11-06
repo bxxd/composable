@@ -23,6 +23,8 @@ fastapi = "^0.103.1"
 psycopg2 = { extras = ["extras"], version = "^2.9.7" }
 aiohttp = "^3.8.5"
 uvicorn = "^0.23.2"
+pyppeteer = "^1.0.2"
+aiofiles = "^23.2.1"
 
 
 [build-system]

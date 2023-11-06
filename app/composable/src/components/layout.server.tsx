@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 
 import Header from "@/components/header/Header";
 import ToasterProvider from "@/components/providers/ToasterProvider";
-import MyThemeProvider from "@/components/providers/ThemeProvider";
+// import MyThemeProvider from "@/components/providers/ThemeProvider";
 
 import Footer from "@/components/footer/Footer";
 
@@ -16,14 +16,14 @@ const Layout: React.FC<LayoutProps> = ({
   headerChildrenComponents,
 }) => {
   return (
-    <MyThemeProvider>
+    <>
       <div className="flex flex-col min-h-screen">
         <Header childrenComponents={headerChildrenComponents} />
         <main className="App w-full flex-grow">{children}</main>
         <Footer />
       </div>
       <ToasterProvider />
-    </MyThemeProvider>
+    </>
   );
 };
 
