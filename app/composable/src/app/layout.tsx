@@ -19,8 +19,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     creator: "@bri4nr33d",
-    title: "Composable Parts",
-    description: "Generative text with Composable Parts",
   },
 };
 
