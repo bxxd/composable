@@ -61,7 +61,16 @@ async def get_screenshot(path: str, cache: bool = True):
         log.info(f"Page URL loaded: {page_url}")
 
         # Wait for 3 seconds to ensure all scripts are executed
-        await asyncio.sleep(3)
+        if "hub" in path:
+            log.info("waiting for 5 second")
+            await asyncio.sleep(5)
+        elif "play" in path:
+            log.info("waiting for 3 second")
+            await asyncio.sleep(3)
+        else:
+            log.info("waiting for 1 second")
+            await asyncio.sleep(1)
+
         log.info("done waiting")
 
         # Take the screenshot
