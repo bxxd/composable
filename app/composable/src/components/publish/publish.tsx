@@ -27,7 +27,7 @@ const Publish: React.FC<PublishProps> = ({ isEditable = true }) => {
 
   const [hydrated, setHydrated] = useState(false);
 
-  const [activeToggle, setActiveToggle] = useState("Assistant");
+  const [activeToggle, setActiveToggle] = useState("All");
 
   const contentArrayRef = useRef<JSONContent[]>([]);
 
