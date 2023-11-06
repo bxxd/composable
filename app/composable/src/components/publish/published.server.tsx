@@ -6,6 +6,7 @@ import { publishedExtensions } from "@/components/publish/extensions";
 import getData from "@/lib/getData";
 import PublishedHeader from "@/components/publish/publishedHeader";
 import PublishedSEO from "@/components/publish/publishedSeo";
+
 import {
   extractAllText,
   extractSummary,
@@ -30,18 +31,18 @@ export default async function Published({ id }: PublishedProps) {
   availableLength = maxDescriptionLength - prefix.length;
   const pageDescription = prefix + extractSummary(text, availableLength);
 
-  const pageImage = `https://composable.parts/api/social-image/published/${id}`;
+  const pageImage = `https://api.kittie.ai/api/social-image/published/${id}`;
 
   // className="prose dark:prose-invert p-4 border rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-gray-100 max-w-[90ch]"
   // <div className="pl-2 pt-2 bg-gray-200 dark:bg-gray-900 flex w-full">
 
   return (
     <>
-      {/* <PublishedSEO
+      <PublishedSEO
         title={pageTitle}
         description={pageDescription}
         image={pageImage}
-      /> */}
+      />
       <PublishedHeader data={data} id={id} />
 
       <div className="flex pl-3 pt-2">
