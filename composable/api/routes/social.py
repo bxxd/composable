@@ -51,7 +51,7 @@ async def get_screenshot(path: str, cache: bool = True):
 
     try:
         # Set the browser window size
-        driver.set_window_size(1200, 600)
+        driver.set_window_size(1200, 630)
         log.info("browser window size set")
 
         # Construct the URL and navigate to the page
