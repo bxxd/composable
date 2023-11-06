@@ -418,18 +418,17 @@ const Play: React.FC<PlayProps> = () => {
 
   return (
     <div ref={bottomRef}>
-      {!loadedFromLocalStorage && (
-        <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm ">
-          <button onMouseDown={() => router.push("/work/" + slug)}>
-            <Icon
-              icon="iconamoon:edit-thin"
-              width={21}
-              height={21}
-              color="#aaa"
-            />
-          </button>
-        </div>
-      )}
+      <div className="flex justify-between items-center border-b p-2 pr-4 mb-2 shadow-sm ">
+        <button onMouseDown={() => router.push("/work/" + slug)}>
+          <Icon
+            icon="iconamoon:edit-thin"
+            width={21}
+            height={21}
+            color="#aaa"
+          />
+        </button>
+      </div>
+
       <div className="space-y-4 p-4 rounded-lg  bg-gray-50 dark:bg-gray-900">
         {displayedItems.map((item, index) => (
           <React.Fragment key={item.id + index}>
