@@ -127,10 +127,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json("Request timed out", { status: 504 }); // 504 Gateway Timeout
       } else {
         // Handle other errors
-        return NextResponse.json((error as any).error.message, { status: 500 });
+        console.log(`Error: ${error.message}`);
+        return NextResponse.json(error as any, { status: 500 });
       }
     } else {
       // Handle unknown error types or other issues
+      console.log(`Error: ${error}`);
       return NextResponse.json("An unknown error occurred", { status: 500 });
     }
   }
