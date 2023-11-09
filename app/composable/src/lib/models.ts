@@ -59,7 +59,7 @@ export const aiModels = [
     value: "openai/gpt-3.5-turbo-instruct",
   },
   { name: "OpenAI: GPT-4", value: "openai/gpt-4" },
-  { name: "OpenAI: GPT-4 32k", value: "openai/gpt-4-32k" },
+  // { name: "OpenAI: GPT-4 32k", value: "openai/gpt-4-32k" },
   { name: "OpenAI: GPT-4 Turbo (preview)", value: "openai/gpt-4-1106-preview" },
   {
     name: "Phind: CodeLlama 34B v2 (beta)",
