@@ -42,6 +42,14 @@ export const aiModels = [
     name: "Mistral OpenOrca 7B (beta)",
     value: "open-orca/mistral-7b-openorca",
   },
+  {
+    value: "mistralai/mixtral-8x7b",
+    name: "Mistral: Mixtral 8x7B (base)",
+  },
+  {
+    value: "mistralai/mixtral-8x7b-instruct",
+    name: "Mistral: Mixtral 8x7B Instruct",
+  },
   { name: "MythoMax L2 13B (beta)", value: "gryphe/mythomax-l2-13b" },
   { name: "MythoMax L2 13B 8k (beta)", value: "gryphe/mythomax-l2-13b-8k" },
   {

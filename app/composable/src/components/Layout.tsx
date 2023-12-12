@@ -5,7 +5,6 @@ import Header from "@/components/header/Header";
 import { GlobalProvider } from "@/lib/context";
 import Footer from "@/components/footer/Footer";
 import ToasterProvider from "@/components/providers/ToasterProvider";
-import PublishedSEO from "@/components/publish/publishedSeo";
 
 interface LayoutProps {
   children: ReactNode;
