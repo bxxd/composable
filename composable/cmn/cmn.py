@@ -22,3 +22,9 @@ PSQL_DB_PORT = env.int("PGPORT", 5432)
 PSQL_DB_EDGAR = env.str("PGDATABASE", "edgar")
 
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", None)
+
+
+SEC_HEADERS = {
+    "User-Agent": "composable.parts abuse@composable.parts",
+    "Host": "data.sec.gov",
+}

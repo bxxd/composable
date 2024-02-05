@@ -141,7 +141,6 @@ async def save_excerpts(company, filing, model=MODEL):
         filing = await session.merge(filing)
         await session.commit()
 
-    log.info("here...")
 
     url = filing.url
     file = None

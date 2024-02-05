@@ -8,6 +8,9 @@ import os
 import composable.cmn
 from types import SimpleNamespace
 from datetime import datetime, timedelta
+from composable.cmn import cmn
+import requests
+
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +26,7 @@ async def fetch(session, url, headers=SEC_HEADERS):
 
 
 async def fetch_document(url):
-    headers = {
-        "User-Agent": SEC_HEADERS["User-Agent"],
-    }
+    headers = cmn.SEC_HEADERS
     async with aiohttp.ClientSession() as session:
         return await fetch(session, url, headers=headers)
 
@@ -138,23 +139,30 @@ async def get_cik_data_for_ticker(ticker: str) -> str:
 async def download_and_save_tickers_to_file(file_path: str):
     log.info("downloading tickers..")
     url = "https://www.sec.gov/files/company_tickers.json"
-    async with aiohttp.ClientSession() as session:
-        content = await fetch(session, url, headers={})
-        try:
-            data = json.loads(content)
-            data_dict = {}
-            for item in data.values():
-                cik_str = str(item["cik_str"]).zfill(10)
-                data_dict[item["ticker"]] = {
-                    "cik_str": cik_str,
-                    "title": item["title"],
-                    "ticker": item["ticker"],
-                }
-            with open(file_path, "w") as file:
-                file.write(json.dumps(data_dict))
-        except Exception as e:
-            log.error("Failed to parse JSON response")
-            raise Exception(f"Failed to parse JSON response e: {e}")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(url, headers=headers)
+    content = response.content
+    log.info(f"fetching url: {url} with headers {headers}")
+    log.info(f"content: {content}")
+    try:
+        data = json.loads(content)
+        data_dict = {}
+        for item in data.values():
+            cik_str = str(item["cik_str"]).zfill(10)
+            data_dict[item["ticker"]] = {
+                "cik_str": cik_str,
+                "title": item["title"],
+                "ticker": item["ticker"],
+            }
+        with open(file_path, "w") as file:
+            file.write(json.dumps(data_dict))
+        log.info(f"Saved tickers to {file_path}")
+    except Exception as e:
+        log.error("Failed to parse JSON response")
+        raise Exception(f"Failed to parse JSON response e: {e}")
 
 
 async def main(args):
