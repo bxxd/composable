@@ -516,7 +516,7 @@ async def save_filing_excerpts(
     for s in sections:
         log.info(f"****** section: {s}")
 
-    return
+    # return
 
     # chain = create_tagging_chain(tagging_schema, llm)
 
