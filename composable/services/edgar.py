@@ -14,19 +14,17 @@ import requests
 
 log = logging.getLogger(__name__)
 
-SEC_HEADERS = {
-    "User-Agent": "composable.parts abuse@composable.parts",
-    "Host": "data.sec.gov",
-}
+SEC_HEADERS = {"User-Agent": "composable.parts abuse@composable.parts"}
 
 
 async def fetch(session, url, headers=SEC_HEADERS):
+    log.info(f"fetching url: {url} with headers {headers}")
     async with session.get(url, headers=headers) as response:
         return await response.text()
 
 
 async def fetch_document(url):
-    headers = cmn.SEC_HEADERS
+    headers = SEC_HEADERS
     async with aiohttp.ClientSession() as session:
         return await fetch(session, url, headers=headers)
 
@@ -53,6 +51,8 @@ async def get_filings(cik_str, year=None, quarter=None, filing_type=None, annual
         reportDates = filings["reportDate"]
 
         for index, description in enumerate(primaryDocDescriptions):
+
+            log.info(f"index: {index} description: {description}")
             if filing_type and description.upper() != filing_type.upper():
                 continue
 
@@ -69,10 +69,12 @@ async def get_filings(cik_str, year=None, quarter=None, filing_type=None, annual
                 ):
                     continue
 
-            if annual and description.upper() != "10-K":
+            description = description.upper()
+
+            if "10-K" not in description and annual:
                 continue
 
-            if description.upper() not in ["10-Q", "10-K"]:
+            if "10-Q" not in description and "10-K" not in description:
                 continue
 
             item = SimpleNamespace()
@@ -80,7 +82,7 @@ async def get_filings(cik_str, year=None, quarter=None, filing_type=None, annual
             primaryDocument = primaryDocuments[index]
             item.filingDate = filingDates[index]
             item.reportDate = reportDates[index]
-            item.filingType = description
+            item.filingType = "10-q" if "10-Q" in description else "10-k"
             item.url = f"https://www.sec.gov/Archives/edgar/data/{cik_str}/{accession_number}/{primaryDocument}"
             item.cik = cik_str
             filing_urls.append(item)

@@ -28,6 +28,7 @@ aiofiles = "^23.2.1"
 selenium = "^4.15.2"
 chromedriver = "^2.24.1"
 webdriver-manager = "^4.0.1"
+black = "^24.1.1"
 
 
 [build-system]

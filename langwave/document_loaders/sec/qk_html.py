@@ -52,7 +52,7 @@ def get_elements(element):
             s.type = "table"
             # print(f"s type: `{s.type}` text: `{s.text}`")
             texts.append(s)
-        elif child.name == "span":
+        elif child.name == "span" or child.name == "p":
             s.text = f"{clean_text(child.text)}"
             # log.info(f"span: `{s.text}`")
             s.type = "span"
@@ -112,11 +112,14 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
     soup = BeautifulSoup(html, "html.parser")
 
     body = soup.find("body")
+
     if not body:
         log.warning("No body found, using div")
         body = soup.find("div")
 
     sections = get_elements(body)
+
+    log.info(f"have raw elements secionts: {len(sections)}")
 
     start = False
 
@@ -170,14 +173,19 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
     last_section = None
 
     log.info(f"have {len(sections)} sections")
+    # print(f"sections: {sections[:]}")
+    # return []
 
     for s in sections[:]:
         text = s.text
+
+        log.info(f"s: `{s}`")
+
         if len(text) <= 3:
-            # log.info(f"skipping short section: {text}")
+            log.info(f"skipping short section: {text}")
             continue
 
-        # log.info(f"s: `{s}`")
+
 
         lowered = text.lower()
         if lowered.startswith("table of contents"):
@@ -242,6 +250,8 @@ def get_sections(file_path, break_on_h3=True, break_on_h4=False):
 
 async def main(args):
     sections = get_sections(args.filing)
+
+    print(f"have {len(sections)} sections")
 
     for s in sections:
         print(f"### section {s.cnt}:\n`{s.text}`")

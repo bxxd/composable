@@ -11,8 +11,7 @@ from composable.services import filings
 log = logging.getLogger(__name__)
 
 SEC_HEADERS = {
-    "User-Agent": "composable.parts abuse@composable.parts",
-    "Host": "data.sec.gov",
+    "User-Agent": "composable.parts abuse@composable.parts",    
 }
 
 
@@ -117,18 +116,18 @@ async def test1(args):
 async def test2(args):
     data = {
         "cik": {
-            "cik_str": "0001679268",
-            "title": "MAMMOTH ENERGY SERVICES, INC.",
-            "ticker": "TUSK",
+         "cik_str": "0000828146",
+        "title": "INTERLINK ELECTRONICS INC",
+        "ticker": "LINK"
         },
         "filing": {
-            "filingDate": "2023-02-24",
-            "reportDate": "2022-12-31",
-            "filingType": "10-K",
-            "url": "https://www.sec.gov/Archives/edgar/data/0001679268/000167926823000006/tusk-20221231.htm",
-            "cik": "0001679268",
+            "filingDate": "2023-11-09",
+            "reportDate": "2023-09-30",
+            "filingType": "10-q",
+            "url": "https://www.sec.gov/Archives/edgar/data/828146/000110465923116252/link-20230930x10q.htm",
+            "cik": "0000828146"
         },
-        "force": False,
+        "force": True,
     }
 
     log.info(f"upload_edgar: {json.dumps(data, indent=2)}")

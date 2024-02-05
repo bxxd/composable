@@ -1,3 +1,4 @@
+import re
 import asyncio
 import argparse
 import yaml
@@ -6,18 +7,94 @@ from composable.cmn import utils
 from composable.services._excerpts.pgvector import db
 from langwave.document_loaders.sec import qk_html
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import create_tagging_chain
+
+# from langchain.chains import create_tagging_chain
 from langchain.schema.messages import HumanMessage
-from langchain.callbacks import get_openai_callback
+
+# from langchain.callbacks import get_openai_callback
 from composable.services.edgar import fetch_document
 from datetime import datetime
 from types import SimpleNamespace
+from openai import OpenAI
+import json
+from tenacity import retry, wait_random_exponential, stop_after_attempt
+
 
 import logging
 
 log = logging.getLogger(__name__)
 
 MODEL = "gpt-3.5-turbo-16k"
+
+GPT_MODEL = "gpt-3.5-turbo-16k"
+client = OpenAI()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "information_extraction",
+            "description": "Extract the desired information from the following passage. Only extract the properties mentioned in the information_extraction' function.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "What is the main intent of this excerpt?",
+                    },
+                    "subcategory": {
+                        "type": "string",
+                        "description": "What is the main thing this excerpt is about?",
+                    },
+                    "insight": {
+                        "type": "string",
+                        "description": "What is the main thing people should know about this excerpt, if you could tell them one thing?",
+                    },
+                    "analysis": {
+                        "type": "string",
+                        "description": "What would be the financial sentiment of this passage, from the perspective of an investor?",
+                        "enum": [
+                            "very positive",
+                            "positive",
+                            "mixed",
+                            "neutral",
+                            "negative",
+                            "very negative",
+                        ],
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Give a well formatted title for this passage, so people know what they are looking at. Be concise.",
+                    },
+                },
+                "required": [
+                    "category",
+                    "subcategory",
+                    "tags",
+                    "insight",
+                    "analysis",
+                    "title",
+                ],
+            },
+        }
+    }
+]
+
+
+@retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
+def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MODEL):
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            tools=tools,
+            tool_choice=tool_choice,
+        )
+        return response
+    except Exception as e:
+        print("Unable to generate ChatCompletion response")
+        print(f"Exception: {e}")
+        return e
 
 
 async def save_company_from_yaml(args):
@@ -140,7 +217,6 @@ async def save_excerpts(company, filing, model=MODEL):
         filing.status = "processing"
         filing = await session.merge(filing)
         await session.commit()
-
 
     url = filing.url
     file = None
@@ -290,9 +366,32 @@ async def process_section(
 
     section_count += 1
 
-    with get_openai_callback() as cb:
-        tags = await chain.arun(section_text)
-        total_cost = cb.total_cost
+    messages = []
+    messages.append(
+        {
+            "role": "system",
+            "content": "You are a world class financial analyst, ruthless and reading between the lines. You are to call the function information_extraction using the passage provided. ",
+        }
+    )
+    messages.append({"role": "user", "content": section_text})
+
+    chat_response = chat_completion_request(messages, tools=tools)
+
+    assistant_message = chat_response.choices[0].message
+
+
+
+
+    log.info("assistant_message: %s", assistant_message)
+
+    tags = json.loads( assistant_message.tool_calls[0].function.arguments)
+
+    log.info(f"tags: {json.dumps(tags, indent=2)}")
+
+
+    # with get_openai_callback() as cb:
+    #     tags = await chain.arun(section_text)
+    #     total_cost = cb.total_cost
 
     log.info(f"saving excerpt {section_count} for filing: {filing.id}")
 
@@ -316,21 +415,21 @@ async def process_section(
     excerpt.filing_name = report_title
 
     excerpt = await session.merge(excerpt)
+    log.info("here before commit...")
     await session.commit()
-
-    log.info(f"excerpt: {excerpt} tags: {tags}")
-
+    log.info("after commit")
     tags = tags.get("tags")
     if tags and isinstance(tags, list):
         tags = set(tags)
+        log.info(f"setting tags: {tags}")
         await session.set_tags(excerpt.id, tags)
 
+    log.info("got here...")
     await session.commit()
 
+    log.info("returning..")
+
     return total_cost, section_count
-
-
-import re
 
 
 def split_closest_sentence(text):
@@ -415,7 +514,7 @@ async def save_filing_excerpts(
     for s in sections:
         log.info(f"****** section: {s}")
 
-    chain = create_tagging_chain(tagging_schema, llm)
+    # chain = create_tagging_chain(tagging_schema, llm)
 
     running_cost = 0.0
     current_section_count = 0
@@ -435,7 +534,7 @@ async def save_filing_excerpts(
             cost, current_section_count = await process_section(
                 s.text,
                 llm,
-                chain,
+                None,
                 filing,
                 company,
                 session,

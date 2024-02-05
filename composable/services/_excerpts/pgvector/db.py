@@ -218,9 +218,7 @@ class Session(AbstractSessionEdgar):
         condition = (
             Company.ticker == ticker
             if ticker
-            else Company.cik == cik
-            if cik
-            else Company.id == id
+            else Company.cik == cik if cik else Company.id == id
         )
         q = select(Company).where(condition)
         result = await self.execute(q)
