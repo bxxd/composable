@@ -511,8 +511,12 @@ async def save_filing_excerpts(
 
     sections = aggregate_sections(sections, llm)
 
+    log.info(f"have {len(sections)} sections")
+
     for s in sections:
         log.info(f"****** section: {s}")
+
+    return
 
     # chain = create_tagging_chain(tagging_schema, llm)
 
