@@ -141,9 +141,12 @@ async def get_cik_data_for_ticker(ticker: str) -> str:
 async def download_and_save_tickers_to_file(file_path: str):
     log.info("downloading tickers..")
     url = "https://www.sec.gov/files/company_tickers.json"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-    }
+    # headers = {
+    #     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+    # }
+
+    headers = {"User-Agent": "composable.parts abuse@composable.parts"}
+
 
     response = requests.get(url, headers=headers)
     content = response.content
