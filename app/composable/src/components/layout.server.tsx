@@ -17,7 +17,8 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   return (
     <>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen dark:bg-gray-900 dark:text-white">
+
         <Header childrenComponents={headerChildrenComponents} />
         <main className="App w-full flex-grow">{children}</main>
         <Footer />
