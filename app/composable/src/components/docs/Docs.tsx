@@ -260,9 +260,9 @@ export default function Docs() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen font-sans">
+    <div className="p-6  min-h-screen font-sans">
       {/* Ticker Search */}
-      <div className="py-4 bg-white shadow-lg rounded-md">
+      <div className="py-4 shadow-lg rounded-md text-gray-700">
         <div className="flex items-center justify-between p-2">
           <div className="relative flex-grow">
             <input
@@ -270,11 +270,11 @@ export default function Docs() {
               placeholder="Enter ticker..."
               value={searchedTicker}
               onChange={handleTickerChange}
-              className="w-full pl-8 pr-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-colors"
+              className="w-full pl-8 pr-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-colors text-gray-700"
             />
             <span className="absolute left-2 top-1/2 transform -translate-y-1/2">
               <span
-                className="iconify text-gray-400"
+                className="iconify"
                 data-icon="ic:baseline-search"
                 data-inline="false"
               ></span>
@@ -291,7 +291,7 @@ export default function Docs() {
 
       {/* Display Available Filings for Selection */}
       {availableFilings.length > 0 && (
-        <div className="my-6 bg-white shadow-lg rounded-md p-6">
+        <div className="my-6 bg-white shadow-lg rounded-md p-6 dark:text-gray-600">
           <h3 className="text-lg font-semibold mb-4">Available Filings</h3>
           <ul className="divide-y divide-gray-200">
             {availableFilings.map((filing, index) => (
@@ -329,12 +329,12 @@ export default function Docs() {
       )}
 
       {/* Display Edgar Documents */}
-      <div className="mt-6 bg-white shadow-lg rounded-md p-4">
+      <div className="mt-6 bg-white shadow-lg rounded-md p-4  text-gray-800">
         <h2 className="text-2xl font-bold mb-4 border-b border-gray-200 pb-2">
           Edgar Documents
         </h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full bg-white border-collapse border border-gray-200">
+          <table className="min-w-full bg-white border-collapse border border-gray-200 text-gray-800">
             <thead>
               <tr>
                 <th className="py-2 px-3 border-b border-gray-200 bg-gray-100 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
