@@ -16,15 +16,8 @@ export const getDbInstance = async (): Promise<pgp.IDatabase<any, any>> => {
       //   .log
       // `creating db instance... host: ${process.env.PGHOST} db: ${process.env.PGDATABASE}`
       // ();
-      dbInstance = pgp()(
-        process.env.DATABASE_URL || {
-          host: process.env.PGHOST || "localhost",
-          database: process.env.PGDATABASE || "",
-          port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 5432,
-          user: process.env.PGUSER || "composable",
-          password: process.env.PGPASSWORD,
-        }
-      );
+      dbInstance = pgp()(process.env.DATABASE_URL);
+
     }
     usageCounter += 1;
   })();
