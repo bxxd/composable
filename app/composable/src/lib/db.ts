@@ -16,7 +16,7 @@ export const getDbInstance = async (): Promise<pgp.IDatabase<any, any>> => {
       //   .log
       // `creating db instance... host: ${process.env.PGHOST} db: ${process.env.PGDATABASE}`
       // ();
-      dbInstance = pgp()(process.env.DATABASE_URL);
+      dbInstance = pgp()(process.env.DATABASE_URL!);
 
     }
     usageCounter += 1;
