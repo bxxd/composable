@@ -21,6 +21,9 @@ PSQL_DB_HOST = env.str("PGHOST", "localhost")
 PSQL_DB_PORT = env.int("PGPORT", 5432)
 PSQL_DB_EDGAR = env.str("PGDATABASE", "edgar")
 
+DATABASE_URL = env.str("DATABASE_URL", "")
+
+
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", None)
 
 
