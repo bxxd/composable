@@ -30,14 +30,14 @@ export async function POST(req: NextRequest) {
   console.log("generate AI response..");
 
   let payload = await req.json();
-  // console.log("payload", payload);
+  console.log("payload", payload);
 
   let { prompt } = payload;
   payload = JSON.parse(prompt);
 
   let { messages, aiModel } = payload;
 
-  // console.log(`messages: ${messages}`);
+  console.log(`messages: ${messages}`);
   console.log(`aiModel: ${aiModel}`);
 
   // return NextResponse.json({}, { status: 400 });
